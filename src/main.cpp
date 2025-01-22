@@ -691,6 +691,21 @@ void astroCalculations(Date date) {
     Serial.print(", N: "); Serial.println(N,10);
 }
 
+
+#include <functional>  // For std::hash
+
+// Custom hash function for String
+struct StringHash {
+    size_t operator()(const String& s) const {
+        size_t hash = 0;
+        for (size_t i = 0; i < s.length(); ++i) {
+            hash = hash * 31 + s[i];  // A simple hash function
+        }
+        return hash;
+    }
+};
+
+
 struct Table2NC {
     String name;
     double T, s, h, p, p1, deg, speed;
@@ -698,44 +713,29 @@ struct Table2NC {
     double (*f_func)();
 };
 
+#include <unordered_map>
 
-// Define the Table2NCDef class
 class Table2NCDef {
-    private:
-    Table2NC* table2NC;  // Pointer to dynamic array of Table2NC
-    int tableSize;       // Number of entries in the table
+private:
+    std::unordered_map<String, Table2NC, StringHash> tableMap;  // Use custom hash function
 
 public:
     // Constructor to initialize the table
     template <size_t N>
     Table2NCDef(Table2NC (&array)[N]) {
         Serial.println("Array passed to constructor size: " + String(N)); // Debugging
-        tableSize = N;
-        Serial.println("Table2NC sizeaaa" + String(tableSize));
-        table2NC = new Table2NC[tableSize];
-        for (int i = 0; i < tableSize; i++) {
-            table2NC[i] = array[i]; // Deep copy the table entries
-             Serial.println("Copying: " + table2NC[i].name); // Debugging each element
+        for (int i = 0; i < N; i++) {
+            tableMap[array[i].name] = array[i]; // Insert into the hash map
+            Serial.println("Copying: " + array[i].name); // Debugging each element
         }
-    }
-
-    // Destructor to free allocated memory
-    ~Table2NCDef() {
-        Serial.println("Table2NCDef destrooyed" + String(tableSize));
-        delete[] table2NC;
-    }
-
-    int get_size() const {
-        return tableSize;
     }
 
     Table2NC get_constituent(const String& name) const {
-        for (int i = 0; i < tableSize; i++) {
-            if (table2NC[i].name == name) {
-                return table2NC[i];
-            }
+        auto it = tableMap.find(name);
+        if (it != tableMap.end()) {
+            return it->second;  // Return the found element
         }
-        // Return a new empty object if not found
+        // Return an empty object if not found
         return Table2NC{"", 0, 0, 0, 0, 0, 0, 0, nullptr, nullptr};
     }
 };
@@ -882,15 +882,15 @@ public:
             Harmonic& harmonic = harmonic_model.get_harmonics()[i]; 
             Table2NC constituent = table2NCDef.get_constituent(harmonic.name);
             
-            if (constituent.name.length() == 0) {
-                Serial.println(("Constituent not found: " + harmonic.name).c_str());
-                continue;
-            }
+           if (constituent.name.length() == 0) {
+               Serial.println(("Constituent not found: " + harmonic.name).c_str());
+               continue;
+           }
           
-            if (harmonic.amplitude > 0.0) {   
-                double var = reduc360(constituent.speed * t + equilbrm[harmonic.name] - harmonic.phase);
-                total_amplitude += nodefctr[harmonic.name] * harmonic.amplitude * cos(radians(var));
-            }
+           if (harmonic.amplitude > 0.0) {   
+               double var = reduc360(constituent.speed * t + equilbrm[harmonic.name] - harmonic.phase);
+               total_amplitude += nodefctr[harmonic.name] * harmonic.amplitude * cos(radians(var));
+           }
         }
         return total_amplitude;
     }
@@ -1228,7 +1228,7 @@ void setup() {
     Table2NCDef table2NCDef(table2NcDefArray);
     HarmonicModel model(nonRefHarmonics,  nonRefZ0Harmonic); 
     HarmonicModel modelRef(refHarmonics, z0RefHarmonic); 
-    Serial.println("Table2NCDef size: " + String(table2NCDef.get_size()));
+   // Serial.println("Table2NCDef size: " + String(table2NCDef.get_size()));
 
     HarmonicCalculator calculator(modelRef, table2NCDef);
     float lowTides[2] = {0};
