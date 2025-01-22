@@ -725,6 +725,10 @@ public:
         delete[] table2NC;
     }
 
+    int get_size() const {
+        return tableSize;
+    }
+
     Table2NC get_constituent(const String& name) const {
         for (int i = 0; i < tableSize; i++) {
             if (table2NC[i].name == name) {
@@ -736,16 +740,13 @@ public:
     }
 };
  
-template <typename T, size_t N>
-constexpr size_t arrayLength(T (&)[N]) {
-    return N;
-}
 
 struct Harmonic {
     String name;
     double amplitude;
     double phase;
 };
+
 
 class HarmonicModel {
 private:
@@ -754,11 +755,12 @@ private:
     int harmonicCount;   // Number of harmonics
 
 public:
+    template <size_t N>
     // Constructor: initialize with harmonics array and its size
-    HarmonicModel(Harmonic* harmonicsArray, int count, Harmonic z0) {
+    HarmonicModel(Harmonic (&harmonicsArray)[N], Harmonic z0) {
         Serial.println("Init HarmonicModel constructor");
         
-        harmonicCount = count;
+        harmonicCount = N;
         harmonics = new Harmonic[harmonicCount];
         z0Harmonic = z0;
         for (int i = 0; i < harmonicCount; ++i) {
@@ -788,47 +790,46 @@ public:
 
 class HarmonicCalculator {
 private:
-    HarmonicModel harmonic_model;
-    const Table2NCDef &table2NCDef;
-    //std::map<String, double> equilbrm;
-    //std::map<String, double> nodefctr;
+    HarmonicModel &harmonic_model;
+    Table2NCDef &table2NCDef;
+    std::map<String, double> equilbrm;
+    std::map<String, double> nodefctr;
 
 
 public:
-    HarmonicCalculator(const HarmonicModel &model, const Table2NCDef &table_def)
+    HarmonicCalculator(HarmonicModel &model, Table2NCDef &table_def)
         : harmonic_model(model), table2NCDef(table_def) {
         Serial.println("HarmonicCalculator Constructor");
-        Serial.println("Table2NCDef size: " + String(sizeof(table2NCDef)));  // Check size of table2NCDef
-       // equi_tide();
+            Serial.println("Table2NCDef size in constructor: " + String(table2NCDef.get_size()));
+        equi_tide();
     }
 
-    //void equi_tide() {
-    //    double T = 180.0;
-    //    Serial.println("equi_tide method");
-    //    //Serial.println("Number of harmonics: " + String(harmonic_model.get_harmonic_count()));
-    //    //for (int i = 0; i < harmonic_model.get_harmonic_count(); i++) {
-    //    //    Harmonic& harmonic = harmonic_model.get_harmonics()[i]; 
-    //    //    Table2NC constituent = table2NCDef.get_constituent(harmonic.name);
-    //    //    Serial.println("after Table2NC constituent" +  harmonic.name);
-    //    //    if (constituent.name.length() == 0) { // Assuming name is "" for invalid
-    //    //        Serial.println(("Constituent not found: " + harmonic.name).c_str());
-    //    //        continue;
-    //    //    } else 
-    //    //    {
-    //    //         Serial.println(("Constituent FOOOOOOOOOOOOUND " + harmonic.name).c_str());
-    //    //    }
-////
-    //    //    equilbrm[harmonic.name] = (constituent.T * T +
-    //    //                               constituent.s * s +
-    //    //                               constituent.h * h +
-    //    //                               constituent.p * p +
-    //    //                               constituent.p1 * p1 +
-    //    //                               constituent.deg +
-    //    //                               constituent.u_func());
-    //    //    equilbrm[harmonic.name] = reduc360(equilbrm[harmonic.name]);
-    //    //    nodefctr[harmonic.name] = constituent.f_func();
-    //    //}
-    //}
+    void equi_tide() {
+        double T = 180.0;
+        Serial.println("equi_tide method");
+        Serial.println("Number of harmonics: " + String(harmonic_model.get_harmonic_count()));
+        for (int i = 0; i < harmonic_model.get_harmonic_count(); i++) {
+            Harmonic& harmonic = harmonic_model.get_harmonics()[i]; 
+            Table2NC constituent = table2NCDef.get_constituent(harmonic.name);
+            Serial.println("after Table2NC constituent" +  harmonic.name);
+            if (constituent.name.length() == 0) { // Assuming name is "" for invalid
+                Serial.println(("Constituent not found: " + harmonic.name).c_str());
+                continue;
+            } else 
+            {
+                 Serial.println(("Constituent FOOOOOOOOOOOOUND " + harmonic.name).c_str());
+            }
+            equilbrm[harmonic.name] = (constituent.T * T +
+                                       constituent.s * s +
+                                       constituent.h * h +
+                                       constituent.p * p +
+                                       constituent.p1 * p1 +
+                                       constituent.deg +
+                                       constituent.u_func());
+            equilbrm[harmonic.name] = reduc360(equilbrm[harmonic.name]);
+            nodefctr[harmonic.name] = constituent.f_func();
+        }
+    }
 //
     //double amplitude(double t) {
     //    double total_amplitude = 0;
@@ -1178,17 +1179,13 @@ void setup() {
       {"3M2S10"  ,10, -6, 6, 0, 0,  0, 146.9523126, u3M2,    f3M2}
     };
 //
-//
-    //// Determine the size of the table
-    ////int tableSize = sizeof(table2NcDefArray) / sizeof(table2NcDefArray[0]);
-//
-    //// Instantiate the Table2NCDef object
+
     Table2NCDef table2NCDef(table2NcDefArray);
     //// Create instances of HarmonicModel
-    HarmonicModel model(nonRefHarmonics,  arrayLength(nonRefHarmonics), nonRefZ0Harmonic); // Non-reference model
-    HarmonicModel modelRef(refHarmonics, arrayLength(refHarmonics), z0RefHarmonic); // Reference model
+    HarmonicModel model(nonRefHarmonics,  nonRefZ0Harmonic); // Non-reference model
+    HarmonicModel modelRef(refHarmonics, z0RefHarmonic); // Reference model
 
-
+    Serial.println("Table2NCDef size: " + String(table2NCDef.get_size()));
 
     HarmonicCalculator calculator(modelRef, table2NCDef);
     //auto [low_tide_coefficients, high_tide_coefficients] = calculator.find_tides_and_times();
