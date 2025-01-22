@@ -799,26 +799,22 @@ private:
 public:
     HarmonicCalculator(HarmonicModel &model, Table2NCDef &table_def)
         : harmonic_model(model), table2NCDef(table_def) {
-        Serial.println("HarmonicCalculator Constructor");
-            Serial.println("Table2NCDef size in constructor: " + String(table2NCDef.get_size()));
         equi_tide();
     }
 
     void equi_tide() {
         double T = 180.0;
-        Serial.println("equi_tide method");
-        Serial.println("Number of harmonics: " + String(harmonic_model.get_harmonic_count()));
         for (int i = 0; i < harmonic_model.get_harmonic_count(); i++) {
             Harmonic& harmonic = harmonic_model.get_harmonics()[i]; 
             Table2NC constituent = table2NCDef.get_constituent(harmonic.name);
-            Serial.println("after Table2NC constituent" +  harmonic.name);
-            if (constituent.name.length() == 0) { // Assuming name is "" for invalid
-                Serial.println(("Constituent not found: " + harmonic.name).c_str());
-                continue;
-            } else 
-            {
-                 Serial.println(("Constituent FOOOOOOOOOOOOUND " + harmonic.name).c_str());
-            }
+            //Serial.println("after Table2NC constituent" +  harmonic.name);
+            //if (constituent.name.length() == 0) { // Assuming name is "" for invalid
+            //    Serial.println(("Constituent not found: " + harmonic.name).c_str());
+            //    continue;
+            //} else 
+            //{
+            //     Serial.println(("Constituent FOOOOOOOOOOOOUND " + harmonic.name).c_str());
+            //}
             equilbrm[harmonic.name] = (constituent.T * T +
                                        constituent.s * s +
                                        constituent.h * h +
@@ -830,23 +826,75 @@ public:
             nodefctr[harmonic.name] = constituent.f_func();
         }
     }
-//
-    //double amplitude(double t) {
-    //    double total_amplitude = 0;
-    //    for (int i = 0; i < harmonic_model.get_harmonic_count(); i++) {
-    //        Harmonic& harmonic = harmonic_model.get_harmonics()[i]; 
-    //        Table2NC constituent = table2NCDef.get_constituent(harmonic.name);
-    //        if (constituent.name.length() == 0) {
-    //            Serial.println(("Constituent not found: " + harmonic.name).c_str());
-    //            continue;
-    //        }
-    //        if (harmonic.amplitude > 0.0) {
-    //            double var = reduc360(constituent.speed * t + equilbrm[harmonic.name] - harmonic.phase);
-    //            total_amplitude += nodefctr[harmonic.name] * harmonic.amplitude * cos(radians(var));
-    //        }
-    //    }
-    //    return total_amplitude;
-    //}
+
+    #define SAMPLES 1440 
+    void findTidesAndTimes(float* lowTides, float* highTides, std::map<float, float>& tideTimes) {
+          float hours[SAMPLES];
+          float amplitudes[SAMPLES];
+          
+          // Fill hours and amplitudes arrays
+          for (int i = 0; i < SAMPLES; ++i) {
+              hours[i] = i / 60.0;  // Hour as a float
+              amplitudes[i] = amplitude(hours[i]);
+              Serial.println("Amplitudes: "+String(amplitudes[i]));
+          }
+
+          double highestPeak1 = -1e6, highestPeak2 = -1e6;
+          double lowestTrough1 = 1e6, lowestTrough2 = 1e6;
+
+          // Iterate through the amplitudes array to find peaks and troughs
+          for (int i = 1; i < SAMPLES - 1; ++i) {
+              // Check if it's a local maximum (peak)
+              if (amplitudes[i] > amplitudes[i - 1] && amplitudes[i] > amplitudes[i + 1]) {
+                  if (amplitudes[i] > highestPeak1) {
+                      highestPeak2 = highestPeak1;
+                      highestPeak1 = amplitudes[i];
+                  } else if (amplitudes[i] > highestPeak2) {
+                      highestPeak2 = amplitudes[i];
+                  }
+              }
+              // Check if it's a local minimum (trough)
+              if (amplitudes[i] < amplitudes[i - 1] && amplitudes[i] < amplitudes[i + 1]) {
+                  if (amplitudes[i] < lowestTrough1) {
+                      lowestTrough2 = lowestTrough1;
+                      lowestTrough1 = amplitudes[i];
+                  } else if (amplitudes[i] < lowestTrough2) {
+                      lowestTrough2 = amplitudes[i];
+                  }
+              }
+          }
+
+      // Print the results
+      Serial.println("Two highest peaks:");
+      Serial.println(highestPeak1, 6); // Print with 6 decimal places
+      Serial.println(highestPeak2, 6);
+
+      Serial.println("Two lowest troughs:");
+      Serial.println(lowestTrough1, 6);
+      Serial.println(lowestTrough2, 6);
+
+    }
+
+
+    double amplitude(double t) {
+        double total_amplitude = 0;
+        for (int i = 0; i < harmonic_model.get_harmonic_count(); i++) {
+            Harmonic& harmonic = harmonic_model.get_harmonics()[i]; 
+            Table2NC constituent = table2NCDef.get_constituent(harmonic.name);
+            
+            if (constituent.name.length() == 0) {
+                Serial.println(("Constituent not found: " + harmonic.name).c_str());
+                continue;
+            }
+          
+            if (harmonic.amplitude > 0.0) {   
+                double var = reduc360(constituent.speed * t + equilbrm[harmonic.name] - harmonic.phase);
+                total_amplitude += nodefctr[harmonic.name] * harmonic.amplitude * cos(radians(var));
+            }
+        }
+        return total_amplitude;
+    }
+};
 //
     //double signe_derivee(double t) {
     //    double sens = 0;
@@ -887,19 +935,18 @@ public:
     //    return t;
     //}
 
-    //std::pair<std::vector<double>, std::vector<double>> find_tides_and_times() {
-    //    std::vector<double> low_tides, high_tides;
-    //    for (double t = 0; t < 24; t += 1.0 / 60) {
-    //        double amp = amplitude(t);
-    //        if (amp < amplitude(t - 1.0 / 60) && amp < amplitude(t + 1.0 / 60)) {
-    //            low_tides.push_back(t);
-    //        } else if (amp > amplitude(t - 1.0 / 60) && amp > amplitude(t + 1.0 / 60)) {
-    //            high_tides.push_back(t);
-    //        }
-    //    }
-    //    return {low_tides, high_tides};
-    //}
 
+
+
+
+        // Calculate tide times
+        //for (int i = 0; i < lowTidesCount; ++i) {
+        //    tideTimes[lowTides[i]] = heure_maree(lowTides[i]) + france_time_offset();
+        //}
+        //for (int i = 0; i < highTidesCount; ++i) {
+        //    tideTimes[highTides[i]] = heure_maree(highTides[i]) + france_time_offset();
+        //}
+ 
  //void calculateTideInfo(std::vector<int>& lowTides, std::vector<int>& highTides, std::vector<float>& tideTimes,
  //                          std::vector<std::pair<std::string, std::string>>& lowTideTimesHM, 
  //                          std::vector<std::pair<std::string, std::string>>& highTideTimesHM, 
@@ -961,8 +1008,6 @@ public:
 //        return std::make_pair(hoursStr, minutesStr);
 //    }
 
-
-};
 
 double reduc360(double angle) {
     double result = fmod(angle, 360.0);
@@ -1178,17 +1223,20 @@ void setup() {
       {"5MSN10"  ,10, -7, 8,-1, 0,  0, 146.4807915, u4M2,    f6M2},
       {"3M2S10"  ,10, -6, 6, 0, 0,  0, 146.9523126, u3M2,    f3M2}
     };
-//
+
 
     Table2NCDef table2NCDef(table2NcDefArray);
-    //// Create instances of HarmonicModel
-    HarmonicModel model(nonRefHarmonics,  nonRefZ0Harmonic); // Non-reference model
-    HarmonicModel modelRef(refHarmonics, z0RefHarmonic); // Reference model
-
+    HarmonicModel model(nonRefHarmonics,  nonRefZ0Harmonic); 
+    HarmonicModel modelRef(refHarmonics, z0RefHarmonic); 
     Serial.println("Table2NCDef size: " + String(table2NCDef.get_size()));
 
     HarmonicCalculator calculator(modelRef, table2NCDef);
-    //auto [low_tide_coefficients, high_tide_coefficients] = calculator.find_tides_and_times();
+    float lowTides[2] = {0};
+    float highTides[2] = {0}; 
+    std::map<float, float> tideTimes;
+    calculator.findTidesAndTimes(lowTides, highTides, tideTimes);
+
+}
 //
     //std::vector<int> lowTides, highTides;
     //std::vector<float> tideTimes;
@@ -1203,8 +1251,8 @@ void setup() {
     //printTideInfo("Low tide times (HH:MM), amplitudes, and coefficients", lowTideTimesHM, lowTideAmplitudes, low_tide_coefficients);
     //printTideInfo("High tide times (HH:MM), amplitudes, and coefficients", highTideTimesHM, highTideAmplitudes, high_tide_coefficients);
 
-    
-}
+
+
 
 void loop() {
     
