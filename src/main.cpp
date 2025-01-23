@@ -825,69 +825,119 @@ public:
 
     #define SAMPLES 1440  // Sample every minute (1440 samples in 24 hours)
 
-    void findTidesAndTimes(float* lowTides, float* highTides, std::map<float, float>& tideTimes) {
-          float hours[SAMPLES];
-          float amplitudes[SAMPLES];
-    
-          // Fill hours and amplitudes arrays
-          for (int i = 0; i < SAMPLES; ++i) {
-              hours[i] = i / 60.0;  // Hour as a float
-              amplitudes[i] = amplitude(hours[i]);
-              Serial.println("Amplitudes: "+String(amplitudes[i]));
-          }
 
-          double highestPeak1 = 0, highestPeak2 = 0;
-          double lowestTrough1 = 0, lowestTrough2 = 0;
+String convertToReadableTime(int minutesSinceMidnight) {
+  // Ensure input is within a valid range
+  if (minutesSinceMidnight < 0 || minutesSinceMidnight >= 24 * 60) {
+    return "Invalid time"; // Handle invalid input
+  }
 
-          // Iterate through the amplitudes array to find peaks and troughs
-          for (int i = 1; i < SAMPLES - 1; ++i) {
-              // Check if it's a local maximum (peak)
-              if (amplitudes[i] > amplitudes[i - 1] && amplitudes[i] > amplitudes[i + 1]) {
-                  if (amplitudes[i] > highestPeak1) {
-                      highestPeak2 = highestPeak1;
-                      highestPeak1 = amplitudes[i];
-                  } else if (amplitudes[i] > highestPeak2) {
-                      highestPeak2 = amplitudes[i];
-                  }
-              }
-              // Check if it's a local minimum (trough)
-              if (amplitudes[i] < amplitudes[i - 1] && amplitudes[i] < amplitudes[i + 1]) {
-                  if (amplitudes[i] < lowestTrough1) {
-                      lowestTrough2 = lowestTrough1;
-                      lowestTrough1 = amplitudes[i];
-                  } else if (amplitudes[i] < lowestTrough2) {
-                      lowestTrough2 = amplitudes[i];
-                  }
-              }
-          }
+  // Calculate hours and minutes
+  int hours = minutesSinceMidnight / 60;
+  int minutes = minutesSinceMidnight % 60;
 
-      // Print the results
-      Serial.println("Two highest peaks:");
-      Serial.println(highestPeak1, 6); // Print with 6 decimal places
-      Serial.println(highestPeak2, 6);
+  // Format hours and minutes as a string
+  char timeBuffer[6]; // Enough for "HH:MM" + null terminator
+  snprintf(timeBuffer, sizeof(timeBuffer), "%02d:%02d", hours, minutes);
 
-      Serial.println("Two lowest troughs:");
-      Serial.println(lowestTrough1, 6);
-      Serial.println(lowestTrough2, 6);
+  return String(timeBuffer);
+}
 
+ void findTidesAndTimes(float* lowTides, float* highTides, std::map<float, float>& tideTimes) {
+    float hours[SAMPLES];
+    float amplitudes[SAMPLES];
+
+    // Fill hours and amplitudes arrays
+    for (int i = 0; i < SAMPLES; ++i) {
+        hours[i] = i / 60.0;  // Hour as a float
+        amplitudes[i] = amplitude(hours[i]);
+        Serial.println("Amplitudes: " + String(amplitudes[i]));
     }
+
+    double highestPeak1 = -INFINITY, highestPeak2 = -INFINITY;
+    int highestPeak1Index = -1, highestPeak2Index = -1;
+    double lowestTrough1 = INFINITY, lowestTrough2 = INFINITY;
+    int lowestTrough1Index = -1, lowestTrough2Index = -1;
+
+    // Iterate through the amplitudes array to find peaks and troughs
+    for (int i = 1; i < SAMPLES - 1; ++i) {
+        // Check if it's a local maximum (peak)
+        if (amplitudes[i] > amplitudes[i - 1] && amplitudes[i] > amplitudes[i + 1]) {
+            if (amplitudes[i] > highestPeak1) {
+                highestPeak2 = highestPeak1;
+                highestPeak2Index = highestPeak1Index;
+
+                highestPeak1 = amplitudes[i];
+                highestPeak1Index = i;
+            } else if (amplitudes[i] > highestPeak2) {
+                highestPeak2 = amplitudes[i];
+                highestPeak2Index = i;
+            }
+        }
+
+        // Check if it's a local minimum (trough)
+        if (amplitudes[i] < amplitudes[i - 1] && amplitudes[i] < amplitudes[i + 1]) {
+            if (amplitudes[i] < lowestTrough1) {
+                lowestTrough2 = lowestTrough1;
+                lowestTrough2Index = lowestTrough1Index;
+
+                lowestTrough1 = amplitudes[i];
+                lowestTrough1Index = i;
+            } else if (amplitudes[i] < lowestTrough2) {
+                lowestTrough2 = amplitudes[i];
+                lowestTrough2Index = i;
+            }
+        }
+    }
+
+    // Print the results
+    Serial.println("Two highest peaks:");
+    if (highestPeak1Index != -1) {
+        Serial.print("Peak 1: Value = ");
+        Serial.print(highestPeak1, 6);
+        Serial.print(", Index = ");
+        Serial.println(convertToReadableTime(highestPeak1Index));
+    } else {
+        Serial.println("Peak 1: Not found");
+    }
+
+    if (highestPeak2Index != -1) {
+        Serial.print("Peak 2: Value = ");
+        Serial.print(highestPeak2, 6);
+        Serial.print(", Index = ");
+        Serial.println(convertToReadableTime(highestPeak2Index));
+    } else {
+        Serial.println("Peak 2: Not found");
+    }
+
+    Serial.println("Two lowest troughs:");
+    if (lowestTrough1Index != -1) {
+        Serial.print("Trough 1: Value = ");
+        Serial.print(lowestTrough1, 6);
+        Serial.print(", Index = ");
+        Serial.println(convertToReadableTime(lowestTrough1Index));
+    } else {
+        Serial.println("Trough 1: Not found");
+    }
+
+    if (lowestTrough2Index != -1) {
+        Serial.print("Trough 2: Value = ");
+        Serial.print(lowestTrough2, 6);
+        Serial.print(", Index = ");
+        Serial.println(convertToReadableTime(lowestTrough2Index));
+    } else {
+        Serial.println("Trough 2: Not found");
+    }
+}
+
 
 
     double amplitude(double t) {
-        double total_amplitude = 0;
-        int harmonicCount = harmonic_model.get_harmonic_count();
-        Harmonic * harmonics = harmonic_model.get_harmonics();
-        Harmonic  harmonicZ0 = harmonic_model.get_z0_harmonic();
-
-        for (int i = 0; i < harmonicCount; i++) {
-            Harmonic& harmonic = harmonics[i]; 
+      double total_amplitude = 0;
+      Harmonic  harmonicZ0 = harmonic_model.get_z0_harmonic();
+       for (int i = 0; i < harmonic_model.get_harmonic_count(); i++) {
+           Harmonic& harmonic = harmonic_model.get_harmonics()[i]; 
             Table2NC constituent = table2NCDef.get_constituent(harmonic.name);
-            
-           if (constituent.name.length() == 0) {
-               Serial.println(("Constituent not found: " + harmonic.name).c_str());
-               continue;
-           }
-          
            if (harmonic.amplitude > 0.0) {   
                double var = reduc360(constituent.speed * t + equilbrm[harmonic.name] - harmonic.phase);
                total_amplitude += nodefctr[harmonic.name] * harmonic.amplitude * cos(radians(var));
@@ -895,47 +945,44 @@ public:
         }
         return harmonicZ0.amplitude + total_amplitude;
     }
-};
-//
-    //double signe_derivee(double t) {
-    //    double sens = 0;
-    //    for (int i = 0; i < harmonic_model.get_harmonic_count(); i++) {
-    //        Harmonic& harmonic = harmonic_model.get_harmonics()[i]; 
-    //        Table2NC constituent = table2NCDef.get_constituent(harmonic.name);
-    //        if (constituent.name.length() == 0) {
-    //            Serial.println(("Constituent not found: " + harmonic.name).c_str());
-    //            continue;
-    //        }
-    //        if (harmonic.amplitude > 0.0) {
-    //            double var = reduc360(constituent.speed * t + equilbrm[harmonic.name] - harmonic.phase);
-    //            sens -= nodefctr[harmonic.name] * harmonic.amplitude * constituent.speed * sin(radians(var));
-    //        }
-    //    }
-    //    return sens >= 0;
-    //}
-//
-    //double heure_maree(double t0) {
-    //    double uneminute = 1.0 / 60;
-    //    double dh = 0.5;
-    //    bool sens0 = signe_derivee(t0);
-    //    if (signe_derivee(t0 - 0.5 * uneminute) != sens0) {
-    //        return t0;
-    //    }
-//
-    //    double t = t0;
-    //    while (signe_derivee(t) == sens0) {
-    //        t += dh;
-    //    }
-    //    sens0 = signe_derivee(t);
-    //    while (signe_derivee(t) == sens0) {
-    //        t -= uneminute;
-    //    }
-    //    if (signe_derivee(t + 0.5 * uneminute) == signe_derivee(t)) {
-    //        t += uneminute;
-    //    }
-    //    return t;
-    //}
 
+   double signe_derivee(double t) {
+       double sens = 0;
+       for (int i = 0; i < harmonic_model.get_harmonic_count(); i++) {
+           Harmonic& harmonic = harmonic_model.get_harmonics()[i]; 
+           Table2NC constituent = table2NCDef.get_constituent(harmonic.name);
+           if (harmonic.amplitude > 0.0) {
+               double var = reduc360(constituent.speed * t + equilbrm[harmonic.name] - harmonic.phase);
+               sens -= nodefctr[harmonic.name] * harmonic.amplitude * constituent.speed * sin(radians(var));
+           }
+       }
+       return sens >= 0;
+   }
+
+   double heure_maree(double t0) {
+       double uneminute = 1.0 / 60;
+       double dh = 0.5;
+       bool sens0 = signe_derivee(t0);
+       if (signe_derivee(t0 - 0.5 * uneminute) != sens0) {
+           return t0;
+       }
+
+       double t = t0;
+       while (signe_derivee(t) == sens0) {
+           t += dh;
+       }
+       sens0 = signe_derivee(t);
+       while (signe_derivee(t) == sens0) {
+           t -= uneminute;
+       }
+       if (signe_derivee(t + 0.5 * uneminute) == signe_derivee(t)) {
+           t += uneminute;
+       }
+       return t;
+   }
+
+
+};
 
 
 
@@ -1060,7 +1107,7 @@ void setup() {
         {"SIGMA1", 0.005182066, -123.58492},
         {"THETA1", 0.001797353, 96.83272}
     };
-    static Harmonic nonRefZ0Harmonic = {"Z0", 0.5, 45.0};
+    static Harmonic nonRefZ0Harmonic = {"Z0", 3, 0};
 
     static Harmonic refHarmonics[] = {
         {"2MN2S2", 0.0018, 283.54},
@@ -1231,7 +1278,8 @@ void setup() {
     HarmonicModel modelRef(refHarmonics, z0RefHarmonic); 
    // Serial.println("Table2NCDef size: " + String(table2NCDef.get_size()));
 
-    HarmonicCalculator calculator(modelRef, table2NCDef);
+    //HarmonicCalculator calculator(modelRef, table2NCDef);
+    HarmonicCalculator calculator(model, table2NCDef);
     float lowTides[2] = {0};
     float highTides[2] = {0}; 
     std::map<float, float> tideTimes;
