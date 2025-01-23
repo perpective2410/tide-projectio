@@ -781,6 +781,10 @@ public:
         return harmonics; // Return pointer to harmonics array
     }
 
+    Harmonic get_z0_harmonic() {
+        return z0Harmonic;
+    }
+
     // Getter for harmonic count
     int get_harmonic_count() const {
         return harmonicCount;
@@ -807,14 +811,6 @@ public:
         for (int i = 0; i < harmonic_model.get_harmonic_count(); i++) {
             Harmonic& harmonic = harmonic_model.get_harmonics()[i]; 
             Table2NC constituent = table2NCDef.get_constituent(harmonic.name);
-            //Serial.println("after Table2NC constituent" +  harmonic.name);
-            //if (constituent.name.length() == 0) { // Assuming name is "" for invalid
-            //    Serial.println(("Constituent not found: " + harmonic.name).c_str());
-            //    continue;
-            //} else 
-            //{
-            //     Serial.println(("Constituent FOOOOOOOOOOOOUND " + harmonic.name).c_str());
-            //}
             equilbrm[harmonic.name] = (constituent.T * T +
                                        constituent.s * s +
                                        constituent.h * h +
@@ -827,11 +823,12 @@ public:
         }
     }
 
-    #define SAMPLES 1440 
+    #define SAMPLES 1440  // Sample every minute (1440 samples in 24 hours)
+
     void findTidesAndTimes(float* lowTides, float* highTides, std::map<float, float>& tideTimes) {
           float hours[SAMPLES];
           float amplitudes[SAMPLES];
-          
+    
           // Fill hours and amplitudes arrays
           for (int i = 0; i < SAMPLES; ++i) {
               hours[i] = i / 60.0;  // Hour as a float
@@ -839,8 +836,8 @@ public:
               Serial.println("Amplitudes: "+String(amplitudes[i]));
           }
 
-          double highestPeak1 = -1e6, highestPeak2 = -1e6;
-          double lowestTrough1 = 1e6, lowestTrough2 = 1e6;
+          double highestPeak1 = 0, highestPeak2 = 0;
+          double lowestTrough1 = 0, lowestTrough2 = 0;
 
           // Iterate through the amplitudes array to find peaks and troughs
           for (int i = 1; i < SAMPLES - 1; ++i) {
@@ -878,8 +875,12 @@ public:
 
     double amplitude(double t) {
         double total_amplitude = 0;
-        for (int i = 0; i < harmonic_model.get_harmonic_count(); i++) {
-            Harmonic& harmonic = harmonic_model.get_harmonics()[i]; 
+        int harmonicCount = harmonic_model.get_harmonic_count();
+        Harmonic * harmonics = harmonic_model.get_harmonics();
+        Harmonic  harmonicZ0 = harmonic_model.get_z0_harmonic();
+
+        for (int i = 0; i < harmonicCount; i++) {
+            Harmonic& harmonic = harmonics[i]; 
             Table2NC constituent = table2NCDef.get_constituent(harmonic.name);
             
            if (constituent.name.length() == 0) {
@@ -892,7 +893,7 @@ public:
                total_amplitude += nodefctr[harmonic.name] * harmonic.amplitude * cos(radians(var));
            }
         }
-        return total_amplitude;
+        return harmonicZ0.amplitude + total_amplitude;
     }
 };
 //
@@ -1018,7 +1019,7 @@ void setup() {
   Serial.begin(115200);
   while(!Serial);
 
-  Date date(2025, 1, 20);
+  Date date(2025, 1, 23);
   astroCalculations(date);
 
     static Harmonic nonRefHarmonics[] = {
