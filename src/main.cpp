@@ -4,11 +4,46 @@
 #include <unordered_map>
 #include <functional> 
 #include <map>
+#include <string>
+
 
 // Global variables
 double T, s, h, p, M, p1, N;
 
 double reduc360(double angle);
+
+
+class MyDate {
+  public:
+    int year;
+    int month;
+    int day;
+
+    // Constructor
+    MyDate(int y, int m, int d) {
+      year = y;
+      month = m;
+      day = d;
+    }
+};
+
+
+struct TideInfo {
+    std::pair<float, std::string> peaks[2];
+    std::pair<float, std::string> troughs[2];
+    int numPeaks;
+    int numTroughs;
+    int lowTideCoefficient;
+    int highTideCoefficient;
+};
+
+
+struct Table2NC {
+    String name;
+    double T, s, h, p, p1, deg, speed;
+    double (*u_func)();
+    double (*f_func)();
+};
 
 
 // Function definitions
@@ -632,23 +667,9 @@ double f2SM() {
 }
 
 
-class Date {
-  public:
-    int year;
-    int month;
-    int day;
-
-    // Constructor
-    Date(int y, int m, int d) {
-      year = y;
-      month = m;
-      day = d;
-    }
-};
-
 
 // Function to convert date to Julian Day Number
-double dateToJulianDay(const Date& date) {
+double dateToJulianDay(const MyDate& date) {
     int year = date.year;
     int month = date.month;
     int day = date.day;
@@ -676,7 +697,7 @@ double julianDateToCentury(double julianDay) {
 
 
 // Function to perform astronomical calculations
-void astroCalculations(Date date) {
+void astroCalculations(MyDate date) {
     double julianDay = dateToJulianDay(date);
     T = julianDateToCentury(julianDay);
     s = reduc360(218.3164591 + 481267.88134236 * T - 0.0013268 * T * T + T * T * T / 538841.0 - T * T * T * T / 65194000.0);
@@ -711,22 +732,6 @@ struct StringHash {
     }
 };
 
-struct TideInfo {
-    std::pair<float, std::string> peaks[2];
-    std::pair<float, std::string> troughs[2];
-    int numPeaks;
-    int numTroughs;
-    int lowTideCoefficient;
-    int highTideCoefficient;
-};
-
-
-struct Table2NC {
-    String name;
-    double T, s, h, p, p1, deg, speed;
-    double (*u_func)();
-    double (*f_func)();
-};
 
 
 
@@ -814,8 +819,8 @@ int lastSunday(int year, int month) {
         }
     }
 
-    // Create a Date object for the last day of the month
-    Date lastDay(year, month, lastDayOfMonth);
+    // Create a MyDate object for the last day of the month
+    MyDate lastDay(year, month, lastDayOfMonth);
 
     // Calculate the day of the week for the last day of the month
     // Using Zeller's Congruence algorithm
@@ -832,13 +837,13 @@ int lastSunday(int year, int month) {
     return lastSunday;
 }
 // Function to determine the UTC offset for France
-int franceTimeOffset(const Date& currentDate) {
+int franceTimeOffset(const MyDate& currentDate) {
     int lastSundayMarch = lastSunday(currentDate.year, 3); // March is month 3
     int lastSundayOctober = lastSunday(currentDate.year, 10); // October is month 10
 
     // Create date objects for the last Sundays
-    Date lastSundayMarchDate(currentDate.year, 3, lastSundayMarch);
-    Date lastSundayOctoberDate(currentDate.year, 10, lastSundayOctober);
+    MyDate lastSundayMarchDate(currentDate.year, 3, lastSundayMarch);
+    MyDate lastSundayOctoberDate(currentDate.year, 10, lastSundayOctober);
 
     // Convert dates to comparable format
     int nowComparable = currentDate.year * 10000 + currentDate.month * 100 + currentDate.day;
@@ -847,10 +852,10 @@ int franceTimeOffset(const Date& currentDate) {
 
     if (nowComparable >= lastSundayMarchComparable && nowComparable < lastSundayOctoberComparable) {
         // Daylight Saving Time (Summer Time)
-        return 120; // UTC+2
+        return 2; // UTC+2
     } else {
         // Standard Time (Winter Time)
-        return 60; // UTC+1
+        return 1; // UTC+1
     }
 }
 
@@ -886,14 +891,13 @@ public:
             nodefctr[harmonic.name] = constituent.f_func();
         }
     }
-    std::string convertToReadableTime(int minutesSinceMidnight, int utcOffsetMinutes) {
+    std::string convertToReadableTime(int minutesSinceMidnight) {
         // Ensure input is within a valid range
         if (minutesSinceMidnight < 0 || minutesSinceMidnight >= 24 * 60) {
             return "Invalid time"; // Handle invalid input
         }
 
         // Adjust for the time zone offset
-        minutesSinceMidnight += utcOffsetMinutes;
         minutesSinceMidnight %= 24 * 60; // Wrap around if it exceeds a day
 
         // Calculate hours and minutes
@@ -908,15 +912,19 @@ public:
     }
 
 
-    TideInfo findTidesAndTimes(int utcOffsetMinutes) {
-        const int SAMPLES = 1440; // Assuming 1440 samples in a day
+    TideInfo findTidesAndTimes(int utcOffsetHours) {
+        const int SAMPLES = 1440; // Assuming 140 samples in a day
         float hours[SAMPLES];
         float amplitudes[SAMPLES];
 
         // Fill hours and amplitudes arrays
         for (int i = 0; i < SAMPLES; ++i) {
-            hours[i] = i / 60.0;  // Hour as a float
-            amplitudes[i] = amplitude(hours[i]);
+            hours[i] = (i / 60.0);
+            amplitudes[i] = amplitude(hours[i] - utcOffsetHours);
+            //Serial.print("Hour: ");
+            //Serial.print(hours[i], 10);
+            //Serial.print(", Amp: ");
+            //Serial.println(amplitudes[i], 10);
         }
 
         double highestPeak1 = -INFINITY, highestPeak2 = -INFINITY;
@@ -961,18 +969,18 @@ public:
 
         // Store the peaks
         if (highestPeak1Index != -1) {
-            tideInfo.peaks[tideInfo.numPeaks++] = std::make_pair(highestPeak1, convertToReadableTime(highestPeak1Index, utcOffsetMinutes));
+            tideInfo.peaks[tideInfo.numPeaks++] = std::make_pair(highestPeak1, convertToReadableTime(highestPeak1Index));
         }
         if (highestPeak2Index != -1) {
-            tideInfo.peaks[tideInfo.numPeaks++] = std::make_pair(highestPeak2, convertToReadableTime(highestPeak2Index, utcOffsetMinutes));
+            tideInfo.peaks[tideInfo.numPeaks++] = std::make_pair(highestPeak2, convertToReadableTime(highestPeak2Index));
         }
 
         // Store the troughs
         if (lowestTrough1Index != -1) {
-            tideInfo.troughs[tideInfo.numTroughs++] = std::make_pair(lowestTrough1, convertToReadableTime(lowestTrough1Index, utcOffsetMinutes));
+            tideInfo.troughs[tideInfo.numTroughs++] = std::make_pair(lowestTrough1, convertToReadableTime(lowestTrough1Index));
         }
         if (lowestTrough2Index != -1) {
-            tideInfo.troughs[tideInfo.numTroughs++] = std::make_pair(lowestTrough2, convertToReadableTime(lowestTrough2Index, utcOffsetMinutes));
+            tideInfo.troughs[tideInfo.numTroughs++] = std::make_pair(lowestTrough2, convertToReadableTime(lowestTrough2Index));
         }
 
         // Calculate the coefficients
@@ -992,8 +1000,8 @@ public:
       Harmonic  harmonicZ0 = harmonic_model.get_z0_harmonic();
        for (int i = 0; i < harmonic_model.get_harmonic_count(); i++) {
            Harmonic& harmonic = harmonic_model.get_harmonics()[i]; 
-            Table2NC constituent = table2NCDef.get_constituent(harmonic.name);
-           if (harmonic.amplitude > 0.0) {   
+           Table2NC constituent = table2NCDef.get_constituent(harmonic.name);
+           if (harmonic.amplitude > 0.0) {  
                double var = reduc360(constituent.speed * t + equilbrm[harmonic.name] - harmonic.phase);
                total_amplitude += nodefctr[harmonic.name] * harmonic.amplitude * cos(radians(var));
            }
@@ -1049,10 +1057,6 @@ void displayTidesSortedByTime(const TideInfo& tides) {
 }
 
 
-void setup() {
-
-  Serial.begin(115200);
-  while(!Serial);
 
   static Harmonic nonRefHarmonics[] = {
       {"E2", 0.010830917, 5.015839},
@@ -1257,24 +1261,25 @@ void setup() {
       {"3M2S10"  ,10, -6, 6, 0, 0,  0, 146.9523126, u3M2,    f3M2}
   };
 
-  Date date(2025, 01, 23);
-  
+
+void run_calculations(const MyDate& date) {
+    
   Serial.println("Calculating Astronomical references for date: " + 
-               String(date.year) + "/" + 
-               String(date.month) + "/" + 
-               String(date.day) + "...");
+              String(date.year) + "/" + 
+              String(date.month) + "/" + 
+              String(date.day) + "...");
 
   astroCalculations(date);
-  int utcOffsetMinutes = franceTimeOffset(date);
+  int utcOffsetHours = franceTimeOffset(date);
   Table2NCDef table2NCDef(table2NcDefArray);
   HarmonicModel model(nonRefHarmonics,  nonRefZ0Harmonic); 
   HarmonicModel modelRef(refHarmonics, z0RefHarmonic); 
   HarmonicCalculator calculatorRef(modelRef, table2NCDef);
   Serial.println("Calculating Coefficients...");
-  TideInfo tides_ref = calculatorRef.findTidesAndTimes(utcOffsetMinutes);
+  TideInfo tides_ref = calculatorRef.findTidesAndTimes(utcOffsetHours);
 
 
-  // Calculate Coefficient for Model Ref (Brest)
+  //// Calculate Coefficient for Model Ref (Brest)
   Serial.print("Low Tide Coefficient: ");
   Serial.println(tides_ref.lowTideCoefficient);
   Serial.print("High Tide Coefficient: ");
@@ -1284,26 +1289,52 @@ void setup() {
   HarmonicCalculator calculator(model, table2NCDef);
   
   Serial.println("Calculating tide times for Belle-île...");
-  TideInfo tides = calculator.findTidesAndTimes(utcOffsetMinutes);
+  TideInfo tides = calculator.findTidesAndTimes(utcOffsetHours);
 
   displayTidesSortedByTime(tides);
-  //for (int i = 0; i < tides.numPeaks; ++i) {
-  //    Serial.print("High tide: ");
-  //    Serial.print(tides.peaks[i].first, 6);
-  //    Serial.print(", Time: ");
-  //    Serial.println(tides.peaks[i].second.c_str());
-  //}
-//
-  //for (int i = 0; i < tides.numTroughs; ++i) {
-  //    Serial.print("Low tide: ");
-  //    Serial.print(tides.troughs[i].first, 6);
-  //    Serial.print(", Time: ");
-  //    Serial.println(tides.troughs[i].second.c_str());
-  //}
+
+}
+
+
+unsigned long previousMillis = 0;  // Store last time the action was executed
+const long interval = 86400000; // 24 hours in milliseconds (24 * 60 * 60 * 1000)
+bool actionTriggered = false;
+
+/* To be replace with the RTC module output */
+MyDate current_date(2025, 01, 24);
+
+void setup() {
+
+  Serial.begin(115200);
+  while(!Serial);
+
+  run_calculations(current_date);
+  previousMillis = millis();
 
 }
 
 
 void loop() {
-    
+
+  unsigned long currentMillis = millis();
+
+  // Check if 24 hours have passed since the last action was triggered
+  if (currentMillis - previousMillis >= interval) {
+    // Save the last time the action was triggered
+    previousMillis = currentMillis;
+
+    // Only trigger the action once a day (at midnight in the general sense)
+    if (!actionTriggered) {
+      Serial.println("Action triggered at midnight!");
+      run_calculations(current_date);
+      actionTriggered = true;
+    }
+  }
+
+  // Reset the flag at the start of the next day
+  if (currentMillis >= interval) {
+    actionTriggered = false;
+  }
+  delay(1000);
+
 }
