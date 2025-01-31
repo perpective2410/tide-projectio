@@ -1,10 +1,22 @@
 
 #include <Arduino.h>
+
+#include <TimeLib.h>
+
+
 #include <math.h>
 #include <unordered_map>
 #include <functional> 
 #include <map>
 #include <string>
+
+
+#include <NTPClient.h>
+#include <WiFiUdp.h>
+#include <WiFi.h>
+
+const char* ssid = "Wokwi-GUEST";
+//const char* password = "Magenta2110";
 
 
 // Global variables
@@ -18,6 +30,13 @@ class MyDate {
     int year;
     int month;
     int day;
+
+    // Default constructor
+    MyDate() {
+      year = 0;
+      month = 0;
+      day = 0;
+    }
 
     // Constructor
     MyDate(int y, int m, int d) {
@@ -1264,10 +1283,8 @@ void displayTidesSortedByTime(const TideInfo& tides) {
 
 void run_calculations(const MyDate& date) {
     
-  Serial.println("Calculating Astronomical references for date: " + 
-              String(date.year) + "/" + 
-              String(date.month) + "/" + 
-              String(date.day) + "...");
+ Serial.println("Calculating Astronomical references for date: " + String(date.day) + "/" + String(date.month) + "/" + String(date.year));
+
 
   astroCalculations(date);
   int utcOffsetHours = franceTimeOffset(date);
@@ -1295,46 +1312,44 @@ void run_calculations(const MyDate& date) {
 
 }
 
+WiFiUDP ntpUDP;
+NTPClient timeClient(ntpUDP, "pool.ntp.org", 0, 86400000 ); // UTC time with 24h refresh
 
-unsigned long previousMillis = 0;  // Store last time the action was executed
-const long interval = 86400000; // 24 hours in milliseconds (24 * 60 * 60 * 1000)
-bool actionTriggered = false;
-
-/* To be replace with the RTC module output */
-MyDate current_date(2025, 01, 24);
+int lastDay = -1; // Stores the last recorded day to detect midnight transition
 
 void setup() {
-
   Serial.begin(115200);
-  while(!Serial);
+  while (!Serial);
 
-  run_calculations(current_date);
-  previousMillis = millis();
+  WiFi.begin(ssid);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
 
+  timeClient.begin();
+  timeClient.update();
+  setTime(timeClient.getEpochTime());
+
+  lastDay = day();
+  Serial.println("Setup completed!");
+  run_calculations(MyDate(year(), month(), lastDay));
 }
 
 
 void loop() {
+  timeClient.update();
+  setTime(timeClient.getEpochTime());
 
-  unsigned long currentMillis = millis();
-
-  // Check if 24 hours have passed since the last action was triggered
-  if (currentMillis - previousMillis >= interval) {
-    // Save the last time the action was triggered
-    previousMillis = currentMillis;
-
-    // Only trigger the action once a day (at midnight in the general sense)
-    if (!actionTriggered) {
-      Serial.println("Action triggered at midnight!");
-      run_calculations(current_date);
-      actionTriggered = true;
-    }
+  int currentDay = day();
+  
+  // Detect midnight transition
+  if (currentDay != lastDay) {
+    Serial.println("Action triggered at midnight!");
+    lastDay = currentDay;  // Update day tracker
+    run_calculations(MyDate(year(), month(), currentDay));
   }
 
-  // Reset the flag at the start of the next day
-  if (currentMillis >= interval) {
-    actionTriggered = false;
-  }
-  delay(1000);
-
+  delay(1000);  // Check every second
 }
+
