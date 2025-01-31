@@ -9,6 +9,7 @@
 #include <functional> 
 #include <map>
 #include <string>
+#include <esp_heap_caps.h>
 
 
 #include <NTPClient.h>
@@ -46,15 +47,6 @@ class MyDate {
     }
 };
 
-
-struct TideInfo {
-    std::pair<float, std::string> peaks[2];
-    std::pair<float, std::string> troughs[2];
-    int numPeaks;
-    int numTroughs;
-    int lowTideCoefficient;
-    int highTideCoefficient;
-};
 
 
 struct Table2NC {
@@ -687,6 +679,82 @@ double f2SM() {
 
 
 
+struct TideInfo {
+    std::pair<float, std::string> peaks[2];
+    std::pair<float, std::string> troughs[2];
+    int numPeaks;
+    int numTroughs;
+    int lowTideCoefficient;
+    int highTideCoefficient;
+};
+class TideStack {
+  private:
+    static const int MAX_CAPACITY = 4;
+    TideInfo stack[MAX_CAPACITY];
+    int top;
+
+  public:
+    // Constructor to initialize the stack
+    TideStack() : top(-1) {}
+
+    // Function to push a TideInfo object onto the stack
+    bool push(const TideInfo& tideInfo) {
+        if (top < MAX_CAPACITY - 1) {
+            stack[++top] = tideInfo;
+            return true;
+        } else {
+          return false;
+        }
+    }
+
+    // Function to get a TideInfo object from the stack
+    bool get(TideInfo& tideInfo) {
+        if (top >= 0) {
+            tideInfo = stack[top--];
+            return true;
+        } else {
+            Serial.println("Stack is empty. Cannot get more TideInfo objects.");
+            return false;
+        }
+    }
+
+     // Pop method
+    TideInfo pop() {
+        if (top < 0) {
+            Serial.println("Stack Underflow");
+            return TideInfo();
+        }
+        return stack[top--];
+    }
+
+    // Function to peek at a specific index in the stack
+    TideInfo peek(int index) {
+        if (index >= 0 && index <= top) {
+            return stack[index];
+        } else {
+            Serial.println("Invalid index. Returning default TideInfo.");
+            return TideInfo();  // Return a default TideInfo object
+        }
+    }
+
+    // Function to get the top index of the stack
+    int getTop() const {
+        return top;
+    }
+
+    // Function to check if the stack is empty
+    bool isEmpty() const {
+        return top == -1;
+    }
+
+    // Function to check if the stack is full
+    bool isFull() const {
+        return top == MAX_CAPACITY - 1;
+    }
+};
+
+
+
 // Function to convert date to Julian Day Number
 double dateToJulianDay(const MyDate& date) {
     int year = date.year;
@@ -753,7 +821,6 @@ struct StringHash {
 
 
 
-
 class Table2NCDef {
 private:
     std::unordered_map<String, Table2NC, StringHash> tableMap;  // Use custom hash function
@@ -766,7 +833,10 @@ public:
             tableMap[array[i].name] = array[i]; // Insert into the hash map
         }
     }
-
+    ~Table2NCDef() {
+      Serial.println("HarmonicCalculator destructor called.");
+      tableMap.clear();
+    }
     Table2NC get_constituent(const String& name) const {
         auto it = tableMap.find(name);
         if (it != tableMap.end()) {
@@ -892,6 +962,12 @@ public:
     HarmonicCalculator(HarmonicModel &model, Table2NCDef &table_def)
         : harmonic_model(model), table2NCDef(table_def) {
         equi_tide();
+    }
+
+    ~HarmonicCalculator() {
+        equilbrm.clear();
+        nodefctr.clear();
+        Serial.println("HarmonicCalculator destructor called, maps cleared.");
     }
 
     void equi_tide() {
@@ -1280,11 +1356,16 @@ void displayTidesSortedByTime(const TideInfo& tides) {
       {"3M2S10"  ,10, -6, 6, 0, 0,  0, 146.9523126, u3M2,    f3M2}
   };
 
+TideStack tideStack;
+WiFiUDP ntpUDP;
+NTPClient timeClient(ntpUDP, "pool.ntp.org", 0, 86400000 ); // UTC time with 24h refresh
+
+int lastDay = -1; // Stores the last recorded day to detect midnight transition
+const int daysToCalculate = 4;  // Number of days to calculate tides for
 
 void run_calculations(const MyDate& date) {
     
  Serial.println("Calculating Astronomical references for date: " + String(date.day) + "/" + String(date.month) + "/" + String(date.year));
-
 
   astroCalculations(date);
   int utcOffsetHours = franceTimeOffset(date);
@@ -1295,8 +1376,7 @@ void run_calculations(const MyDate& date) {
   Serial.println("Calculating Coefficients...");
   TideInfo tides_ref = calculatorRef.findTidesAndTimes(utcOffsetHours);
 
-
-  //// Calculate Coefficient for Model Ref (Brest)
+  // Calculate Coefficient for Model Ref (Brest)
   Serial.print("Low Tide Coefficient: ");
   Serial.println(tides_ref.lowTideCoefficient);
   Serial.print("High Tide Coefficient: ");
@@ -1304,52 +1384,90 @@ void run_calculations(const MyDate& date) {
 
   // Calculate Tides and Times for Model (Le Palais)
   HarmonicCalculator calculator(model, table2NCDef);
-  
   Serial.println("Calculating tide times for Belle-île...");
   TideInfo tides = calculator.findTidesAndTimes(utcOffsetHours);
-
-  displayTidesSortedByTime(tides);
+  tideStack.push(tides);
 
 }
 
-WiFiUDP ntpUDP;
-NTPClient timeClient(ntpUDP, "pool.ntp.org", 0, 86400000 ); // UTC time with 24h refresh
 
-int lastDay = -1; // Stores the last recorded day to detect midnight transition
+
+MyDate epochToDate(time_t epoch) {
+    setTime(epoch);  // Set the current time to epoch
+    return MyDate(year(), month(), day());
+}
+
+
 
 void setup() {
-  Serial.begin(115200);
-  while (!Serial);
+    Serial.begin(115200);
+    while (!Serial);
 
-  WiFi.begin(ssid);
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
-  }
+    WiFi.begin(ssid);
+    while (WiFi.status() != WL_CONNECTED) {
+        delay(500);
+        Serial.print(".");
+    }
 
-  timeClient.begin();
-  timeClient.update();
-  setTime(timeClient.getEpochTime());
+    timeClient.begin();
+    timeClient.update();
+    setTime(timeClient.getEpochTime());
 
-  lastDay = day();
-  Serial.println("Setup completed!");
-  run_calculations(MyDate(year(), month(), lastDay));
+    lastDay = day();
+    Serial.println("Setup completed!");
+    
+    time_t currentEpoch = timeClient.getEpochTime();
+    for (int i = 0; i < daysToCalculate; i++) {
+        MyDate futureDate = epochToDate(currentEpoch + i * SECS_PER_DAY);
+        run_calculations(futureDate);
+    }
 }
-
 
 void loop() {
   timeClient.update();
   setTime(timeClient.getEpochTime());
-
   int currentDay = day();
-  
-  // Detect midnight transition
   if (currentDay != lastDay) {
-    Serial.println("Action triggered at midnight!");
-    lastDay = currentDay;  // Update day tracker
-    run_calculations(MyDate(year(), month(), currentDay));
+      Serial.println("Midnight transition detected! Updating tide data...");
+      lastDay = currentDay;
+      tideStack.pop(); // Remove the oldest entry
+      time_t newEpoch = timeClient.getEpochTime() + (daysToCalculate - 1) * SECS_PER_DAY;
+      MyDate newDay = epochToDate(newEpoch);
+      run_calculations(newDay); // Calculate tide for the new day
   }
 
-  delay(1000);  // Check every second
+  Serial.println("Current TideStack contents:");
+    for (int i = 0; i <= tideStack.getTop(); i++) {
+        TideInfo tideInfo = tideStack.peek(i);
+        
+        Serial.print("Tide Info ");
+        Serial.print(i + 1);
+        Serial.println(":");
+
+        Serial.println("  Peaks:");
+        for (int j = 0; j < tideInfo.numPeaks; j++) {
+            Serial.print("    ");
+            Serial.print(tideInfo.peaks[j].first);
+            Serial.print(" meters at ");
+            Serial.println(tideInfo.peaks[j].second.c_str());  // Convert std::string to const char*
+        }
+
+        Serial.println("  Troughs:");
+        for (int j = 0; j < tideInfo.numTroughs; j++) {
+            Serial.print("    ");
+            Serial.print(tideInfo.troughs[j].first);
+            Serial.print(" meters at ");
+            Serial.println(tideInfo.troughs[j].second.c_str());  // Convert std::string to const char*
+        }
+
+        Serial.print("  Low Tide Coefficient: ");
+        Serial.println(tideInfo.lowTideCoefficient);
+        Serial.print("  High Tide Coefficient: ");
+        Serial.println(tideInfo.highTideCoefficient);
+    }
+
+
+    delay(1000);  // Check every second
 }
+
 
