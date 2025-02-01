@@ -1,17 +1,11 @@
 
 #include <Arduino.h>
-
 #include <TimeLib.h>
-
-
 #include <math.h>
 #include <unordered_map>
 #include <functional> 
 #include <map>
 #include <string>
-#include <esp_heap_caps.h>
-
-
 #include <NTPClient.h>
 #include <WiFiUdp.h>
 #include <WiFi.h>
@@ -44,6 +38,12 @@ class MyDate {
       year = y;
       month = m;
       day = d;
+    }
+
+    String getDate() const {
+        char buffer[11];  // Buffer to hold the formatted date string
+        sprintf(buffer, "%02d/%02d/%04d", day, month, year);  // Format as DD/MM/YYYY
+        return String(buffer);
     }
 };
 
@@ -686,6 +686,7 @@ struct TideInfo {
     int numTroughs;
     int lowTideCoefficient;
     int highTideCoefficient;
+    MyDate date;
 };
 class TideStack {
   private:
@@ -834,7 +835,6 @@ public:
         }
     }
     ~Table2NCDef() {
-      Serial.println("HarmonicCalculator destructor called.");
       tableMap.clear();
     }
     Table2NC get_constituent(const String& name) const {
@@ -967,7 +967,6 @@ public:
     ~HarmonicCalculator() {
         equilbrm.clear();
         nodefctr.clear();
-        Serial.println("HarmonicCalculator destructor called, maps cleared.");
     }
 
     void equi_tide() {
@@ -1016,10 +1015,6 @@ public:
         for (int i = 0; i < SAMPLES; ++i) {
             hours[i] = (i / 60.0);
             amplitudes[i] = amplitude(hours[i] - utcOffsetHours);
-            //Serial.print("Hour: ");
-            //Serial.print(hours[i], 10);
-            //Serial.print(", Amp: ");
-            //Serial.println(amplitudes[i], 10);
         }
 
         double highestPeak1 = -INFINITY, highestPeak2 = -INFINITY;
@@ -1385,7 +1380,11 @@ void run_calculations(const MyDate& date) {
   // Calculate Tides and Times for Model (Le Palais)
   HarmonicCalculator calculator(model, table2NCDef);
   Serial.println("Calculating tide times for Belle-île...");
+  
   TideInfo tides = calculator.findTidesAndTimes(utcOffsetHours);
+  tides.lowTideCoefficient = tides_ref.lowTideCoefficient;
+  tides.highTideCoefficient = tides_ref.highTideCoefficient;
+  tides.date = date;
   tideStack.push(tides);
 
 }
@@ -1411,7 +1410,7 @@ void setup() {
 
     timeClient.begin();
     timeClient.update();
-    setTime(timeClient.getEpochTime());
+    setTime(1738454154);
 
     lastDay = day();
     Serial.println("Setup completed!");
@@ -1424,8 +1423,8 @@ void setup() {
 }
 
 void loop() {
-  timeClient.update();
-  setTime(timeClient.getEpochTime());
+  //timeClient.update();
+  //setTime(timeClient.getEpochTime());
   int currentDay = day();
   if (currentDay != lastDay) {
       Serial.println("Midnight transition detected! Updating tide data...");
@@ -1436,35 +1435,38 @@ void loop() {
       run_calculations(newDay); // Calculate tide for the new day
   }
 
-  Serial.println("Current TideStack contents:");
-    for (int i = 0; i <= tideStack.getTop(); i++) {
-        TideInfo tideInfo = tideStack.peek(i);
-        
-        Serial.print("Tide Info ");
-        Serial.print(i + 1);
-        Serial.println(":");
+  for (int i = 0; i <= tideStack.getTop(); i++) {
+      TideInfo tideInfo = tideStack.peek(i);
+      
+      Serial.print("Tide Info ");
+      Serial.print(i + 1);
+      Serial.println(":");
 
-        Serial.println("  Peaks:");
-        for (int j = 0; j < tideInfo.numPeaks; j++) {
-            Serial.print("    ");
-            Serial.print(tideInfo.peaks[j].first);
-            Serial.print(" meters at ");
-            Serial.println(tideInfo.peaks[j].second.c_str());  // Convert std::string to const char*
-        }
+      // Print the date
+      Serial.print("  Date: ");
+      Serial.println(tideInfo.date.getDate().c_str());
 
-        Serial.println("  Troughs:");
-        for (int j = 0; j < tideInfo.numTroughs; j++) {
-            Serial.print("    ");
-            Serial.print(tideInfo.troughs[j].first);
-            Serial.print(" meters at ");
-            Serial.println(tideInfo.troughs[j].second.c_str());  // Convert std::string to const char*
-        }
+      Serial.println("  Peaks:");
+      for (int j = 0; j < tideInfo.numPeaks; j++) {
+          Serial.print("    ");
+          Serial.print(tideInfo.peaks[j].first);
+          Serial.print(" meters at ");
+          Serial.println(tideInfo.peaks[j].second.c_str());  
+      }
 
-        Serial.print("  Low Tide Coefficient: ");
-        Serial.println(tideInfo.lowTideCoefficient);
-        Serial.print("  High Tide Coefficient: ");
-        Serial.println(tideInfo.highTideCoefficient);
-    }
+      Serial.println("  Troughs:");
+      for (int j = 0; j < tideInfo.numTroughs; j++) {
+          Serial.print("    ");
+          Serial.print(tideInfo.troughs[j].first);
+          Serial.print(" meters at ");
+          Serial.println(tideInfo.troughs[j].second.c_str()); 
+      }
+
+      Serial.print("  Low Tide Coefficient: ");
+      Serial.println(tideInfo.lowTideCoefficient);
+      Serial.print("  High Tide Coefficient: ");
+      Serial.println(tideInfo.highTideCoefficient);
+  }
 
 
     delay(1000);  // Check every second
