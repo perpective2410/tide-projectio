@@ -687,72 +687,56 @@ struct TideInfo {
     int lowTideCoefficient;
     int highTideCoefficient;
     MyDate date;
+
+    TideInfo() : numPeaks(0), numTroughs(0), lowTideCoefficient(0), highTideCoefficient(0) {
+        peaks[0] = std::make_pair(0.0f, "");
+        peaks[1] = std::make_pair(0.0f, "");
+        troughs[0] = std::make_pair(0.0f, "");
+        troughs[1] = std::make_pair(0.0f, "");
+        date = {0, 0, 0};
+    }
+     
 };
+
+
 class TideStack {
-  private:
-    static const int MAX_CAPACITY = 4;
-    TideInfo stack[MAX_CAPACITY];
-    int top;
+private:
+    static const int STACK_SIZE = 4; // Fixed size
+    TideInfo stack[STACK_SIZE];
+    int count;
 
-  public:
-    // Constructor to initialize the stack
-    TideStack() : top(-1) {}
+public:
+    TideStack() : count(0) { }
 
-    // Function to push a TideInfo object onto the stack
-    bool push(const TideInfo& tideInfo) {
-        if (top < MAX_CAPACITY - 1) {
-            stack[++top] = tideInfo;
-            return true;
-        } else {
-          return false;
+    void push(const TideInfo& tideInfo) {
+        // Shift elements left
+        for (int i = 0; i < STACK_SIZE - 1; i++) {
+            stack[i] = stack[i + 1];
         }
+
+        // Place the new element at the end
+        stack[STACK_SIZE - 1] = tideInfo;
+
+        // Ensure count does not exceed STACK_SIZE
+        if (count < STACK_SIZE) count++;
     }
 
-    // Function to get a TideInfo object from the stack
-    bool get(TideInfo& tideInfo) {
-        if (top >= 0) {
-            tideInfo = stack[top--];
-            return true;
-        } else {
-            Serial.println("Stack is empty. Cannot get more TideInfo objects.");
-            return false;
-        }
-    }
+    // Getter methods for printing
+    const TideInfo* getStack() const { return stack; }
+    int getCount() const { return count; }
 
-     // Pop method
-    TideInfo pop() {
-        if (top < 0) {
-            Serial.println("Stack Underflow");
-            return TideInfo();
-        }
-        return stack[top--];
-    }
-
-    // Function to peek at a specific index in the stack
-    TideInfo peek(int index) {
-        if (index >= 0 && index <= top) {
-            return stack[index];
-        } else {
-            Serial.println("Invalid index. Returning default TideInfo.");
-            return TideInfo();  // Return a default TideInfo object
-        }
-    }
-
-    // Function to get the top index of the stack
+    // Method to get the top index
     int getTop() const {
-        return top;
+        return count - 1;
     }
 
-    // Function to check if the stack is empty
-    bool isEmpty() const {
-        return top == -1;
-    }
-
-    // Function to check if the stack is full
-    bool isFull() const {
-        return top == MAX_CAPACITY - 1;
+    // Method to peek at an index
+    const TideInfo& peek(int index) const {
+        return stack[index];
     }
 };
+
+
 
 
 
@@ -1351,17 +1335,18 @@ void displayTidesSortedByTime(const TideInfo& tides) {
       {"3M2S10"  ,10, -6, 6, 0, 0,  0, 146.9523126, u3M2,    f3M2}
   };
 
-TideStack tideStack;
+
 WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP, "pool.ntp.org", 0, 86400000 ); // UTC time with 24h refresh
 
 int lastDay = -1; // Stores the last recorded day to detect midnight transition
 const int daysToCalculate = 4;  // Number of days to calculate tides for
+TideStack tideStack;
+
 
 void run_calculations(const MyDate& date) {
     
- Serial.println("Calculating Astronomical references for date: " + String(date.day) + "/" + String(date.month) + "/" + String(date.year));
-
+  Serial.println("Calculating Astronomical references for date: " + String(date.day) + "/" + String(date.month) + "/" + String(date.year));
   astroCalculations(date);
   int utcOffsetHours = franceTimeOffset(date);
   Table2NCDef table2NCDef(table2NcDefArray);
@@ -1385,10 +1370,10 @@ void run_calculations(const MyDate& date) {
   tides.lowTideCoefficient = tides_ref.lowTideCoefficient;
   tides.highTideCoefficient = tides_ref.highTideCoefficient;
   tides.date = date;
+  // Store TideInfo into a stack of only 4 elements max
   tideStack.push(tides);
 
 }
-
 
 
 MyDate epochToDate(time_t epoch) {
@@ -1397,6 +1382,17 @@ MyDate epochToDate(time_t epoch) {
 }
 
 
+time_t calculateEpochTime(int year, int month, int day, int hour, int minute, int second) {
+    tm tm_info = {};
+    tm_info.tm_year = year - 1900;  // tm_year is years since 1900
+    tm_info.tm_mon = month - 1;     // tm_mon is months since January (0-11)
+    tm_info.tm_mday = day;
+    tm_info.tm_hour = hour;
+    tm_info.tm_min = minute;
+    tm_info.tm_sec = second;
+    return mktime(&tm_info);
+}
+time_t testEpochTime;
 
 void setup() {
     Serial.begin(115200);
@@ -1408,68 +1404,102 @@ void setup() {
         Serial.print(".");
     }
 
+    
     timeClient.begin();
     timeClient.update();
-    setTime(1738454154);
+
+    // Calculate epoch time for 3 minutes before midnight on 2025-02-01
+    testEpochTime = calculateEpochTime(2025, 2, 1, 23, 59, 50);
+    setTime(testEpochTime);
+    // Print the current time after setting the epoch time
+    Serial.print("Current Time: ");
+    Serial.print(hour());
+    Serial.print(":");
+    Serial.print(minute());
+    Serial.print(":");
+    Serial.println(second());
 
     lastDay = day();
     Serial.println("Setup completed!");
     
-    time_t currentEpoch = timeClient.getEpochTime();
+    //time_t currentEpoch = timeClient.getEpochTime();
     for (int i = 0; i < daysToCalculate; i++) {
-        MyDate futureDate = epochToDate(currentEpoch + i * SECS_PER_DAY);
+        MyDate futureDate = epochToDate(testEpochTime + i * SECS_PER_DAY);
         run_calculations(futureDate);
     }
 }
 
 void loop() {
-  //timeClient.update();
-  //setTime(timeClient.getEpochTime());
-  int currentDay = day();
-  if (currentDay != lastDay) {
-      Serial.println("Midnight transition detected! Updating tide data...");
-      lastDay = currentDay;
-      tideStack.pop(); // Remove the oldest entry
-      time_t newEpoch = timeClient.getEpochTime() + (daysToCalculate - 1) * SECS_PER_DAY;
-      MyDate newDay = epochToDate(newEpoch);
-      run_calculations(newDay); // Calculate tide for the new day
-  }
+    static unsigned long lastUpdate = 0;
+    const unsigned long updateInterval = 1000; // Update every second for testing
 
-  for (int i = 0; i <= tideStack.getTop(); i++) {
-      TideInfo tideInfo = tideStack.peek(i);
-      
-      Serial.print("Tide Info ");
-      Serial.print(i + 1);
-      Serial.println(":");
+    unsigned long currentMillis = millis();
+    if (currentMillis - lastUpdate >= updateInterval) {
+        Serial.print("loop inside if Current Time: ");
+        lastUpdate = currentMillis;
 
-      // Print the date
-      Serial.print("  Date: ");
-      Serial.println(tideInfo.date.getDate().c_str());
+        testEpochTime += 1;  // Increment the test time by one second
+        setTime(testEpochTime);  // Update the internal time/
 
-      Serial.println("  Peaks:");
-      for (int j = 0; j < tideInfo.numPeaks; j++) {
-          Serial.print("    ");
-          Serial.print(tideInfo.peaks[j].first);
-          Serial.print(" meters at ");
-          Serial.println(tideInfo.peaks[j].second.c_str());  
-      }
+        // Print the current time
+        Serial.print("Current Time: ");
+        Serial.print(hour());
+        Serial.print(":");
+        Serial.print(minute());
+        Serial.print(":");
+        Serial.println(second());
 
-      Serial.println("  Troughs:");
-      for (int j = 0; j < tideInfo.numTroughs; j++) {
-          Serial.print("    ");
-          Serial.print(tideInfo.troughs[j].first);
-          Serial.print(" meters at ");
-          Serial.println(tideInfo.troughs[j].second.c_str()); 
-      }
+        int currentDay = day();
+        if (currentDay != lastDay) {
+            Serial.println("Midnight transition detected! Updating tide data...");
+            Serial.print("Current Time: ");
+            Serial.print(hour());
+            Serial.print(":");
+            Serial.print(minute());
+            Serial.print(":");
+            Serial.println(second());
+            lastDay = currentDay;
+            time_t newEpoch = testEpochTime + (daysToCalculate - 1) * SECS_PER_DAY;
+            MyDate newDay = epochToDate(newEpoch);
+            run_calculations(newDay);
+        }
+    }
+    Serial.print("loop Current Time: ");
+    Serial.println(timeClient.getFormattedTime());  
 
-      Serial.print("  Low Tide Coefficient: ");
-      Serial.println(tideInfo.lowTideCoefficient);
-      Serial.print("  High Tide Coefficient: ");
-      Serial.println(tideInfo.highTideCoefficient);
-  }
+   for (int i = 0; i <= tideStack.getTop(); i++) {
+        const TideInfo& tideInfo = tideStack.peek(i);
 
+        Serial.print("Tide Info ");
+        Serial.print(i + 1);
+        Serial.println(":");
+
+        // Print the date
+        Serial.print("  Date: ");
+        Serial.println(tideInfo.date.getDate());
+
+        Serial.println("  Peaks:");
+        for (int j = 0; j < tideInfo.numPeaks; j++) {
+            Serial.print("    ");
+            Serial.print(tideInfo.peaks[j].first);
+            Serial.print(" meters at ");
+            Serial.println(tideInfo.peaks[j].second.c_str());
+        }
+
+        Serial.println("  Troughs:");
+        for (int j = 0; j < tideInfo.numTroughs; j++) {
+            Serial.print("    ");
+            Serial.print(tideInfo.troughs[j].first);
+            Serial.print(" meters at ");
+            Serial.println(tideInfo.troughs[j].second.c_str());
+        }
+
+        Serial.print("  Low Tide Coefficient: ");
+        Serial.println(tideInfo.lowTideCoefficient);
+        Serial.print("  High Tide Coefficient: ");
+        Serial.println(tideInfo.highTideCoefficient);
+    }
 
     delay(1000);  // Check every second
 }
-
 
