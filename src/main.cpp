@@ -13,6 +13,7 @@
 const char* ssid = "Wokwi-GUEST";
 //const char* password = "Magenta2110";
 
+constexpr int daysToCalculate = 3; 
 
 // Global variables
 double T, s, h, p, M, p1, N;
@@ -701,7 +702,7 @@ struct TideInfo {
 
 class TideStack {
 private:
-    static const int STACK_SIZE = 4; // Fixed size
+    static constexpr int STACK_SIZE = daysToCalculate; // Fixed size
     TideInfo stack[STACK_SIZE];
     int count;
 
@@ -1340,7 +1341,7 @@ WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP, "pool.ntp.org", 0, 86400000 ); // UTC time with 24h refresh
 
 int lastDay = -1; // Stores the last recorded day to detect midnight transition
-const int daysToCalculate = 4;  // Number of days to calculate tides for
+
 TideStack tideStack;
 
 
@@ -1404,7 +1405,6 @@ void setup() {
         Serial.print(".");
     }
 
-    
     timeClient.begin();
     timeClient.update();
 
