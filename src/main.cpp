@@ -13,7 +13,7 @@
 const char* ssid = "Wokwi-GUEST";
 //const char* password = "Magenta2110";
 
-constexpr int daysToCalculate = 3; 
+constexpr int daysToCalculate = 2; 
 
 // Global variables
 double T, s, h, p, M, p1, N;
@@ -1339,9 +1339,6 @@ void displayTidesSortedByTime(const TideInfo& tides) {
 
 WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP, "pool.ntp.org", 0, 86400000 ); // UTC time with 24h refresh
-
-int lastDay = -1; // Stores the last recorded day to detect midnight transition
-
 TideStack tideStack;
 
 
@@ -1371,114 +1368,93 @@ void run_calculations(const MyDate& date) {
   tides.lowTideCoefficient = tides_ref.lowTideCoefficient;
   tides.highTideCoefficient = tides_ref.highTideCoefficient;
   tides.date = date;
-  // Store TideInfo into a stack of only 4 elements max
   tideStack.push(tides);
 
 }
 
 
-MyDate epochToDate(time_t epoch) {
-    setTime(epoch);  // Set the current time to epoch
-    return MyDate(year(), month(), day());
+MyDate epochToDate(time_t epochTime) {
+    return MyDate(year(epochTime), month(epochTime), day(epochTime));
 }
 
+unsigned long currentEpoch;
+unsigned long lastMillis;
+int lastDay;
+bool useNtpTime = true; // Set this to true to use NTP time, false to use the manually set time
 
-time_t calculateEpochTime(int year, int month, int day, int hour, int minute, int second) {
-    tm tm_info = {};
-    tm_info.tm_year = year - 1900;  // tm_year is years since 1900
-    tm_info.tm_mon = month - 1;     // tm_mon is months since January (0-11)
-    tm_info.tm_mday = day;
-    tm_info.tm_hour = hour;
-    tm_info.tm_min = minute;
-    tm_info.tm_sec = second;
-    return mktime(&tm_info);
-}
-time_t testEpochTime;
 
 void setup() {
     Serial.begin(115200);
     while (!Serial);
-
     WiFi.begin(ssid);
     while (WiFi.status() != WL_CONNECTED) {
         delay(500);
         Serial.print(".");
     }
-
     timeClient.begin();
-    timeClient.update();
-
-    // Calculate epoch time for 3 minutes before midnight on 2025-02-01
-    testEpochTime = calculateEpochTime(2025, 2, 1, 23, 59, 50);
-    setTime(testEpochTime);
-    // Print the current time after setting the epoch time
-    Serial.print("Current Time: ");
-    Serial.print(hour());
-    Serial.print(":");
-    Serial.print(minute());
-    Serial.print(":");
-    Serial.println(second());
-
+    if (useNtpTime) {
+        timeClient.update();
+        currentEpoch = timeClient.getEpochTime();
+    } else {
+        currentEpoch = 1738540730; // Manually set epoch time
+    }
+    setTime(currentEpoch);
+    lastMillis = millis();
     lastDay = day();
-    Serial.println("Setup completed!");
-    
-    //time_t currentEpoch = timeClient.getEpochTime();
+
     for (int i = 0; i < daysToCalculate; i++) {
-        MyDate futureDate = epochToDate(testEpochTime + i * SECS_PER_DAY);
+        time_t futureEpoch = currentEpoch + (i * SECS_PER_DAY); // Add i days in seconds
+        MyDate futureDate = epochToDate(futureEpoch);
         run_calculations(futureDate);
     }
 }
 
 void loop() {
+    
     static unsigned long lastUpdate = 0;
     const unsigned long updateInterval = 1000; // Update every second for testing
-
     unsigned long currentMillis = millis();
+
     if (currentMillis - lastUpdate >= updateInterval) {
-        Serial.print("loop inside if Current Time: ");
         lastUpdate = currentMillis;
 
-        testEpochTime += 1;  // Increment the test time by one second
-        setTime(testEpochTime);  // Update the internal time/
-
-        // Print the current time
-        Serial.print("Current Time: ");
-        Serial.print(hour());
-        Serial.print(":");
-        Serial.print(minute());
-        Serial.print(":");
-        Serial.println(second());
-
+        if (!useNtpTime) {
+            // Update the currentEpoch based on the elapsed time
+            currentEpoch += (currentMillis - lastMillis) / 1000;
+            lastMillis = currentMillis;
+        }
         int currentDay = day();
         if (currentDay != lastDay) {
             Serial.println("Midnight transition detected! Updating tide data...");
-            Serial.print("Current Time: ");
-            Serial.print(hour());
-            Serial.print(":");
-            Serial.print(minute());
-            Serial.print(":");
-            Serial.println(second());
+            
+            if (useNtpTime) {
+                Serial.println("Formatted time:");
+                Serial.println(timeClient.getFormattedTime());
+                Serial.println("Epoch time:");
+                Serial.println(timeClient.getEpochTime());
+            } else {
+                Serial.println("Formatted time:");
+                Serial.println(String(hour()) + ":" + String(minute()) + ":" + String(second()));
+                Serial.println("Epoch time:");
+                Serial.println(currentEpoch);
+            }
+
             lastDay = currentDay;
-            time_t newEpoch = testEpochTime + (daysToCalculate - 1) * SECS_PER_DAY;
+            time_t newEpoch = currentEpoch + (daysToCalculate - 1 ) * SECS_PER_DAY;
             MyDate newDay = epochToDate(newEpoch);
             run_calculations(newDay);
         }
     }
-    Serial.print("loop Current Time: ");
-    Serial.println(timeClient.getFormattedTime());  
 
+   /* Display Tide Stack */
    for (int i = 0; i <= tideStack.getTop(); i++) {
         const TideInfo& tideInfo = tideStack.peek(i);
-
-        Serial.print("Tide Info ");
-        Serial.print(i + 1);
-        Serial.println(":");
-
+        Serial.println("------------");
         // Print the date
         Serial.print("  Date: ");
         Serial.println(tideInfo.date.getDate());
 
-        Serial.println("  Peaks:");
+        Serial.println("  Marée haute:");
         for (int j = 0; j < tideInfo.numPeaks; j++) {
             Serial.print("    ");
             Serial.print(tideInfo.peaks[j].first);
@@ -1486,7 +1462,7 @@ void loop() {
             Serial.println(tideInfo.peaks[j].second.c_str());
         }
 
-        Serial.println("  Troughs:");
+        Serial.println("  Marée basse:");
         for (int j = 0; j < tideInfo.numTroughs; j++) {
             Serial.print("    ");
             Serial.print(tideInfo.troughs[j].first);
@@ -1494,10 +1470,11 @@ void loop() {
             Serial.println(tideInfo.troughs[j].second.c_str());
         }
 
-        Serial.print("  Low Tide Coefficient: ");
+        Serial.print(" 1er Coefficient: ");
         Serial.println(tideInfo.lowTideCoefficient);
-        Serial.print("  High Tide Coefficient: ");
+        Serial.print(" 2nd Coefficient: ");
         Serial.println(tideInfo.highTideCoefficient);
+        Serial.println("------------");
     }
 
     delay(1000);  // Check every second
