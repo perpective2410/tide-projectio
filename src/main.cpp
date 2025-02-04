@@ -678,27 +678,23 @@ double f2SM() {
     return pow(fM2(), 2);
 }
 
-
+struct TideEvent {
+    float amplitude;
+    float time;
+    bool isPeak; // true if peak, false if trough
+};
 
 struct TideInfo {
-    std::pair<float, std::string> peaks[2];
-    std::pair<float, std::string> troughs[2];
-    int numPeaks;
-    int numTroughs;
+    TideEvent events[4]; // Up to 2 peaks and 2 troughs
+    int numEvents;
     int lowTideCoefficient;
     int highTideCoefficient;
     MyDate date;
 
-    TideInfo() : numPeaks(0), numTroughs(0), lowTideCoefficient(0), highTideCoefficient(0) {
-        peaks[0] = std::make_pair(0.0f, "");
-        peaks[1] = std::make_pair(0.0f, "");
-        troughs[0] = std::make_pair(0.0f, "");
-        troughs[1] = std::make_pair(0.0f, "");
+    TideInfo() : numEvents(0), lowTideCoefficient(0), highTideCoefficient(0) {
         date = {0, 0, 0};
     }
-     
 };
-
 
 class TideStack {
 private:
@@ -990,85 +986,55 @@ public:
         return std::string(timeBuffer);
     }
 
-
     TideInfo findTidesAndTimes(int utcOffsetHours) {
-        const int SAMPLES = 1440; // Assuming 140 samples in a day
-        float hours[SAMPLES];
-        float amplitudes[SAMPLES];
+        const int SAMPLES = 1440;
+        static float hours[SAMPLES];
+        static float amplitudes[SAMPLES];
+        TideEvent tideEvents[4];
+        int eventCount = 0;
 
-        // Fill hours and amplitudes arrays
         for (int i = 0; i < SAMPLES; ++i) {
             hours[i] = (i / 60.0);
             amplitudes[i] = amplitude(hours[i] - utcOffsetHours);
         }
 
-        double highestPeak1 = -INFINITY, highestPeak2 = -INFINITY;
-        int highestPeak1Index = -1, highestPeak2Index = -1;
-        double lowestTrough1 = INFINITY, lowestTrough2 = INFINITY;
-        int lowestTrough1Index = -1, lowestTrough2Index = -1;
-
-        // Iterate through the amplitudes array to find peaks and troughs
-        for (int i = 1; i < SAMPLES - 1; ++i) {
-            // Check if it's a local maximum (peak)
+        for (int i = 1; i < SAMPLES - 1 && eventCount < 4; ++i) {
             if (amplitudes[i] > amplitudes[i - 1] && amplitudes[i] > amplitudes[i + 1]) {
-                if (amplitudes[i] > highestPeak1) {
-                    highestPeak2 = highestPeak1;
-                    highestPeak2Index = highestPeak1Index;
-
-                    highestPeak1 = amplitudes[i];
-                    highestPeak1Index = i;
-                } else if (amplitudes[i] > highestPeak2) {
-                    highestPeak2 = amplitudes[i];
-                    highestPeak2Index = i;
-                }
+                tideEvents[eventCount++] = {amplitudes[i], hours[i], true};
             }
-
-            // Check if it's a local minimum (trough)
             if (amplitudes[i] < amplitudes[i - 1] && amplitudes[i] < amplitudes[i + 1]) {
-                if (amplitudes[i] < lowestTrough1) {
-                    lowestTrough2 = lowestTrough1;
-                    lowestTrough2Index = lowestTrough1Index;
-                    lowestTrough1 = amplitudes[i];
-                    lowestTrough1Index = i;
-                } else if (amplitudes[i] < lowestTrough2) {
-                    lowestTrough2 = amplitudes[i];
-                    lowestTrough2Index = i;
+                tideEvents[eventCount++] = {amplitudes[i], hours[i], false};
+            }
+        }
+
+        for (int i = 0; i < eventCount - 1; ++i) {
+            for (int j = i + 1; j < eventCount; ++j) {
+                if (tideEvents[i].time > tideEvents[j].time) {
+                    TideEvent temp = tideEvents[i];
+                    tideEvents[i] = tideEvents[j];
+                    tideEvents[j] = temp;
                 }
             }
         }
 
-        // Create a TideInfo object to hold the results
         TideInfo tideInfo;
-        tideInfo.numPeaks = 0;
-        tideInfo.numTroughs = 0;
-
-        // Store the peaks
-        if (highestPeak1Index != -1) {
-            tideInfo.peaks[tideInfo.numPeaks++] = std::make_pair(highestPeak1, convertToReadableTime(highestPeak1Index));
-        }
-        if (highestPeak2Index != -1) {
-            tideInfo.peaks[tideInfo.numPeaks++] = std::make_pair(highestPeak2, convertToReadableTime(highestPeak2Index));
+        tideInfo.numEvents = eventCount;
+        for (int i = 0; i < eventCount; ++i) {
+            tideInfo.events[i] = tideEvents[i];
         }
 
-        // Store the troughs
-        if (lowestTrough1Index != -1) {
-            tideInfo.troughs[tideInfo.numTroughs++] = std::make_pair(lowestTrough1, convertToReadableTime(lowestTrough1Index));
-        }
-        if (lowestTrough2Index != -1) {
-            tideInfo.troughs[tideInfo.numTroughs++] = std::make_pair(lowestTrough2, convertToReadableTime(lowestTrough2Index));
-        }
-
-        // Calculate the coefficients
-        if (tideInfo.numPeaks > 0 && tideInfo.numTroughs > 0) {
-            tideInfo.lowTideCoefficient = round(((tideInfo.peaks[0].first - tideInfo.troughs[0].first) / 6.1) * 100);
-            tideInfo.highTideCoefficient = round(((tideInfo.peaks[tideInfo.numPeaks - 1].first - tideInfo.troughs[tideInfo.numTroughs - 1].first) / 6.1) * 100);
-        } else {
-            tideInfo.lowTideCoefficient = 0;
-            tideInfo.highTideCoefficient = 0;
+        if (tideInfo.numEvents >= 2) {
+            if (tideInfo.events[0].isPeak != tideInfo.events[1].isPeak) {
+                tideInfo.lowTideCoefficient = abs(round(((tideInfo.events[0].amplitude - tideInfo.events[1].amplitude) / 6.1) * 100));
+            }
+            if (tideInfo.events[tideInfo.numEvents - 2].isPeak != tideInfo.events[tideInfo.numEvents - 1].isPeak) {
+                tideInfo.highTideCoefficient = abs(round(((tideInfo.events[tideInfo.numEvents - 2].amplitude - tideInfo.events[tideInfo.numEvents - 1].amplitude) / 6.1) * 100));
+            }
         }
 
         return tideInfo;
     }
+
 
     double amplitude(double t) {
       double total_amplitude = 0;
@@ -1091,45 +1057,45 @@ double reduc360(double angle) {
 }
 
 
-void displayTidesSortedByTime(const TideInfo& tides) {
-    struct TideEntry {
-        float level;
-        std::string time;
-        bool isHigh; // true for high tide, false for low tide
-    };
+//void displayTidesSortedByTime(const TideInfo& tides) {
+//    struct TideEntry {
+//        float level;
+//        std::string time;
+//        bool isHigh; // true for high tide, false for low tide
+//    };//
 
-    // Combine peaks and troughs into one array
-    TideEntry combined[4];
-    int combinedCount = 0;
+//    // Combine peaks and troughs into one array
+//    TideEntry combined[4];
+//    int combinedCount = 0;//
 
-    for (int i = 0; i < tides.numPeaks; ++i) {
-        combined[combinedCount++] = {tides.peaks[i].first, tides.peaks[i].second, true};
-    }
+//    for (int i = 0; i < tides.numPeaks; ++i) {
+//        combined[combinedCount++] = {tides.peaks[i].first, tides.peaks[i].second, true};
+//    }//
 
-    for (int i = 0; i < tides.numTroughs; ++i) {
-        combined[combinedCount++] = {tides.troughs[i].first, tides.troughs[i].second, false};
-    }
+//    for (int i = 0; i < tides.numTroughs; ++i) {
+//        combined[combinedCount++] = {tides.troughs[i].first, tides.troughs[i].second, false};
+//    }//
 
-    // Sort the combined array by time
-    for (int i = 0; i < combinedCount - 1; ++i) {
-        for (int j = i + 1; j < combinedCount; ++j) {
-            if (combined[i].time > combined[j].time) {
-                TideEntry temp = combined[i];
-                combined[i] = combined[j];
-                combined[j] = temp;
-            }
-        }
-    }
+//    // Sort the combined array by time
+//    for (int i = 0; i < combinedCount - 1; ++i) {
+//        for (int j = i + 1; j < combinedCount; ++j) {
+//            if (combined[i].time > combined[j].time) {
+//                TideEntry temp = combined[i];
+//                combined[i] = combined[j];
+//                combined[j] = temp;
+//            }
+//        }
+//    }//
 
-    // Display the sorted tides
-    for (int i = 0; i < combinedCount; ++i) {
-        Serial.print(combined[i].isHigh ? "High tide: " : "Low tide: ");
-        Serial.print(combined[i].time.c_str());
-        Serial.print(" (");
-        Serial.print(combined[i].level, 2);
-        Serial.println("m)");
-    }
-}
+//    // Display the sorted tides
+//    for (int i = 0; i < combinedCount; ++i) {
+//        Serial.print(combined[i].isHigh ? "High tide: " : "Low tide: ");
+//        Serial.print(combined[i].time.c_str());
+//        Serial.print(" (");
+//        Serial.print(combined[i].level, 2);
+//        Serial.println("m)");
+//    }
+//}
 
 
 
@@ -1445,37 +1411,68 @@ void loop() {
             run_calculations(newDay);
         }
     }
+    for (int i = 0; i <= tideStack.getTop(); i++) {
+        const TideInfo& tideInfo = tideStack.peek(i);
+
+        // Display date
+        Serial.print("Date: ");
+        Serial.print(tideInfo.date.day);
+        Serial.print("/");
+        Serial.print(tideInfo.date.month);
+        Serial.print("/");
+        Serial.println(tideInfo.date.year);
+
+        // Display tide events in chronological order
+        Serial.println("Tide Events:");
+        for (int j = 0; j < tideInfo.numEvents; ++j) {
+            const TideEvent& event = tideInfo.events[j];
+            Serial.print("  Time: ");
+            Serial.print(event.time);
+            Serial.print(" hours, ");
+            Serial.print(event.isPeak ? "High" : "Low");
+            Serial.print(" tide, Amplitude: ");
+            Serial.println(event.amplitude);
+        }
+
+        // Display coefficients
+        Serial.print("Low Tide Coefficient: ");
+        Serial.println(tideInfo.lowTideCoefficient);
+        Serial.print("High Tide Coefficient: ");
+        Serial.println(tideInfo.highTideCoefficient);
+
+        Serial.println();
+    }
 
    /* Display Tide Stack */
-   for (int i = 0; i <= tideStack.getTop(); i++) {
-        const TideInfo& tideInfo = tideStack.peek(i);
-        Serial.println("------------");
-        // Print the date
-        Serial.print("  Date: ");
-        Serial.println(tideInfo.date.getDate());
+  //for (int i = 0; i <= tideStack.getTop(); i++) {
+  //     const TideInfo& tideInfo = tideStack.peek(i);
+  //     Serial.println("------------");
+  //     // Print the date
+  //     Serial.print("  Date: ");
+  //     Serial.println(tideInfo.date.getDate());
 
-        Serial.println("  Marée haute:");
-        for (int j = 0; j < tideInfo.numPeaks; j++) {
-            Serial.print("    ");
-            Serial.print(tideInfo.peaks[j].first);
-            Serial.print(" meters at ");
-            Serial.println(tideInfo.peaks[j].second.c_str());
-        }
+  //     Serial.println("  Marée haute:");
+  //     for (int j = 0; j < tideInfo.numPeaks; j++) {
+  //         Serial.print("    ");
+  //         Serial.print(tideInfo.peaks[j].first);
+  //         Serial.print(" meters at ");
+  //         Serial.println(tideInfo.peaks[j].second.c_str());
+  //     }
 
-        Serial.println("  Marée basse:");
-        for (int j = 0; j < tideInfo.numTroughs; j++) {
-            Serial.print("    ");
-            Serial.print(tideInfo.troughs[j].first);
-            Serial.print(" meters at ");
-            Serial.println(tideInfo.troughs[j].second.c_str());
-        }
+  //     Serial.println("  Marée basse:");
+  //     for (int j = 0; j < tideInfo.numTroughs; j++) {
+  //         Serial.print("    ");
+  //         Serial.print(tideInfo.troughs[j].first);
+  //         Serial.print(" meters at ");
+  //         Serial.println(tideInfo.troughs[j].second.c_str());
+  //     }
 
-        Serial.print(" 1er Coefficient: ");
-        Serial.println(tideInfo.lowTideCoefficient);
-        Serial.print(" 2nd Coefficient: ");
-        Serial.println(tideInfo.highTideCoefficient);
-        Serial.println("------------");
-    }
+  //     Serial.print(" 1er Coefficient: ");
+  //     Serial.println(tideInfo.lowTideCoefficient);
+  //     Serial.print(" 2nd Coefficient: ");
+  //     Serial.println(tideInfo.highTideCoefficient);
+  //     Serial.println("------------");
+  // }
 
     delay(1000);  // Check every second
 }
