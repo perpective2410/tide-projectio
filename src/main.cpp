@@ -11,13 +11,9 @@
 #include <WiFi.h>
 
 const char* ssid = "Wokwi-GUEST";
-//const char* password = "Magenta2110";
-
-constexpr int daysToCalculate = 3; 
-
-// Global variables
+const char* password = "";
+constexpr int daysToCalculate = 4; 
 double T, s, h, p, M, p1, N;
-
 double reduc360(double angle);
 
 
@@ -48,7 +44,9 @@ class MyDate {
     }
 };
 
-
+MyDate epochToDate(time_t epochTime) {
+    return MyDate(year(epochTime), month(epochTime), day(epochTime));
+}
 
 struct Table2NC {
     String name;
@@ -689,10 +687,10 @@ struct TideInfo {
     int numEvents;
     int morningCoefficient;
     int afternoonCoefficient;
-    MyDate date;
+    time_t epoch;
 
     TideInfo() : numEvents(0), morningCoefficient(0), afternoonCoefficient(0) {
-        date = {0, 0, 0};
+        epoch = -1;
     }
 };
 
@@ -766,7 +764,8 @@ double julianDateToCentury(double julianDay) {
 
 
 // Function to perform astronomical calculations
-void astroCalculations(MyDate date) {
+void astroCalculations(time_t epoch) {
+    MyDate date = epochToDate(epoch); 
     double julianDay = dateToJulianDay(date);
     T = julianDateToCentury(julianDay);
     s = reduc360(218.3164591 + 481267.88134236 * T - 0.0013268 * T * T + T * T * T / 538841.0 - T * T * T * T / 65194000.0);
@@ -922,7 +921,9 @@ int lastSunday(int year, int month) {
     return lastSunday;
 }
 // Function to determine the UTC offset for France
-int franceTimeOffset(const MyDate& currentDate) {
+int franceTimeOffset(time_t epoch) {
+    MyDate currentDate = epochToDate(epoch);
+
     int lastSundayMarch = lastSunday(currentDate.year, 3); // March is month 3
     int lastSundayOctober = lastSunday(currentDate.year, 10); // October is month 10
 
@@ -1263,11 +1264,6 @@ double reduc360(double angle) {
 
 
 
-MyDate epochToDate(time_t epochTime) {
-    return MyDate(year(epochTime), month(epochTime), day(epochTime));
-}
-
-
 WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP, "pool.ntp.org", 0, 86400000 ); // UTC time with 24h refresh
 TideStack tideStack;
@@ -1282,13 +1278,15 @@ HarmonicCalculator calculatorRef(modelRef, table2NCDef);
 unsigned long currentEpoch;
 unsigned long lastMillis;
 int lastDay;
-bool useNtpTime = false; // Set this to true to use NTP time, false to use the manually set time
+bool useNtpTime = true; // Set this to true to use NTP time, false to use the manually set time
+const char* daysOfWeek[] = { "Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi" };
 
-void run_calculations(const MyDate& date) {
-   
-  Serial.println("Calculating Astronomical references for date: " + String(date.day) + "/" + String(date.month) + "/" + String(date.year));
-  astroCalculations(date);
-  int utcOffsetMinutes = franceTimeOffset(date);
+
+void run_calculations(time_t epoch) {
+  MyDate currentDate = epochToDate(epoch);
+  Serial.println("Calculating Astronomical references for date: " + String(currentDate.day) + "/" + String(currentDate.month) + "/" + String(currentDate.year));
+  astroCalculations(epoch);
+  int utcOffsetMinutes = franceTimeOffset(epoch);
   Serial.println("Calculating tide times for Belle-ile...");
   calculator.equi_tide();
   TideInfo tides = calculator.findTidesAndTimes(utcOffsetMinutes);
@@ -1298,7 +1296,7 @@ void run_calculations(const MyDate& date) {
 
   tides.morningCoefficient = tides_ref.morningCoefficient;
   tides.afternoonCoefficient = tides_ref.afternoonCoefficient;
-  tides.date = date;
+  tides.epoch = epoch;
   tideStack.push(tides);
 
 }
@@ -1307,7 +1305,11 @@ void run_calculations(const MyDate& date) {
 void setup() {
     Serial.begin(115200);
     while (!Serial);
-    WiFi.begin(ssid);
+    if (strlen(password) > 0) {
+        WiFi.begin(ssid, password);
+    } else {
+        WiFi.begin(ssid);
+    }
     while (WiFi.status() != WL_CONNECTED) {
         delay(500);
         Serial.print(".");
@@ -1323,10 +1325,12 @@ void setup() {
     lastMillis = millis();
     lastDay = day();
 
+
+
     for (int i = 0; i < daysToCalculate; i++) {
         time_t futureEpoch = currentEpoch + (i * SECS_PER_DAY); // Add i days in seconds
-        MyDate futureDate = epochToDate(futureEpoch);
-        run_calculations(futureDate);
+        //MyDate futureDate = epochToDate(futureEpoch);
+        run_calculations(futureEpoch);
     }
 }
 
@@ -1338,64 +1342,40 @@ void loop() {
 
     if (currentMillis - lastUpdate >= updateInterval) {
         lastUpdate = currentMillis;
-
         if (!useNtpTime) {
             // Update the currentEpoch based on the elapsed time
             currentEpoch += (currentMillis - lastMillis) / 1000;
             lastMillis = currentMillis;
         }
         int currentDay = day();
-
-        if (useNtpTime) {
-            Serial.println("Formatted time:");
-            Serial.println(timeClient.getFormattedTime());
-            Serial.println("Epoch time:");
-            Serial.println(timeClient.getEpochTime());
-        } else {
-            Serial.println("Formatted time:");
-            Serial.println(String(hour()) + ":" + String(minute()) + ":" + String(second()));
-            Serial.println("Epoch time:");
-            Serial.println(currentEpoch);
-        }
         if (currentDay != lastDay) {
             Serial.println("Midnight transition detected! Updating tide data...");
             lastDay = currentDay;
-            time_t newEpoch = currentEpoch + (daysToCalculate ) * SECS_PER_DAY;
-            MyDate newDay = epochToDate(newEpoch);
-            run_calculations(newDay);
+            time_t newEpoch = currentEpoch + (daysToCalculate - 1) * SECS_PER_DAY;
+            run_calculations(newEpoch);
         }
     }
+        
     for (int i = 0; i <= tideStack.getTop(); i++) {
-        const TideInfo& tideInfo = tideStack.peek(i);
-
-        // Display date
-        Serial.print("Date: ");
-        Serial.print(tideInfo.date.day);
-        Serial.print("/");
-        Serial.print(tideInfo.date.month);
-        Serial.print("/");
-        Serial.println(tideInfo.date.year);
-
-        // Display tide events in chronological order
-        Serial.println("Tide Events:");
-        for (int j = 0; j < tideInfo.numEvents; ++j) {
-            const TideEvent& event = tideInfo.events[j];
-            Serial.print(convertDecimalTimeToHM(event.time));
-            Serial.print(event.isPeak ? " High" : " Low");
-            Serial.print(" tide, Amplitude: ");
-            Serial.println(event.amplitude);
-        }
-
-        // Display coefficients
-        Serial.print("Morning Coefficient: ");
-        Serial.println(tideInfo.morningCoefficient);
-        Serial.print("Afternoon Coefficient: ");
-        Serial.println(tideInfo.afternoonCoefficient);
-
-        Serial.println();
+      const TideInfo& tideInfo = tideStack.peek(i);
+      Serial.print(daysOfWeek[weekday(tideInfo.epoch) - 1]);
+      Serial.println(" " + String(epochToDate(tideInfo.epoch).day) + "/" + String(epochToDate(tideInfo.epoch).month) + "/" + String(epochToDate(tideInfo.epoch).year));
+      for (int j = 0; j < tideInfo.numEvents; ++j) {
+        const TideEvent& event = tideInfo.events[j];
+        Serial.print(event.isPeak ? "Marée Haute: " : "Marée Basse: ");
+        Serial.print(convertDecimalTimeToHM(event.time));
+        Serial.print(" (");
+        Serial.print(event.amplitude);
+        Serial.print("m");
+        Serial.println(")");
+      }
+      Serial.print("Coefficient matin: ");
+      Serial.println(tideInfo.morningCoefficient);
+      Serial.print("Coefficient aprem: ");
+      Serial.println(tideInfo.afternoonCoefficient);
+      Serial.println("---");
     }
-
-
+  
     delay(1000);  // Check every second
 }
 
