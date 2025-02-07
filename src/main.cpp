@@ -687,18 +687,18 @@ struct TideEvent {
 struct TideInfo {
     TideEvent events[4]; // Up to 2 peaks and 2 troughs
     int numEvents;
-    int lowTideCoefficient;
-    int highTideCoefficient;
+    int morningCoefficient;
+    int afternoonCoefficient;
     MyDate date;
 
-    TideInfo() : numEvents(0), lowTideCoefficient(0), highTideCoefficient(0) {
+    TideInfo() : numEvents(0), morningCoefficient(0), afternoonCoefficient(0) {
         date = {0, 0, 0};
     }
 };
 
 class TideStack {
 private:
-    static constexpr int STACK_SIZE = daysToCalculate; // Fixed size
+    static constexpr int STACK_SIZE = daysToCalculate;
     TideInfo stack[STACK_SIZE];
     int count;
 
@@ -796,7 +796,7 @@ String convertDecimalTimeToHM(float decimalTime) {
   int minutes = (int)((decimalTime - hours) * 60);  // Calculate the remaining minutes
 
   // Create a formatted string for hours and minutes
-  String timeString = String(hours) + ":";
+  String timeString = String(hours) + "h";
   if (minutes < 10) {
     timeString += "0";  // Add leading zero for single-digit minutes
   }
@@ -955,10 +955,9 @@ private:
 
 
 public:
-    HarmonicCalculator(HarmonicModel &model, Table2NCDef &table_def)
+    HarmonicCalculator(HarmonicModel& model, Table2NCDef& table_def)
         : harmonic_model(model), table2NCDef(table_def) {
-        Serial.println("Just before equi_tide");
-        equi_tide();
+        Serial.println("Harmonic Calculator constructor");
     }
 
     ~HarmonicCalculator() {
@@ -967,129 +966,84 @@ public:
     }
 
     void equi_tide() {
-      Serial.println("start equi_tide");
-        double T = 180.0;
-        for (int i = 0; i < harmonic_model.get_harmonic_count(); i++) {
-            Serial.print("harmonic index");
-            Serial.println(i);
-            Harmonic& harmonic = harmonic_model.get_harmonics()[i]; 
-            Serial.print("harmonic name:");
-            Serial.println(harmonic.name);
-            Table2NC constituent = table2NCDef.get_constituent(harmonic.name);
-            equilbrm[harmonic.name] = (constituent.T * T +
-                                       constituent.s * s +
-                                       constituent.h * h +
-                                       constituent.p * p +
-                                       constituent.p1 * p1 +
-                                       constituent.deg +
-                                       constituent.u_func());
-            equilbrm[harmonic.name] = reduc360(equilbrm[harmonic.name]);
-            nodefctr[harmonic.name] = constituent.f_func();
-        }
-     Serial.println("end equi_tide");   
-    }
+      static const double T = 180.0;
+      for (int i = 0; i < harmonic_model.get_harmonic_count(); i++) {
+          Harmonic& harmonic = harmonic_model.get_harmonics()[i]; 
+          Table2NC constituent = table2NCDef.get_constituent(harmonic.name);
+          equilbrm[harmonic.name] = (constituent.T * T +
+                                      constituent.s * s +
+                                      constituent.h * h +
+                                      constituent.p * p +
+                                      constituent.p1 * p1 +
+                                      constituent.deg +
+                                      constituent.u_func());
+          equilbrm[harmonic.name] = reduc360(equilbrm[harmonic.name]);
+          nodefctr[harmonic.name] = constituent.f_func();
+      }
+  }
 
-
-
-
-    //std::string convertToReadableTime(int minutesSinceMidnight) {
-    //    // Ensure input is within a valid range
-    //    if (minutesSinceMidnight < 0 || minutesSinceMidnight >= 24 * 60) {
-    //        return "Invalid time"; // Handle invalid input
-    //    }
-//
-    //    // Adjust for the time zone offset
-    //    minutesSinceMidnight %= 24 * 60; // Wrap around if it exceeds a day
-//
-    //    // Calculate hours and minutes
-    //    int hours = minutesSinceMidnight / 60;
-    //    int minutes = minutesSinceMidnight % 60;
-//
-    //    // Format hours and minutes as a string
-    //    char timeBuffer[6]; // Enough for "HH:MM" + null terminator
-    //    snprintf(timeBuffer, sizeof(timeBuffer), "%02d:%02d", hours, minutes);
-//
-    //    return std::string(timeBuffer);
-    //}
 
     TideInfo findTidesAndTimes(int utcOffsetMinutes) {
-        static const int SAMPLES = 1440;
-        static float hours[SAMPLES];
-        static double amplitudes[SAMPLES];
-
-        TideEvent tideEvents[4];
-        int eventCount = 0;
-        // memset(amplitudes, 0, sizeof(amplitudes));
-
+      static const int SAMPLES = 1440;
+      static float hours[SAMPLES];
+      static double amplitudes[SAMPLES];
+      TideInfo tideInfo;
+      TideEvent tideEvents[4];
+      int eventCount = 0;
+   
       for (int i = 0; i < SAMPLES; ++i) {
         int adjustedIndex = i - utcOffsetMinutes;
         hours[adjustedIndex] = (adjustedIndex / 60.0);
         amplitudes[adjustedIndex] = amplitude(hours[adjustedIndex]);
-        Serial.print("Hour: ");
-        Serial.print(hours[adjustedIndex]);
-        Serial.print(", Amplitude: ");
-        Serial.println(amplitudes[adjustedIndex], 20);
-    }
+      }
 
-    for (int i = 1 - utcOffsetMinutes; i < SAMPLES - utcOffsetMinutes - 1; ++i) {
-        if (amplitudes[i - 1] > 0 ) {
-            if (amplitudes[i] > amplitudes[i - 1] && amplitudes[i] > amplitudes[i + 1]) {
-                Serial.println("Marée haute detected");
-                Serial.print("Hour: ");
-                Serial.print(convertDecimalTimeToHM(hours[i] + utcOffsetMinutes / 60));
-                Serial.print(", Amplitude: ");
-                Serial.println(amplitudes[i], 10);
-                tideEvents[eventCount++] = {amplitudes[i], hours[i] + utcOffsetMinutes / 60, true};
-            }
-            if (amplitudes[i] < amplitudes[i - 1] && amplitudes[i] < amplitudes[i + 1]) {
-                Serial.println("Marée basse detected");
-                Serial.print("Hour: ");
-                Serial.print(convertDecimalTimeToHM(hours[i] + utcOffsetMinutes / 60));
-                Serial.print(", Amplitude: ");
-                Serial.println(amplitudes[i], 20);
-                tideEvents[eventCount++] = {amplitudes[i], hours[i] + utcOffsetMinutes / 60, false};
-            }
-        }
-        
-    }
+      for (int i = 1 - utcOffsetMinutes; i < SAMPLES - utcOffsetMinutes - 1; ++i) {
+          if (amplitudes[i - 1] > 0 ) { // workaround with statics amplitudes
+              if (amplitudes[i] > amplitudes[i - 1] && amplitudes[i] > amplitudes[i + 1]) {
+                  tideEvents[eventCount++] = {amplitudes[i], hours[i] + utcOffsetMinutes / 60, true};
+              }
+              if (amplitudes[i] < amplitudes[i - 1] && amplitudes[i] < amplitudes[i + 1]) {
+                  tideEvents[eventCount++] = {amplitudes[i], hours[i] + utcOffsetMinutes / 60, false};
+              }
+          }
+          
+      }
 
+      for (int i = 0; i < eventCount; ++i) {
+          for (int j = i + 1; j < eventCount; ++j) {
+              if (tideEvents[i].time > tideEvents[j].time) {
+                  TideEvent temp = tideEvents[i];
+                  tideEvents[i] = tideEvents[j];
+                  tideEvents[j] = temp;
+              }
+          }
+      }
 
-    for (int i = 0; i < eventCount; ++i) {
-        for (int j = i + 1; j < eventCount; ++j) {
-            if (tideEvents[i].time > tideEvents[j].time) {
-                TideEvent temp = tideEvents[i];
-                tideEvents[i] = tideEvents[j];
-                tideEvents[j] = temp;
-            }
-        }
-    }
+      tideInfo.numEvents = eventCount;
+      for (int i = 0; i < eventCount; ++i) {
+          tideInfo.events[i] = tideEvents[i];
+      }
 
+      if (tideInfo.numEvents >= 2) {
+          if (tideInfo.events[0].isPeak != tideInfo.events[1].isPeak) {
+              tideInfo.morningCoefficient = abs(round(((tideInfo.events[0].amplitude - tideInfo.events[1].amplitude) / 6.1) * 100));
+          }
+          if (tideInfo.events[tideInfo.numEvents - 2].isPeak != tideInfo.events[tideInfo.numEvents - 1].isPeak) {
+              tideInfo.afternoonCoefficient = abs(round(((tideInfo.events[tideInfo.numEvents - 2].amplitude - tideInfo.events[tideInfo.numEvents - 1].amplitude) / 6.1) * 100));
+          }
+      }
 
-        TideInfo tideInfo;
-        tideInfo.numEvents = eventCount;
-        for (int i = 0; i < eventCount; ++i) {
-            tideInfo.events[i] = tideEvents[i];
-        }
-
-        if (tideInfo.numEvents >= 2) {
-            if (tideInfo.events[0].isPeak != tideInfo.events[1].isPeak) {
-                tideInfo.lowTideCoefficient = abs(round(((tideInfo.events[0].amplitude - tideInfo.events[1].amplitude) / 6.1) * 100));
-            }
-            if (tideInfo.events[tideInfo.numEvents - 2].isPeak != tideInfo.events[tideInfo.numEvents - 1].isPeak) {
-                tideInfo.highTideCoefficient = abs(round(((tideInfo.events[tideInfo.numEvents - 2].amplitude - tideInfo.events[tideInfo.numEvents - 1].amplitude) / 6.1) * 100));
-            }
-        }
-
-        return tideInfo;
+      return tideInfo;
     }
 
 
     double amplitude(double t) {
       double total_amplitude = 0;
-      Harmonic  harmonicZ0 = harmonic_model.get_z0_harmonic();
+      Harmonic harmonicZ0 = harmonic_model.get_z0_harmonic();
        for (int i = 0; i < harmonic_model.get_harmonic_count(); i++) {
            Harmonic& harmonic = harmonic_model.get_harmonics()[i]; 
            Table2NC constituent = table2NCDef.get_constituent(harmonic.name);
+
            if (harmonic.amplitude > 0.0) {  
                double var = reduc360(constituent.speed * t + equilbrm[harmonic.name] - harmonic.phase);
                total_amplitude += nodefctr[harmonic.name] * harmonic.amplitude * cos(radians(var));
@@ -1308,52 +1262,46 @@ double reduc360(double angle) {
   };
 
 
-WiFiUDP ntpUDP;
-NTPClient timeClient(ntpUDP, "pool.ntp.org", 0, 86400000 ); // UTC time with 24h refresh
-TideStack tideStack;
-
-
-void run_calculations(const MyDate& date) {
-    
-  Serial.println("Calculating Astronomical references for date: " + String(date.day) + "/" + String(date.month) + "/" + String(date.year));
-  astroCalculations(date);
-  int utcOffsetMinutes = franceTimeOffset(date);
-  Table2NCDef table2NCDef(table2NcDefArray);
-  HarmonicModel model(nonRefHarmonics,  nonRefZ0Harmonic); 
- // HarmonicModel modelRef(refHarmonics, z0RefHarmonic); 
- // HarmonicCalculator calculatorRef(modelRef, table2NCDef);
-  Serial.println("Calculating Coefficients...");
-  //TideInfo tides_ref = calculatorRef.findTidesAndTimes(utcOffsetMinutes);
-
-  //// Calculate Coefficient for Model Ref (Brest)
-  //Serial.print("Low Tide Coefficient: ");
-  //Serial.println(tides_ref.lowTideCoefficient);
-  //Serial.print("High Tide Coefficient: ");
-  //Serial.println(tides_ref.highTideCoefficient);
-
-  // Calculate Tides and Times for Model (Le Palais)
-  HarmonicCalculator calculator(model, table2NCDef);
-  Serial.println("Calculating tide times for Belle-île...");
-  
-  TideInfo tides = calculator.findTidesAndTimes(utcOffsetMinutes);
-  tides.lowTideCoefficient = 0;
-  tides.highTideCoefficient = 0;
-  //tides.lowTideCoefficient = tides_ref.lowTideCoefficient;
-  //tides.highTideCoefficient = tides_ref.highTideCoefficient;
-  tides.date = date;
-  tideStack.push(tides);
-
-}
-
 
 MyDate epochToDate(time_t epochTime) {
     return MyDate(year(epochTime), month(epochTime), day(epochTime));
 }
 
+
+WiFiUDP ntpUDP;
+NTPClient timeClient(ntpUDP, "pool.ntp.org", 0, 86400000 ); // UTC time with 24h refresh
+TideStack tideStack;
+
+Table2NCDef table2NCDef(table2NcDefArray);
+HarmonicModel model(nonRefHarmonics,  nonRefZ0Harmonic);
+HarmonicModel modelRef(refHarmonics, z0RefHarmonic);  
+HarmonicCalculator calculator(model, table2NCDef);
+HarmonicCalculator calculatorRef(modelRef, table2NCDef);
+
+
 unsigned long currentEpoch;
 unsigned long lastMillis;
 int lastDay;
 bool useNtpTime = false; // Set this to true to use NTP time, false to use the manually set time
+
+void run_calculations(const MyDate& date) {
+   
+  Serial.println("Calculating Astronomical references for date: " + String(date.day) + "/" + String(date.month) + "/" + String(date.year));
+  astroCalculations(date);
+  int utcOffsetMinutes = franceTimeOffset(date);
+  Serial.println("Calculating tide times for Belle-ile...");
+  calculator.equi_tide();
+  TideInfo tides = calculator.findTidesAndTimes(utcOffsetMinutes);
+  Serial.println("Calculating Coefficients (based on Brest Harmonics)...");
+  calculatorRef.equi_tide();
+  TideInfo tides_ref = calculatorRef.findTidesAndTimes(utcOffsetMinutes);
+
+  tides.morningCoefficient = tides_ref.morningCoefficient;
+  tides.afternoonCoefficient = tides_ref.afternoonCoefficient;
+  tides.date = date;
+  tideStack.push(tides);
+
+}
 
 
 void setup() {
@@ -1369,7 +1317,7 @@ void setup() {
         timeClient.update();
         currentEpoch = timeClient.getEpochTime();
     } else {
-        currentEpoch = 1738925930; // Manually set epoch time
+        currentEpoch = 1738972730; // Manually set epoch time for my tests (to test midnight transition)
     }
     setTime(currentEpoch);
     lastMillis = millis();
@@ -1397,23 +1345,22 @@ void loop() {
             lastMillis = currentMillis;
         }
         int currentDay = day();
+
+        if (useNtpTime) {
+            Serial.println("Formatted time:");
+            Serial.println(timeClient.getFormattedTime());
+            Serial.println("Epoch time:");
+            Serial.println(timeClient.getEpochTime());
+        } else {
+            Serial.println("Formatted time:");
+            Serial.println(String(hour()) + ":" + String(minute()) + ":" + String(second()));
+            Serial.println("Epoch time:");
+            Serial.println(currentEpoch);
+        }
         if (currentDay != lastDay) {
             Serial.println("Midnight transition detected! Updating tide data...");
-            
-            if (useNtpTime) {
-                Serial.println("Formatted time:");
-                Serial.println(timeClient.getFormattedTime());
-                Serial.println("Epoch time:");
-                Serial.println(timeClient.getEpochTime());
-            } else {
-                Serial.println("Formatted time:");
-                Serial.println(String(hour()) + ":" + String(minute()) + ":" + String(second()));
-                Serial.println("Epoch time:");
-                Serial.println(currentEpoch);
-            }
-
             lastDay = currentDay;
-            time_t newEpoch = currentEpoch + (daysToCalculate - 1 ) * SECS_PER_DAY;
+            time_t newEpoch = currentEpoch + (daysToCalculate ) * SECS_PER_DAY;
             MyDate newDay = epochToDate(newEpoch);
             run_calculations(newDay);
         }
@@ -1433,19 +1380,17 @@ void loop() {
         Serial.println("Tide Events:");
         for (int j = 0; j < tideInfo.numEvents; ++j) {
             const TideEvent& event = tideInfo.events[j];
-            Serial.print("  Time: ");
             Serial.print(convertDecimalTimeToHM(event.time));
-            Serial.print(" hours, ");
-            Serial.print(event.isPeak ? "High" : "Low");
+            Serial.print(event.isPeak ? " High" : " Low");
             Serial.print(" tide, Amplitude: ");
             Serial.println(event.amplitude);
         }
 
         // Display coefficients
-        Serial.print("Low Tide Coefficient: ");
-        Serial.println(tideInfo.lowTideCoefficient);
-        Serial.print("High Tide Coefficient: ");
-        Serial.println(tideInfo.highTideCoefficient);
+        Serial.print("Morning Coefficient: ");
+        Serial.println(tideInfo.morningCoefficient);
+        Serial.print("Afternoon Coefficient: ");
+        Serial.println(tideInfo.afternoonCoefficient);
 
         Serial.println();
     }
