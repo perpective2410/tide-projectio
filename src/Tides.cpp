@@ -729,6 +729,10 @@ String convertDecimalTimeToHM(float decimalTime) {
     return "-";
   }
   
+  if (decimalTime == 0) {
+    return " ";
+  }
+
   int hours = (int)decimalTime;  // Extract the integer part for hours
   int minutes = (int)((decimalTime - hours) * 60);  // Calculate the remaining minutes
 
