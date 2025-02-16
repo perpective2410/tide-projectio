@@ -642,7 +642,7 @@ TideStack::~TideStack() {
     delete[] stack;
 }
 
-void TideStack::push(const TideInfo& tideInfo) {
+void TideStack::push(TideInfo& tideInfo) {
     // Shift elements left
     for (int i = 0; i < stackSize - 1; i++) {
         stack[i] = stack[i + 1];
@@ -655,19 +655,19 @@ void TideStack::push(const TideInfo& tideInfo) {
     if (count < stackSize) count++;
 }
 
-const TideInfo* TideStack::getStack() const {
+TideInfo* TideStack::getStack() {
     return stack;
 }
 
-int TideStack::getCount() const {
+int TideStack::getCount() {
     return count;
 }
 
-int TideStack::getTop() const {
+int TideStack::getTop() {
     return count - 1;
 }
 
-const TideInfo& TideStack::peek(int index) const {
+TideInfo& TideStack::peek(int index) {
     return stack[index];
 }
 

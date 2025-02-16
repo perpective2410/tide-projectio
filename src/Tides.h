@@ -16,8 +16,10 @@ struct TideInfo {
     int afternoonCoefficient;
     time_t epoch;
 
-    TideInfo() : numEvents(0), morningCoefficient(0), afternoonCoefficient(0) {
-        epoch = -1;
+    TideInfo() : numEvents(0), morningCoefficient(0), afternoonCoefficient(0), epoch(-1) {
+        for (int i = 0; i < 4; i++) {
+            events[i] = TideEvent();
+        }
     }
 };
 
@@ -31,17 +33,17 @@ class TideStack {
         TideStack(int daysToCalculate);
         ~TideStack();
     
-        void push(const TideInfo& tideInfo);
+        void push(TideInfo& tideInfo);
     
         // Getter methods for printing
-        const TideInfo* getStack() const;
-        int getCount() const;
+        TideInfo* getStack();
+        int getCount();
     
         // Method to get the top index
-        int getTop() const;
+        int getTop();
     
         // Method to peek at an index
-        const TideInfo& peek(int index) const;
+        TideInfo& peek(int index);
     };
     
 TideInfo run_calculations(time_t epoch);
