@@ -830,15 +830,41 @@ public:
 };
 
 int getFranceTimezoneOffset(time_t epoch) {
-    struct tm* localTime = gmtime(&epoch); // Convert epoch to UTC time
-    localTime = localtime(&epoch); // Convert UTC time to local time
+    struct tm *timeinfo = gmtime(&epoch);
+    int year = timeinfo->tm_year + 1900;
 
-    if (localTime->tm_isdst > 0) {
-        // Daylight saving time is in effect
-        return 120; // UTC+2
+    // Calculate the start and end of DST for the given year
+    struct tm startDST;
+    startDST.tm_year = year - 1900;
+    startDST.tm_mon = 2; // March
+    startDST.tm_mday = 31;
+    startDST.tm_hour = 1;
+    startDST.tm_min = 0;
+    startDST.tm_sec = 0;
+    startDST.tm_isdst = -1;
+    time_t startDSTEpoch = mktime(&startDST);
+    while (gmtime(&startDSTEpoch)->tm_wday != 0) { // Find the last Sunday in March
+        startDSTEpoch -= 24 * 3600;
+    }
+
+    struct tm endDST;
+    endDST.tm_year = year - 1900;
+    endDST.tm_mon = 9; // October
+    endDST.tm_mday = 31;
+    endDST.tm_hour = 1;
+    endDST.tm_min = 0;
+    endDST.tm_sec = 0;
+    endDST.tm_isdst = -1;
+    time_t endDSTEpoch = mktime(&endDST);
+    while (gmtime(&endDSTEpoch)->tm_wday != 0) { // Find the last Sunday in October
+        endDSTEpoch -= 24 * 3600;
+    }
+
+    // Check if the given epoch falls within the DST period
+    if (epoch >= startDSTEpoch && epoch < endDSTEpoch) {
+        return 120; // DST is in effect
     } else {
-        // Standard time
-        return 60; // UTC+1
+        return 60; // Standard time
     }
 }
 
