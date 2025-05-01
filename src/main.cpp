@@ -18,7 +18,7 @@
 unsigned long myChannelNumber = 134567;
 const char * myWriteAPIKey = "OCOFBXF7R5DMCY6P";
 
-constexpr int daysToCalculate = 4; 
+constexpr int daysToCalculate = 4;
 WiFiClient client;
 TideStack tideStack(daysToCalculate);
 TideInfo tideInfo;
@@ -69,12 +69,11 @@ DeviceAddress sensor_in = {0x28, 0xFF, 0xF0, 0x43, 0x22, 0x16, 0x03, 0xF9};     
 DeviceAddress sensor_out =  {0x28, 0xAA, 0x51, 0x8F, 0x3C, 0x14, 0x01, 0x7A};   //sonde extérieure
 TimeLord myLord;
 
-
 int decal_TU = 1;                // Heure hiver
 //int decal_TU = 2;                  // Heure été
 int timeZone = decal_TU;
-int LONGITUDE = -3.16908;
-int LATITUDE = 47.32275;
+int LONGITUDE = 7.2185398;
+int LATITUDE = 43.6938513;
 
 const int numReadings = 5;
 int indice = 0;
@@ -105,35 +104,10 @@ int h_TU, SunSet_h, SunSet_m, SunSet_mn, azimut_Set, SunRise_h, SunRise_m, SunRi
 bool PassageMaJ = false;
 
 unsigned long currentEpoch;
+time_t baseEpoch; 
 unsigned long lastMillis;
 int lastDay;
-bool useNtpTime = true; // Set this to true to use NTP time, false to use the manually set time
-
-//============================================================== virtuinoRun
-void virtuinoRun() {
-  WiFiClient client = server.available();
-  if (client) {
-    virtuino.readBuffer = "";           // clear Virtuino input buffer. The inputBuffer stores the incoming characters
-    if (client.connected()) {
-      while (client.available() > 0) {
-        char c = client.read();         // read the incoming data
-        virtuino.readBuffer += c;       // add the incoming character to Virtuino input buffer
-      }
-      String* response = virtuino.getResponse();   // get the text that has to be sent to Virtuino as reply. The library will check the inptuBuffer and it will create the response text
-      if (response->length() > 0) {
-        client.print(*response);
-      }
-      client.stop();
-    }
-  }
-}
-
-
-//============================================================== vDelay
-void vDelay(int delayInMillis) {
-  long t = millis() + delayInMillis;
-  while (millis() < t) virtuinoRun();
-}
+bool useNtpTime = false; // Set this to true to use NTP time, false to use the manually set time
 
 
 
@@ -202,6 +176,298 @@ String onRequested(char variableType, uint8_t variableIndex) {
 }
 
 
+
+
+//============================================================== virtuinoRun
+void virtuinoRun() {
+  WiFiClient client = server.available();
+  if (client) {
+    virtuino.readBuffer = "";           // clear Virtuino input buffer. The inputBuffer stores the incoming characters
+    if (client.connected()) {
+      while (client.available() > 0) {
+        char c = client.read();         // read the incoming data
+        virtuino.readBuffer += c;       // add the incoming character to Virtuino input buffer
+      }
+      String* response = virtuino.getResponse();   // get the text that has to be sent to Virtuino as reply. The library will check the inptuBuffer and it will create the response text
+      if (response->length() > 0) {
+        client.print(*response);
+      }
+      client.stop();
+    }
+  }
+}
+
+
+//============================================================== vDelay
+void vDelay(int delayInMillis) {
+  long t = millis() + delayInMillis;
+  while (millis() < t) virtuinoRun();
+}
+
+//************** M à J données journalières ********************************************
+
+
+void Elevation_Noon()
+{
+  if (SunNoon_mn < 10) {
+    SunNoon_time = String(SunNoon_h) + "h0" + String(SunNoon_mn) + " / ";
+  }
+  else {
+    SunNoon_time = String(SunNoon_h) + "h" + String(SunNoon_mn) + " / ";
+  }
+  tmElements_t someTime = {0, SunNoon_mn, SunNoon_h - decal_TU, 0, day(), month(), CalendarYrToTm(year()) };
+  time_t someEpochTime = makeTime(someTime);
+
+  elev_Noon = round(Bangor.getSolarElevation(someEpochTime));
+  Noon = SunNoon_time + elev_Noon;
+  Text_3 = Noon;
+}
+
+//************** 3 jours suivants  ***********************************
+
+void J_Semaine()
+{
+  int today = weekday(); // Stocke le jour actuel (1 = Dimanche, ..., 7 = Samedi)
+
+  for (int i = 0; i < 3; i++) {
+    int nextDay = today + (i + 1); // Ajoute 1, 2, 3 jours
+    if (nextDay > 7) nextDay -= 7; // Corrige dépassement de la semaine
+    joursSuivants[i] = joursSemaine[nextDay - 1]; // Stocke dans le tableau
+  }
+  Text_4 = joursSuivants[0];
+  Text_5 = joursSuivants[1];
+  Text_6 = joursSuivants[2];
+}
+
+//**************** Marées ***************************************
+
+void Marees()
+{
+  for (int i = 0; i <= tideStack.getTop(); i++) {
+    const TideInfo& tideInfo = tideStack.peek(i);
+    Serial.println(joursSemaine[weekday(tideInfo.epoch) - 1]);
+    //Serial.println(" " + String(epochToDate(tideInfo.epoch).day) + "/" + String(epochToDate(tideInfo.epoch).month) + "/" + String(epochToDate(tideInfo.epoch).year));
+    for (int j = 0; j < tideInfo.numEvents; ++j) {
+      const TideEvent& event = tideInfo.events[j];
+      Serial.print(event.isPeak ? "Marée Haute: " : "Marée Basse: ");
+      Serial.print(convertDecimalTimeToHM(event.time));
+      Serial.print(" (");
+      Serial.print(event.amplitude);
+      Serial.print("m");
+      Serial.println(")");
+    }
+    Serial.print("Coefficient matin: ");
+    Serial.println(tideInfo.morningCoefficient);
+    Serial.print("Coefficient aprem: ");
+    Serial.println(tideInfo.afternoonCoefficient);
+    Serial.println("---");
+  }
+
+  //**************** Jour J ***********************************************
+  // const TideInfo& tideInfo = tideStack.peek(0);
+  //const TideEvent& event = tideInfo.events[0];
+
+  //Serial.println(joursSemaine[weekday(tideStack.peek(0).epoch) - 1]);
+  //Serial.println(tideStack.peek(0).events[0].amplitude);
+  //Serial.println(convertDecimalTimeToHM(tideStack.peek(0).events[0].time));
+  //Serial.println(tideStack.peek(0).morningCoefficient);
+  //Serial.println(tideStack.peek(0).afternoonCoefficient);
+  //Serial.println("---");
+  //Serial.println(tideStack.peek(0).events[1].amplitude);
+  //Serial.println(convertDecimalTimeToHM(tideStack.peek(0).events[1].time));
+  //Serial.println("---");
+  //Serial.println(tideStack.peek(0).events[2].amplitude);
+  //Serial.println(convertDecimalTimeToHM(tideStack.peek(0).events[2].time));
+  //Serial.println("---");
+  //Serial.println(tideStack.peek(0).events[3].amplitude);
+  //Serial.println(convertDecimalTimeToHM(tideStack.peek(0).events[3].time));
+
+  //**************** Jour J ***********************************************
+//**************** Jour J ***********************************************
+Serial.println("Jour J:");
+
+Serial.print("tideStack.peek(0).events[0].amplitude: ");
+Serial.println(tideStack.peek(0).events[0].amplitude);
+
+Serial.print("tideStack.peek(0).morningCoefficient: ");
+Serial.println(tideStack.peek(0).morningCoefficient);
+
+Serial.print("tideStack.peek(0).events[0].time: ");
+Serial.println(convertDecimalTimeToHM(tideStack.peek(0).events[0].time));
+
+Serial.print("tideStack.peek(0).events[1].amplitude: ");
+Serial.println(tideStack.peek(0).events[1].amplitude);
+
+Serial.print("V[108] (set to 0): ");
+Serial.println(0);
+
+Serial.print("tideStack.peek(0).events[1].time: ");
+Serial.println(convertDecimalTimeToHM(tideStack.peek(0).events[1].time));
+
+Serial.print("tideStack.peek(0).events[2].amplitude: ");
+Serial.println(tideStack.peek(0).events[2].amplitude);
+
+Serial.print("tideStack.peek(0).afternoonCoefficient: ");
+Serial.println(tideStack.peek(0).afternoonCoefficient);
+
+Serial.print("tideStack.peek(0).events[2].time: ");
+Serial.println(convertDecimalTimeToHM(tideStack.peek(0).events[2].time));
+
+Serial.print("tideStack.peek(0).events[3].amplitude: ");
+Serial.println(tideStack.peek(0).events[3].amplitude);
+
+Serial.print("V[110] (set to 0): ");
+Serial.println(0);
+
+Serial.print("tideStack.peek(0).events[3].time: ");
+Serial.println(convertDecimalTimeToHM(tideStack.peek(0).events[3].time));
+
+//**************** Jour J+1 ***********************************************
+Serial.println("Jour J+1:");
+
+Serial.print("tideStack.peek(1).events[0].amplitude: ");
+Serial.println(tideStack.peek(1).events[0].amplitude);
+
+Serial.print("tideStack.peek(1).morningCoefficient: ");
+Serial.println(tideStack.peek(1).morningCoefficient);
+
+Serial.print("tideStack.peek(1).events[0].time: ");
+Serial.println(convertDecimalTimeToHM(tideStack.peek(1).events[0].time));
+
+Serial.print("tideStack.peek(1).events[1].amplitude: ");
+Serial.println(tideStack.peek(1).events[1].amplitude);
+
+Serial.print("V[112] (set to 0): ");
+Serial.println(0);
+
+Serial.print("tideStack.peek(1).events[1].time: ");
+Serial.println(convertDecimalTimeToHM(tideStack.peek(1).events[1].time));
+
+Serial.print("tideStack.peek(1).events[2].amplitude: ");
+Serial.println(tideStack.peek(1).events[2].amplitude);
+
+Serial.print("tideStack.peek(1).afternoonCoefficient: ");
+Serial.println(tideStack.peek(1).afternoonCoefficient);
+
+Serial.print("tideStack.peek(1).events[2].time: ");
+Serial.println(convertDecimalTimeToHM(tideStack.peek(1).events[2].time));
+
+Serial.print("tideStack.peek(1).events[3].amplitude: ");
+Serial.println(tideStack.peek(1).events[3].amplitude);
+
+Serial.print("V[114] (set to 0): ");
+Serial.println(0);
+
+Serial.print("tideStack.peek(1).events[3].time: ");
+Serial.println(convertDecimalTimeToHM(tideStack.peek(1).events[3].time));
+
+//**************** Jour J+2 ***********************************************
+Serial.println("Jour J+2:");
+
+Serial.print("tideStack.peek(2).events[0].amplitude: ");
+Serial.println(tideStack.peek(2).events[0].amplitude);
+
+Serial.print("tideStack.peek(2).morningCoefficient: ");
+Serial.println(tideStack.peek(2).morningCoefficient);
+
+Serial.print("tideStack.peek(2).events[0].time: ");
+Serial.println(convertDecimalTimeToHM(tideStack.peek(2).events[0].time));
+
+Serial.print("tideStack.peek(2).events[1].amplitude: ");
+Serial.println(tideStack.peek(2).events[1].amplitude);
+
+Serial.print("V[116] (set to 0): ");
+Serial.println(0);
+
+Serial.print("tideStack.peek(2).events[1].time: ");
+Serial.println(convertDecimalTimeToHM(tideStack.peek(2).events[1].time));
+
+Serial.print("tideStack.peek(2).events[2].amplitude: ");
+Serial.println(tideStack.peek(2).events[2].amplitude);
+
+Serial.print("tideStack.peek(2).afternoonCoefficient: ");
+Serial.println(tideStack.peek(2).afternoonCoefficient);
+
+Serial.print("tideStack.peek(2).events[2].time: ");
+Serial.println(convertDecimalTimeToHM(tideStack.peek(2).events[2].time));
+
+Serial.print("tideStack.peek(2).events[3].amplitude: ");
+Serial.println(tideStack.peek(2).events[3].amplitude);
+
+Serial.print("V[118] (set to 0): ");
+Serial.println(0);
+
+Serial.print("tideStack.peek(2).events[3].time: ");
+Serial.println(convertDecimalTimeToHM(tideStack.peek(2).events[3].time));
+
+//**************** Jour J+3 ***********************************************
+Serial.println("Jour J+3:");
+
+Serial.print("tideStack.peek(3).events[0].amplitude: ");
+Serial.println(tideStack.peek(3).events[0].amplitude);
+
+Serial.print("tideStack.peek(3).morningCoefficient: ");
+Serial.println(tideStack.peek(3).morningCoefficient);
+
+Serial.print("tideStack.peek(3).events[0].time: ");
+Serial.println(convertDecimalTimeToHM(tideStack.peek(3).events[0].time));
+
+Serial.print("tideStack.peek(3).events[1].amplitude: ");
+Serial.println(tideStack.peek(3).events[1].amplitude);
+
+Serial.print("V[120] (set to 0): ");
+Serial.println(0);
+
+Serial.print("tideStack.peek(3).events[1].time: ");
+Serial.println(convertDecimalTimeToHM(tideStack.peek(3).events[1].time));
+
+Serial.print("tideStack.peek(3).events[2].amplitude: ");
+Serial.println(tideStack.peek(3).events[2].amplitude);
+
+Serial.print("tideStack.peek(3).afternoonCoefficient: ");
+Serial.println(tideStack.peek(3).afternoonCoefficient);
+
+Serial.print("tideStack.peek(3).events[2].time: ");
+Serial.println(convertDecimalTimeToHM(tideStack.peek(3).events[2].time));
+
+Serial.print("tideStack.peek(3).events[3].amplitude: ");
+Serial.println(tideStack.peek(3).events[3].amplitude);
+
+Serial.print("V[122] (set to 0): ");
+Serial.println(0);
+
+Serial.print("tideStack.peek(3).events[3].time: ");
+Serial.println(convertDecimalTimeToHM(tideStack.peek(3).events[3].time));
+
+
+
+
+  //**************** Jour J ***********************************************
+  V[7] = tideStack.peek(0).events[0].amplitude; V[107] = tideStack.peek(0).morningCoefficient; Text_7 = convertDecimalTimeToHM(tideStack.peek(0).events[0].time);
+  V[8] = tideStack.peek(0).events[1].amplitude; V[108] = 0; Text_8 = convertDecimalTimeToHM(tideStack.peek(0).events[1].time);
+  V[9] = tideStack.peek(0).events[2].amplitude; V[109] = tideStack.peek(0).afternoonCoefficient; Text_9 = convertDecimalTimeToHM(tideStack.peek(0).events[2].time);
+  V[10] = tideStack.peek(0).events[3].amplitude; V[110] = 0; Text_10 = convertDecimalTimeToHM(tideStack.peek(0).events[3].time);
+
+  //**************** Jour J+1 ***********************************************
+  V[11] = tideStack.peek(1).events[0].amplitude; V[111] = tideStack.peek(1).morningCoefficient; Text_11 = convertDecimalTimeToHM(tideStack.peek(1).events[0].time);
+  V[12] = tideStack.peek(1).events[1].amplitude; V[112] = 0; Text_12 = convertDecimalTimeToHM(tideStack.peek(1).events[1].time);
+  V[13] = tideStack.peek(1).events[2].amplitude; V[113] = tideStack.peek(1).afternoonCoefficient; Text_13 = convertDecimalTimeToHM(tideStack.peek(1).events[2].time);
+  V[14] = tideStack.peek(1).events[3].amplitude; V[114] = 0; Text_14 = convertDecimalTimeToHM(tideStack.peek(1).events[3].time);
+
+  //**************** Jour J+2 ***********************************************
+  V[15] = tideStack.peek(2).events[0].amplitude; V[115] = tideStack.peek(2).morningCoefficient; Text_15 = convertDecimalTimeToHM(tideStack.peek(2).events[0].time);
+  V[16] = tideStack.peek(2).events[1].amplitude; V[116] = 0; Text_16 = convertDecimalTimeToHM(tideStack.peek(2).events[1].time);
+  V[17] = tideStack.peek(2).events[2].amplitude; V[117] = tideStack.peek(2).afternoonCoefficient; Text_17 = convertDecimalTimeToHM(tideStack.peek(2).events[2].time);
+  V[18] = tideStack.peek(2).events[3].amplitude; V[118] = 0; Text_18 = convertDecimalTimeToHM(tideStack.peek(2).events[3].time);
+
+  //**************** Jour J+3 ***********************************************
+  V[19] = tideStack.peek(3).events[0].amplitude; V[119] = tideStack.peek(3).morningCoefficient; Text_19 = convertDecimalTimeToHM(tideStack.peek(3).events[0].time);
+  V[20] = tideStack.peek(3).events[1].amplitude; V[120] = 0; Text_20 = convertDecimalTimeToHM(tideStack.peek(3).events[1].time);
+  V[21] = tideStack.peek(3).events[2].amplitude; V[121] = tideStack.peek(3).afternoonCoefficient; Text_21 = convertDecimalTimeToHM(tideStack.peek(3).events[2].time);
+  V[22] = tideStack.peek(3).events[3].amplitude; V[122] = 0; Text_22 = convertDecimalTimeToHM(tideStack.peek(3).events[3].time);
+}
+
+
 //************** Calcul heure lever - heure coucher soleil ***************************
 
 void Lever_Coucher()
@@ -256,151 +522,48 @@ void Lever_Coucher()
   V[6] = azimut_Set;
 }
 
-//************** Calcul azimut - élévation midi  ***********************************
 
-void Elevation_Noon()
+
+void MaJ()
 {
-  if (SunNoon_mn < 10) {
-    SunNoon_time = String(SunNoon_h) + "h0" + String(SunNoon_mn) + " / ";
-  }
-  else {
-    SunNoon_time = String(SunNoon_h) + "h" + String(SunNoon_mn) + " / ";
-  }
-  tmElements_t someTime = {0, SunNoon_mn, SunNoon_h - decal_TU, 0, day(), month(), CalendarYrToTm(year()) };
-  time_t someEpochTime = makeTime(someTime);
-
-  elev_Noon = round(Bangor.getSolarElevation(someEpochTime));
-  Noon = SunNoon_time + elev_Noon;
-  Text_3 = Noon;
-}
-
-//************** 3 jours suivants  ***********************************
-
-void J_Semaine()
-{
-  int today = weekday(); // Stocke le jour actuel (1 = Dimanche, ..., 7 = Samedi)
-
-  for (int i = 0; i < 3; i++) {
-    int nextDay = today + (i + 1); // Ajoute 1, 2, 3 jours
-    if (nextDay > 7) nextDay -= 7; // Corrige dépassement de la semaine
-    joursSuivants[i] = joursSemaine[nextDay - 1]; // Stocke dans le tableau
-  }
-  Text_4 = joursSuivants[0];
-  Text_5 = joursSuivants[1];
-  Text_6 = joursSuivants[2];
-}
-
-//**************** Marées ***************************************
-
-void Marees()
-{
-
-
-  for (int i = 0; i <= tideStack.getTop(); i++) {
-    const TideInfo& tideInfo = tideStack.peek(i);
-    Serial.println(joursSemaine[weekday(tideInfo.epoch) - 1]);
-    //Serial.println(" " + String(epochToDate(tideInfo.epoch).day) + "/" + String(epochToDate(tideInfo.epoch).month) + "/" + String(epochToDate(tideInfo.epoch).year));
-    for (int j = 0; j < tideInfo.numEvents; ++j) {
-      const TideEvent& event = tideInfo.events[j];
-      Serial.print(event.isPeak ? "Marée Haute: " : "Marée Basse: ");
-      Serial.print(convertDecimalTimeToHM(event.time));
-      Serial.print(" (");
-      Serial.print(event.amplitude);
-      Serial.print("m");
-      Serial.println(")");
-    }
-    Serial.print("Coefficient matin: ");
-    Serial.println(tideInfo.morningCoefficient);
-    Serial.print("Coefficient aprem: ");
-    Serial.println(tideInfo.afternoonCoefficient);
-    Serial.println("---");
-  }
-
-//**************** Jour J ***********************************************
- // const TideInfo& tideInfo = tideStack.peek(0);
-  //const TideEvent& event = tideInfo.events[0];
-
- //Serial.println(joursSemaine[weekday(tideStack.peek(0).epoch) - 1]);
- //Serial.println(tideStack.peek(0).events[0].amplitude);
- //Serial.println(convertDecimalTimeToHM(tideStack.peek(0).events[0].time));
- //Serial.println(tideStack.peek(0).morningCoefficient);
- //Serial.println(tideStack.peek(0).afternoonCoefficient);
- //Serial.println("---");
- //Serial.println(tideStack.peek(0).events[1].amplitude);
- //Serial.println(convertDecimalTimeToHM(tideStack.peek(0).events[1].time));
- //Serial.println("---");
- //Serial.println(tideStack.peek(0).events[2].amplitude);
- //Serial.println(convertDecimalTimeToHM(tideStack.peek(0).events[2].time));
- //Serial.println("---");
- //Serial.println(tideStack.peek(0).events[3].amplitude);
- //Serial.println(convertDecimalTimeToHM(tideStack.peek(0).events[3].time));
-
-
-//**************** Jour J ***********************************************
-  V[7] =  tideStack.peek(0).events[0].amplitude; V[107] = tideStack.peek(0).morningCoefficient; Text_7 = convertDecimalTimeToHM(tideStack.peek(0).events[0].time);
-  V[8] =  tideStack.peek(0).events[1].amplitude; V[108] = 0; Text_8 = convertDecimalTimeToHM(tideStack.peek(0).events[1].time);
-  V[9] =  tideStack.peek(0).events[2].amplitude; V[109] = tideStack.peek(0).afternoonCoefficient; Text_9 = convertDecimalTimeToHM(tideStack.peek(0).events[2].time);
-  V[10] = tideStack.peek(0).events[3].amplitude; V[110] = 0; Text_10 = convertDecimalTimeToHM(tideStack.peek(0).events[3].time);
-//**************** Jour J ***********************************************
-//  V[7] = 4.58; V[107] = 62; Text_7 = "03h27";
-//  V[8] = 1.37; V[108] = 0; Text_8 = "09h27";
-//  V[9] = 4.53; V[109] = 68; Text_9 = "15h52";
-//  V[10] = 0; V[110] = 0; Text_10 = " ";
-//**************** Jour J+1 ***********************************************  
-//  V[11] = 4.82; V[111] = 74; Text_11 = "04h07";
-//  V[12] = 1.11; V[112] = 0; Text_12 = "10h15";
-//  V[13] = 4.72; V[113] = 78; Text_13 = "16h28";
-//  V[14] = 1.15; V[114] = 0; Text_14 = "22h27";
-////**************** Jour J+2 *********************************************** 
-//  V[15] = 5.00; V[115] = 82; Text_15 = "04h41";
-//  V[16] = 0.92; V[116] = 0; Text_16 = "10h56";
-//  V[17] = 4.86; V[117] = 86; Text_17 = "16h59";
-//  V[18] = 0.98; V[118] = 0; Text_18 = "23h06";
-////**************** Jour J+3 ***********************************************  
-//  V[19] = 5.11; V[119] = 88; Text_19 = "05h11";
-//  V[20] = 0.82; V[120] = 0; Text_20 = "11h33";
-//  V[21] = 4.93; V[121] = 89; Text_21 = "17h26";
-//  V[22] = 0.91; V[122] = 0; Text_22 = "23h41";
-}
-
-
-void MaJ() {
   Lever_Coucher();
   Elevation_Noon();
   J_Semaine();
   Marees();
 }
 
+//********************************** setup **********************************************************
 
-
-
-void setup() {
+void setup()
+{
   Serial.begin(115200);
   while (!Serial);
+
   if (strlen(password) > 0) {
-      WiFi.begin(ssid, password);
+    WiFi.begin(ssid, password);
   } else {
-      WiFi.begin(ssid);
+    WiFi.begin(ssid);
   }
   while (WiFi.status() != WL_CONNECTED) {
-      delay(500);
-      Serial.print(".");
+    delay(500);
+    Serial.print(".");
   }
   timeClient.begin();
   if (useNtpTime) {
-      timeClient.update();
-      currentEpoch = timeClient.getEpochTime();
+    timeClient.update();
+    baseEpoch = timeClient.getEpochTime();
   } else {
-      currentEpoch = 1739577500; // Manually set epoch time for my tests (to test midnight transition)
+    baseEpoch = 1746143934; // Your manual test time
   }
+  currentEpoch = baseEpoch;
   setTime(currentEpoch);
   lastMillis = millis();
   lastDay = day();
 
   for (int i = 0; i < daysToCalculate; i++) {
-      time_t futureEpoch = currentEpoch + (i * SECS_PER_DAY); // Add i days in seconds
-      tideInfo = run_calculations(futureEpoch);
-      tideStack.push(tideInfo);
+    time_t futureEpoch = currentEpoch + (i * SECS_PER_DAY); // Add i days in seconds
+    tideInfo = run_calculations(futureEpoch);
+    tideStack.push(tideInfo);
   }
 
   server.begin();
@@ -430,14 +593,12 @@ void setup() {
   MaJ();
 }
 
-
-
-
+//============================== fin setup ====================================
+//=============================================================================
 
 void loop() {
 
-
-   unsigned long currentMillis = millis();
+  unsigned long currentMillis = millis();
 
   // if WiFi is down, try reconnecting every CHECK_WIFI_TIME seconds
   if ((WiFi.status() != WL_CONNECTED) && (currentMillis - previousMillis >= interval)) {
@@ -456,19 +617,24 @@ void loop() {
 
   if (currentMillis - previousMillis >= interval) {
     previousMillis = currentMillis;
-    int currentDay = day();
+
     if (!useNtpTime) {
-        // Update the currentEpoch based on the elapsed time
-        currentEpoch += (currentMillis - lastMillis) / 1000;
-        lastMillis = currentMillis;
+      currentEpoch += (currentMillis - lastMillis) / 1000;
+      lastMillis = currentMillis;
+      setTime(currentEpoch);  // keep system time in sync
     }
+  
+    int currentDay = day();
+  
     if (currentDay != lastDay) {
-        Serial.println("Midnight transition detected!");
-        lastDay = currentDay;
-        time_t newEpoch = currentEpoch + (daysToCalculate - 1) * SECS_PER_DAY;
-        tideInfo = run_calculations(newEpoch);
-        tideStack.push(tideInfo);
-        MaJ();
+      Serial.println("Midnight transition detected!");
+      lastDay = currentDay;
+  
+      time_t newEpoch = now() + (daysToCalculate - 1) * SECS_PER_DAY;
+  
+      tideInfo = run_calculations(newEpoch);
+      tideStack.push(tideInfo);
+      MaJ();
     }
 
     total_outTemp_reading = total_outTemp_reading - outTemp_reading[indice];
@@ -506,8 +672,9 @@ void loop() {
 
       //************** Ecriture Virtuino ***************************
 
-      V[1] = average_outTemp;                            // write temp extérieure to virtual pin V30. On Virtuino panel add a value display or an analog instrument to pin V1
+      V[1] = average_outTemp;                            // write temp extérieure to virtual pin V1. On Virtuino panel add a value display or an analog instrument to pin V1
       V[2] = average_inTemp;
+
       V[4] = elevation;
       if (elevation > 0) {
         V[3] = azimut;
@@ -517,7 +684,6 @@ void loop() {
 
     }       //************************fin de la boucle de l'indice ****************************************
   }         //************************fin de la boucle de l'interval **************************************
-
 
   //************** Thingspeak ***************************
 
@@ -529,6 +695,6 @@ void loop() {
 //============================== fin loop ====================================
 //============================================================================
 
-//************** M à J données journalières ********************************************
 
 
+//************** Calcul azimut - élévation midi  ***********************************
