@@ -6,7 +6,7 @@
 #include <WiFi.h>
 //#include <Wire.h>
 #include <OneWire.h>
-//#include "ThingSpeak.h"
+#include "ThingSpeak.h"
 #include <DallasTemperature.h>
 #include <TimeLib.h>
 #include "TimeLord.h"
@@ -559,10 +559,8 @@ void loop() {
 
   //************** Thingspeak ***************************
 
-  /*  ThingSpeak.setField(1, average_outTemp);
-    ThingSpeak.setField(2, average_inTemp);
-    ThingSpeak.writeFields(myChannelNumber, myWriteAPIKey);*/
+  ThingSpeak.setField(1, average_outTemp);
+  ThingSpeak.setField(2, average_inTemp);
+  ThingSpeak.writeFields(myChannelNumber, myWriteAPIKey);
 }
 
-//============================== fin loop ====================================
-//============================================================================
