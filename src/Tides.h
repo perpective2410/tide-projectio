@@ -16,6 +16,13 @@ struct TideInfo {
     int afternoonCoefficient;
     time_t epoch;
 
+    float getEventTime(int index) const {
+        if (index >= 0 && index < numEvents) {
+            return events[index].time;
+        }
+        return 0; // Invalid index
+    }
+
     TideInfo() : numEvents(0), morningCoefficient(0), afternoonCoefficient(0), epoch(-1) {
         for (int i = 0; i < 4; i++) {
             events[i] = TideEvent();
