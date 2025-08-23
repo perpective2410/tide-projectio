@@ -458,7 +458,7 @@ void setup() {
   sensors.setResolution(sensor_out, 10);
 
   // Initialisation Thingspeak
-  //  ThingSpeak.begin(client);
+  ThingSpeak.begin(client);
 
   // Configurations supplémentaires
   myLord.TimeZone(decal_TU * 60);
