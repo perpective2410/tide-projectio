@@ -14,8 +14,8 @@
 #include <NTPClient.h>
 #include <Tides.h>
 
-unsigned long myChannelNumber = 134567;
-const char* myWriteAPIKey = "OCOFBXF7R5DMCY6P";
+unsigned long myChannelNumber = 1275039;
+const char* myWriteAPIKey = "D9S73UER1TAUP4OL";
 
 constexpr int daysToCalculate = 4;
 WiFiClient client;
@@ -559,8 +559,8 @@ void loop() {
 
   //************** Thingspeak ***************************
 
-  ThingSpeak.setField(1, average_outTemp);
-  ThingSpeak.setField(2, average_inTemp);
+  ThingSpeak.setField(4, average_outTemp);
+  ThingSpeak.setField(5, average_inTemp);
   ThingSpeak.writeFields(myChannelNumber, myWriteAPIKey);
 }
 
