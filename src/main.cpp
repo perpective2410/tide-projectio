@@ -2,7 +2,7 @@
 
 //------------- Library and settings --------------
 
-//#include <ArduinoOTA.h>
+#include <ArduinoOTA.h>
 #include <WiFi.h>
 //#include <Wire.h>
 #include <OneWire.h>
@@ -416,8 +416,8 @@ void MaJ() {
 
 void setup() {
   Serial.begin(9600);
-  while (!Serial)
-    ;
+  
+  while (!Serial);
   if (strlen(password) > 0) {
     WiFi.begin(ssid, password);
   } else {
@@ -429,6 +429,7 @@ void setup() {
     Serial.print(".");
   }
   Serial.println("Connected");
+  ArduinoOTA.begin();
   timeClient.begin();
   if (useNtpTime) {
     timeClient.update();
@@ -470,10 +471,11 @@ void setup() {
     inTemp_reading[i] = 0;
   }
   MaJ();
+  
 }
 
 void loop() {
-
+  ArduinoOTA.handle();
   unsigned long currentMillis = millis();
 
   // if WiFi is down, try reconnecting every CHECK_WIFI_TIME seconds
