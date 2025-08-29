@@ -350,6 +350,9 @@ void Marees() {
   V[110] = 0;
   Text_10 = convertDecimalTimeToHM_WithOffset(tideStack.peek(0).getEventTime(3), 0);
 
+
+
+
   //**************** Jour J+1 - TOUS CHANGÉS ***********************************************
   V[11] = tideStack.peek(1).events[0].amplitude;
   V[111] = tideStack.peek(1).morningCoefficient;
@@ -472,9 +475,15 @@ void setup() {
   }
   MaJ();
   
+
+
 }
 
 void loop() {
+
+
+
+
   ArduinoOTA.handle();
   unsigned long currentMillis = millis();
 
@@ -556,6 +565,55 @@ void loop() {
       }
 
     }  //************************fin de la boucle de l'indice ****************************************
+
+
+  float currentTimeFloat = hour() + minute() / 60.0 + second() / 3600.0;
+  Serial.print("Current time: "); Serial.println(currentTimeFloat, 4);
+  Serial.println(tideStack.peek(0).getEventTime(0));
+  Serial.println(tideStack.peek(0).getEventTime(1));
+  Serial.println(tideStack.peek(0).getEventTime(2));
+  Serial.println(tideStack.peek(0).getEventTime(3));
+  int nextIndex = -1;
+  
+  for (int i = 0; i < 4; i++) {
+    float eventTime = tideStack.peek(0).getEventTime(i);
+    if (eventTime > currentTimeFloat) {
+      nextIndex = i;
+      bool isPeak = tideStack.peek(i).events[0].isPeak;
+      break;
+    }
+  }
+  // Si aucun événement trouvé dans la journée, regarder le premier événement du lendemain
+  if (nextIndex == -1) {
+    float eventTimeNextDay = tideStack.peek(1).getEventTime(0);
+    if (eventTimeNextDay >= 0) { // Vérifie que l'événement existe
+      bool isPeak = tideStack.peek(1).events[0].isPeak;
+      nextIndex = 100; // Utilise une valeur spéciale pour indiquer "premier événement du lendemain"
+    }
+  }
+  
+  
+  // Réinitialiser les variables
+  for (int i = 0; i < 4; i++) {
+    V[100 + i] = 0; // up
+    V[210 + i] = 0; // down
+  }
+  Serial.println("Next index: " + String(nextIndex));
+
+  // Mettre à 1 la bonne variable
+  if (isPeak) {
+    V[210 + nextIndex] = 1;  // marée descendante
+  } else {
+    V[100 + nextIndex] = 1;  // marée montante
+  }
+  
+  // Debug
+  Serial.print("Next event: ");
+  Serial.print(tideStack.peek(0).getEventTime(nextIndex));
+  Serial.print(" -> ");
+  Serial.println(isPeak ? "UP" : "DOWN");
+
+
   }    //************************fin de la boucle de l'interval **************************************
 
 
@@ -565,4 +623,3 @@ void loop() {
   ThingSpeak.setField(5, average_inTemp);
   ThingSpeak.writeFields(myChannelNumber, myWriteAPIKey);
 }
-
