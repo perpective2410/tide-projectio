@@ -17,7 +17,7 @@
 unsigned long myChannelNumber = 1275039;
 const char* myWriteAPIKey = "D9S73UER1TAUP4OL";
 
-constexpr int daysToCalculate = 1;
+constexpr int daysToCalculate = 4;
 WiFiClient client;
 TideStack tideStack(daysToCalculate);
 TideInfo tideInfo;
