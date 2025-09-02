@@ -27,6 +27,11 @@ TideInfo tideInfo;
 //const char* ssid     = "SFR_1198";    // Your ssid
 const char* ssid = "SFR_5360";
 const char* password = "0123456789";  // Your Password
+
+//const char* ssid = "Wokwi-GUEST";  // Your ssid
+//const char* password = "";  // Your Password
+
+
 WiFiServer server(8002);              // Default Virtuino Server port
 
 //-------------VirtuinoCM  Library and settings --------------
@@ -350,6 +355,9 @@ void Marees() {
   V[110] = 0;
   Text_10 = convertDecimalTimeToHM_WithOffset(tideStack.peek(0).getEventTime(3), 0);
 
+
+
+
   //**************** Jour J+1 - TOUS CHANGÉS ***********************************************
   V[11] = tideStack.peek(1).events[0].amplitude;
   V[111] = tideStack.peek(1).morningCoefficient;
@@ -471,10 +479,12 @@ void setup() {
     inTemp_reading[i] = 0;
   }
   MaJ();
-  
+
+
 }
 
 void loop() {
+
   ArduinoOTA.handle();
   unsigned long currentMillis = millis();
 
@@ -556,6 +566,67 @@ void loop() {
       }
 
     }  //************************fin de la boucle de l'indice ****************************************
+
+    float currentTimeFloat = hour() + minute() / 60.0 + second() / 3600.0;
+    Serial.print("Current time: "); 
+    Serial.println(currentTimeFloat, 4);
+    
+    auto today = tideStack.peek(0);
+    auto tomorrow = tideStack.peek(1);
+    
+    int nextIndex = -1;
+    bool isPeak = false;
+    
+    // Display today's events
+    for (int i = 0; i < 4; i++) {
+      float eventTime = today.getEventTime(i);
+      Serial.print("Event time "); 
+      Serial.print(i); 
+      Serial.print(": "); 
+      Serial.println(eventTime, 4);
+    
+      if (nextIndex == -1 && eventTime > currentTimeFloat) {
+        nextIndex = i;
+        isPeak = today.events[i].isPeak;
+      }
+    }
+    
+    // If no event left today → check tomorrow
+    if (nextIndex == -1) {
+      Serial.println("No more events today, checking next day...");
+      float eventTimeNextDay = tomorrow.getEventTime(0);
+      if (eventTimeNextDay >= 0) {
+        nextIndex = 100; // special code for "tomorrow"
+        isPeak = tomorrow.events[0].isPeak;
+      }
+    }
+    
+    // Reset V values
+    for (int i = 0; i <= 4; i++) {
+      V[200 + i] = 0;
+      V[210 + i] = 0;
+    }
+    
+    Serial.println("Next index: " + String(nextIndex));
+    
+    // Mark the right slot
+    if (nextIndex >= 0 && nextIndex < 4) {
+      Serial.println(today.getEventTime(nextIndex));
+      (isPeak ? V[210 + nextIndex] : V[200 + nextIndex]) = 1;
+    } else if (nextIndex == 100) {
+      Serial.println(tomorrow.getEventTime(0));
+      (isPeak ? V[214] : V[204]) = 1;
+    }
+    
+    // Print V states
+    for (int i = 0; i <= 4; i++) {
+      Serial.print("V"); Serial.print(200 + i); Serial.print(": "); Serial.println(V[200 + i]);
+      Serial.print("V"); Serial.print(210 + i); Serial.print(": "); Serial.println(V[210 + i]);
+    }
+    
+    Serial.print(" -> ");
+    Serial.println(isPeak ? "UP" : "DOWN");
+
   }    //************************fin de la boucle de l'interval **************************************
 
 
@@ -565,4 +636,3 @@ void loop() {
   ThingSpeak.setField(5, average_inTemp);
   ThingSpeak.writeFields(myChannelNumber, myWriteAPIKey);
 }
-
