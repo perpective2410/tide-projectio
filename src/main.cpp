@@ -17,7 +17,7 @@
 unsigned long myChannelNumber = 1275039;
 const char* myWriteAPIKey = "D9S73UER1TAUP4OL";
 
-constexpr int daysToCalculate = 4;
+constexpr int daysToCalculate = 1;
 WiFiClient client;
 TideStack tideStack(daysToCalculate);
 TideInfo tideInfo;
@@ -27,6 +27,11 @@ TideInfo tideInfo;
 //const char* ssid     = "SFR_1198";    // Your ssid
 const char* ssid = "SFR_5360";
 const char* password = "0123456789";  // Your Password
+
+//const char* ssid = "Wokwi-GUEST";  // Your ssid
+//const char* password = "";  // Your Password
+
+
 WiFiServer server(8002);              // Default Virtuino Server port
 
 //-------------VirtuinoCM  Library and settings --------------
@@ -474,15 +479,11 @@ void setup() {
     inTemp_reading[i] = 0;
   }
   MaJ();
-  
 
 
 }
 
 void loop() {
-
-
-
 
   ArduinoOTA.handle();
   unsigned long currentMillis = millis();
@@ -566,53 +567,65 @@ void loop() {
 
     }  //************************fin de la boucle de l'indice ****************************************
 
-
-  float currentTimeFloat = hour() + minute() / 60.0 + second() / 3600.0;
-  Serial.print("Current time: "); Serial.println(currentTimeFloat, 4);
-  Serial.println(tideStack.peek(0).getEventTime(0));
-  Serial.println(tideStack.peek(0).getEventTime(1));
-  Serial.println(tideStack.peek(0).getEventTime(2));
-  Serial.println(tideStack.peek(0).getEventTime(3));
-  int nextIndex = -1;
-  
-  for (int i = 0; i < 4; i++) {
-    float eventTime = tideStack.peek(0).getEventTime(i);
-    if (eventTime > currentTimeFloat) {
-      nextIndex = i;
-      bool isPeak = tideStack.peek(i).events[0].isPeak;
-      break;
+    float currentTimeFloat = hour() + minute() / 60.0 + second() / 3600.0;
+    Serial.print("Current time: "); 
+    Serial.println(currentTimeFloat, 4);
+    
+    auto today = tideStack.peek(0);
+    auto tomorrow = tideStack.peek(1);
+    
+    int nextIndex = -1;
+    bool isPeak = false;
+    
+    // Display today's events
+    for (int i = 0; i < 4; i++) {
+      float eventTime = today.getEventTime(i);
+      Serial.print("Event time "); 
+      Serial.print(i); 
+      Serial.print(": "); 
+      Serial.println(eventTime, 4);
+    
+      if (nextIndex == -1 && eventTime > currentTimeFloat) {
+        nextIndex = i;
+        isPeak = today.events[i].isPeak;
+      }
     }
-  }
-  // Si aucun événement trouvé dans la journée, regarder le premier événement du lendemain
-  if (nextIndex == -1) {
-    float eventTimeNextDay = tideStack.peek(1).getEventTime(0);
-    if (eventTimeNextDay >= 0) { // Vérifie que l'événement existe
-      bool isPeak = tideStack.peek(1).events[0].isPeak;
-      nextIndex = 100; // Utilise une valeur spéciale pour indiquer "premier événement du lendemain"
+    
+    // If no event left today → check tomorrow
+    if (nextIndex == -1) {
+      Serial.println("No more events today, checking next day...");
+      float eventTimeNextDay = tomorrow.getEventTime(0);
+      if (eventTimeNextDay >= 0) {
+        nextIndex = 100; // special code for "tomorrow"
+        isPeak = tomorrow.events[0].isPeak;
+      }
     }
-  }
-  
-  
-  // Réinitialiser les variables
-  for (int i = 0; i < 4; i++) {
-    V[100 + i] = 0; // up
-    V[210 + i] = 0; // down
-  }
-  Serial.println("Next index: " + String(nextIndex));
-
-  // Mettre à 1 la bonne variable
-  if (isPeak) {
-    V[210 + nextIndex] = 1;  // marée descendante
-  } else {
-    V[100 + nextIndex] = 1;  // marée montante
-  }
-  
-  // Debug
-  Serial.print("Next event: ");
-  Serial.print(tideStack.peek(0).getEventTime(nextIndex));
-  Serial.print(" -> ");
-  Serial.println(isPeak ? "UP" : "DOWN");
-
+    
+    // Reset V values
+    for (int i = 0; i <= 4; i++) {
+      V[200 + i] = 0;
+      V[210 + i] = 0;
+    }
+    
+    Serial.println("Next index: " + String(nextIndex));
+    
+    // Mark the right slot
+    if (nextIndex >= 0 && nextIndex < 4) {
+      Serial.println(today.getEventTime(nextIndex));
+      (isPeak ? V[210 + nextIndex] : V[200 + nextIndex]) = 1;
+    } else if (nextIndex == 100) {
+      Serial.println(tomorrow.getEventTime(0));
+      (isPeak ? V[214] : V[204]) = 1;
+    }
+    
+    // Print V states
+    for (int i = 0; i <= 4; i++) {
+      Serial.print("V"); Serial.print(200 + i); Serial.print(": "); Serial.println(V[200 + i]);
+      Serial.print("V"); Serial.print(210 + i); Serial.print(": "); Serial.println(V[210 + i]);
+    }
+    
+    Serial.print(" -> ");
+    Serial.println(isPeak ? "UP" : "DOWN");
 
   }    //************************fin de la boucle de l'interval **************************************
 
