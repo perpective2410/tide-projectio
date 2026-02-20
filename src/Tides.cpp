@@ -781,57 +781,103 @@ public:
   }
 
 
+    // h'(t) = -Σ f_i · A_i · ω_i · sin(ω_i·t + φ_i)   [ω in rad/hr]
+    // Sign of h'(t): positive = rising tide, negative = falling tide.
+    // h'(t) = 0 at every high/low tide.
+    double derivative(double t) {
+        double total = 0.0;
+        for (int i = 0; i < harmonic_model.get_harmonic_count(); i++) {
+            Harmonic& harmonic = harmonic_model.get_harmonics()[i];
+            if (harmonic.amplitude > 0.0) {
+                Table2NC constituent = table2NCDef.get_constituent(harmonic.name);
+                double var = reduc360(constituent.speed * t + equilbrm[harmonic.name] - harmonic.phase);
+                total -= nodefctr[harmonic.name] * harmonic.amplitude
+                         * radians(constituent.speed) * sin(radians(var));
+            }
+        }
+        return total;
+    }
+
+    // Finds high/low tides by detecting sign changes in h'(t) with a coarse
+    // 20-minute scan, then bisects each interval to sub-second precision.
+    // Replaces the old 1440-sample brute-force approach (~15× fewer evaluations).
     TideInfo findTidesAndTimes(int utcOffsetMinutes) {
-      static const int SAMPLES = 1440;
-      static float hours[SAMPLES];
-      static double amplitudes[SAMPLES];
-      TideInfo tideInfo;
-      TideEvent tideEvents[4];
-      int eventCount = 0;
-   
-      for (int i = 0; i < SAMPLES; ++i) {
-        int adjustedIndex = i - utcOffsetMinutes;
-        hours[adjustedIndex] = (adjustedIndex / 60.0);
-        amplitudes[adjustedIndex] = amplitude(hours[adjustedIndex]);
-      }
+        TideInfo tideInfo;
+        TideEvent tideEvents[4];
+        int eventCount = 0;
 
-      for (int i = 1 - utcOffsetMinutes; i < SAMPLES - utcOffsetMinutes - 1; ++i) {
-          if (amplitudes[i - 1] > 0 ) { // workaround with statics amplitudes
-              if (amplitudes[i] > amplitudes[i - 1] && amplitudes[i] > amplitudes[i + 1]) {
-                  tideEvents[eventCount++] = {amplitudes[i], hours[i] + utcOffsetMinutes / 60, true};
-              }
-              if (amplitudes[i] < amplitudes[i - 1] && amplitudes[i] < amplitudes[i + 1]) {
-                  tideEvents[eventCount++] = {amplitudes[i], hours[i] + utcOffsetMinutes / 60, false};
-              }
-          }
-          
-      }
+        // 20-minute coarse step covers the full local day in UTC coordinates.
+        const double COARSE_STEP  = 20.0 / 60.0;  // hours
+        const int    BISECT_STEPS = 14;            // 2^14 subdivisions of 20 min ≈ 0.07 s precision
 
-      for (int i = 0; i < eventCount; ++i) {
-          for (int j = i + 1; j < eventCount; ++j) {
-              if (tideEvents[i].time > tideEvents[j].time) {
-                  TideEvent temp = tideEvents[i];
-                  tideEvents[i] = tideEvents[j];
-                  tideEvents[j] = temp;
-              }
-          }
-      }
+        double utcStart = -(utcOffsetMinutes / 60.0);
+        double utcEnd   = utcStart + 24.0;
 
-      tideInfo.numEvents = eventCount;
-      for (int i = 0; i < eventCount; ++i) {
-          tideInfo.events[i] = tideEvents[i];
-      }
+        double prevT = utcStart;
+        double prevD = derivative(prevT);
 
-      if (tideInfo.numEvents >= 2) {
-          if (tideInfo.events[0].isPeak != tideInfo.events[1].isPeak) {
-              tideInfo.morningCoefficient = abs(round(((tideInfo.events[0].amplitude - tideInfo.events[1].amplitude) / 6.1) * 100));
-          }
-          if (tideInfo.events[tideInfo.numEvents - 2].isPeak != tideInfo.events[tideInfo.numEvents - 1].isPeak) {
-              tideInfo.afternoonCoefficient = abs(round(((tideInfo.events[tideInfo.numEvents - 2].amplitude - tideInfo.events[tideInfo.numEvents - 1].amplitude) / 6.1) * 100));
-          }
-      }
+        for (double t = utcStart + COARSE_STEP;
+             t <= utcEnd + COARSE_STEP * 0.5 && eventCount < 4;
+             t += COARSE_STEP) {
 
-      return tideInfo;
+            double curD = derivative(t);
+
+            if (prevD * curD < 0.0) {
+                // Sign change → bracket the zero of h'(t) and bisect.
+                double a = prevT, da = prevD;
+                double b = t,     db = curD;
+
+                for (int k = 0; k < BISECT_STEPS; k++) {
+                    double mid = (a + b) * 0.5;
+                    double dm  = derivative(mid);
+                    if (da * dm <= 0.0) { b = mid; db = dm; }
+                    else                { a = mid; da = dm; }
+                }
+
+                double extremumT = (a + b) * 0.5;
+                double extremumH = amplitude(extremumT);
+                bool   isPeak    = (prevD > 0.0);  // + → − transition = high tide
+
+                // Convert UTC extremum time to local time.
+                float localT = (float)(extremumT + utcOffsetMinutes / 60.0);
+                while (localT <  0.0f) localT += 24.0f;
+                while (localT >= 24.0f) localT -= 24.0f;
+
+                tideEvents[eventCount++] = { extremumH, localT, isPeak };
+            }
+
+            prevT = t;
+            prevD = curD;
+        }
+
+        // Events are found in UTC (= local) order; sort defensively.
+        for (int i = 0; i < eventCount; i++) {
+            for (int j = i + 1; j < eventCount; j++) {
+                if (tideEvents[i].time > tideEvents[j].time) {
+                    TideEvent tmp  = tideEvents[i];
+                    tideEvents[i]  = tideEvents[j];
+                    tideEvents[j]  = tmp;
+                }
+            }
+        }
+
+        tideInfo.numEvents = eventCount;
+        for (int i = 0; i < eventCount; i++) tideInfo.events[i] = tideEvents[i];
+
+        if (tideInfo.numEvents >= 2) {
+            if (tideInfo.events[0].isPeak != tideInfo.events[1].isPeak) {
+                tideInfo.morningCoefficient = abs(round(
+                    (tideInfo.events[0].amplitude - tideInfo.events[1].amplitude) / 6.1 * 100));
+            }
+            if (tideInfo.events[tideInfo.numEvents - 2].isPeak !=
+                tideInfo.events[tideInfo.numEvents - 1].isPeak) {
+                tideInfo.afternoonCoefficient = abs(round(
+                    (tideInfo.events[tideInfo.numEvents - 2].amplitude -
+                     tideInfo.events[tideInfo.numEvents - 1].amplitude) / 6.1 * 100));
+            }
+        }
+
+        return tideInfo;
     }
 
 
