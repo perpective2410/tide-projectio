@@ -1,1136 +1,349 @@
-
 #include <Arduino.h>
 #include <TimeLib.h>
 #include <math.h>
-#include <Tides.h>
 #include <unordered_map>
-#include <functional> 
 #include <map>
-#include <string>
+#include "Tides.h"
+#include "stations/StationDef.h"
 
+// ── Astronomical variables (used by TideHarmonics.cpp via extern) ─────────
 double T, s, ls, p, M, p1, N;
 
+// ── Internal data structures ──────────────────────────────────────────────
 
-
-// Function definitions
-double zero() {
-    return 0.0;
-}
-double fMm() {
-    return 1.0 - (0.1311 * cos(radians(N))) + (0.0538 * cos(radians(2.0 * p))) + (0.0205 * cos(radians(2.0 * p - N)));
-}
-
-double uMf() {
-    return (-23.7 * sin(radians(N))) + (2.7 * sin(radians(2.0 * N))) - (0.4 * sin(radians(3.0 * N)));
-}
-
-double fMf() {
-    return 1.084 + (0.415 * cos(radians(N))) + (0.039 * cos(radians(2.0 * N)));
-}
-
-double uO1() {
-    return (10.80 * sin(radians(N))) - (1.34 * sin(radians(2.0 * N))) + (0.19 * sin(radians(3.0 * N)));
-}
-
-double fO1() {
-    return 1.0176 + (0.1871 * cos(radians(N))) - (0.0147 * cos(radians(2.0 * N)));
-}
-
-double uK1() {
-    return (-8.86 * sin(radians(N))) + (0.68 * sin(radians(2.0 * N))) - (0.07 * sin(radians(3.0 * N)));
-}
-
-double fK1() {
-    return 1.0060 + (0.1150 * cos(radians(N))) - (0.0088 * cos(radians(2.0 * N))) + (0.0006 * cos(radians(3.0 * N)));
-}
-
-double one() {
-    return 1.0;
-}
-
-double uJ1() {
-    return (-12.94 * sin(radians(N))) + (1.34 * sin(radians(2.0 * N))) - (0.19 * sin(radians(3.0 * N)));
-}
-
-double fJ1() {
-    return 1.1029 + (0.1676 * cos(radians(N))) - (0.0170 * cos(radians(2.0 * N))) + (0.0016 * cos(radians(3.0 * N)));
-}
-
-double uM2() {
-    return -2.14 * sin(radians(N));
-}
-
-double fM2() {
-    return 1.0007 - (0.0373 * cos(radians(N))) + (0.0002 * cos(radians(2.0 * N)));
-}
-
-double uK2() {
-    return (-17.74 * sin(radians(N))) + (0.68 * sin(radians(2.0 * N))) - (0.04 * sin(radians(3.0 * N)));
-}
-
-double fK2() {
-    return 1.0246 + (0.2863 * cos(radians(N))) + (0.0083 * cos(radians(2.0 * N))) - (0.0015 * cos(radians(3.0 * N)));
-}
-
-double uM3() {
-    return -3.21 * sin(radians(N));
-}
-
-double fM3() {
-    return pow(sqrt(fM2()), 3);
-}
-
-double uminusM2() {
-    return -uM2();
-}
-
-double u2M2() {
-    return 2 * uM2();
-}
-
-double u3M2() {
-    return 3 * uM2();
-}
-
-double u4M2() {
-    return 4 * uM2();
-}
-
-double u5M2() {
-    return 5 * uM2();
-}
-
-double u6M2() {
-    return 6 * uM2();
-}
-
-double f2M2() {
-    return pow(fM2(), 2);
-}
-
-double f3M2() {
-    return pow(fM2(), 3);
-}
-
-double f4M2() {
-    return pow(fM2(), 4);
-}
-
-double f5M2() {
-    return pow(fM2(), 5);
-}
-
-double f6M2() {
-    return pow(fM2(), 6);
-}
-
-double uM2mK1() {
-    return uM2() - uK1();
-}
-
-double uM2pK1() {
-    return uM2() + uK1();
-}
-
-double fM2K1() {
-    return fM2() * fK1();
-}
-
-double u2M2pK1() {
-    return (2 * uM2()) + uK1();
-}
-
-double f2M2K1() {
-    return pow(fM2(), 2) * fK1();
-}
-
-double uM2mK2() {
-    return uM2() - uK2();
-}
-
-double uM2pK2() {
-    return uM2() + uK2();
-}
-
-double uK2mM2() {
-    return uK2() - uM2();
-}
-
-double fM2K2() {
-    return fM2() * fK2();
-}
-
-double u2M2mK2() {
-    return (2 * uM2()) - uK2();
-}
-
-double u2M2pK2() {
-    return (2 * uM2()) + uK2();
-}
-
-double f2M2K2() {
-    return pow(fM2(), 2) * fK2();
-}
-
-double u3M2mK2() {
-    return (3 * uM2()) - uK2();
-}
-
-double u3M2pK2() {
-    return (3 * uM2()) + uK2();
-}
-
-double f3M2K2() {
-    return pow(fM2(), 3) * fK2();
-}
-
-double u4M2mK2() {
-    return (4 * uM2()) - uK2();
-}
-
-double f4M2K2() {
-    return pow(fM2(), 4) * fK2();
-}
-
-double fsinM1() {
-    return sin(radians(p)) + (0.2 * sin(radians(p - N)));
-}
-
-double fcosM1() {
-    return 2 * (cos(radians(p)) + (0.2 * cos(radians(p - N))));
-}
-
-double uM1() {
-    return degrees(atan2(fsinM1(), fcosM1()));
-}
-
-double fM1() {
-    return sqrt(pow(fsinM1(), 2) + pow(fcosM1(), 2));
-}
-
-double fsinGamma2() {
-    return 0.147 * sin(radians(2 * (N - p)));
-}
-
-double fcosGamma2() {
-    return 1.0 + (0.147 * cos(radians(2 * (N - p))));
-}
-
-double uGamma2() {
-    return degrees(atan2(fsinGamma2(), fcosGamma2()));
-}
-
-double fGamma2() {
-    return sqrt(pow(fsinGamma2(), 2) + pow(fcosGamma2(), 2));
-}
-
-double fsinL2() {
-    return (-0.2505 * sin(radians(2 * p))) - (0.1102 * sin(radians(2 * p - N))) - (0.0156 * sin(radians(2 * p - 2 * N))) - (0.037 * sin(radians(N)));
-}
-
-double fcosL2() {
-    return 1.0 - (0.2505 * cos(radians(2 * p))) - (0.1102 * cos(radians(2 * p - N))) - (0.0156 * cos(radians(2 * p - 2 * N))) - (0.037 * cos(radians(N)));
-}
-
-double uL2() {
-    return degrees(atan2(fsinL2(), fcosL2()));
-}
-
-double fL2() {
-    return sqrt(pow(fsinL2(), 2) + pow(fcosL2(), 2));
-}
-
-double uK1pJ1() {
-    return uK1() + uJ1();
-}
-
-double fK1J1() {
-    return fK1() * fJ1();
-}
-
-double uK2mQ1() {
-    return uK2() - uO1();
-}
-
-double fK2Q1() {
-    return fK2() * fO1();
-}
-
-double uK1mO1() {
-    return uK1() - uO1();
-}
-
-double fK1O1() {
-    return fK1() * fO1();
-}
-
-double uM2mJ1() {
-    return uM2() - uJ1();
-}
-
-double fM2J1() {
-    return fM2() * fJ1();
-}
-
-double uminusK1() {
-    return -uK1();
-}
-
-double uM2mO1() {
-    return uM2() - uO1();
-}
-
-double fM2O1() {
-    return fM2() * fO1();
-}
-
-double uminusO1() {
-    return -uO1();
-}
-
-double u2O1() {
-    return 2 * uO1();
-}
-
-double f2O1() {
-    return pow(fO1(), 2);
-}
-
-double u2M2pL2() {
-    return (2 * uM2()) + uL2();
-}
-
-double f2M2L2() {
-    return pow(fM2(), 2) * fL2();
-}
-
-double u2M2m2K2() {
-    return (2 * uM2()) - 2 * uK2();
-}
-
-double f2M22K2() {
-    return pow(fM2(), 2) * pow(fK2(), 2);
-}
-
-double uM2pL2mK2() {
-    return uM2() + uL2() - 2 * uK2();
-}
-
-double fM2L2K2() {
-    return fM2() * fL2() * fK2();
-}
-
-double uK1pO1() {
-    return uK1() + uO1();
-}
-
-double uM2p2K1() {
-    return uM2() + 2 * uK1();
-}
-
-double f2K1M2() {
-    return pow(fK1(), 2) * fM2();
-}
-
-double uM2m2K1() {
-    return uM2() - 2 * uK1();
-}
-
-double u2K2pM2() {
-    return uM2() + 2 * uK2();
-}
-
-double fM22K2() {
-    return pow(fK2(), 2) * fM2();
-}
-
-double u2K2() {
-    return 2 * uK2();
-}
-
-double uminus2M2() {
-    return -2 * uM2();
-}
-
-double uK2m2M2() {
-    return uK2() - 2 * uM2();
-}
-
-double uM2pO1() {
-    return uM2() + uO1();
-}
-
-double u2M2mK1() {
-    return 2 * uM2() - uK1();
-}
-
-double f3M2K1() {
-    return pow(fM2(), 3) * fK1();
-}
-
-
-double u2M2mO1() {
-    return 2 * uM2() - uO1();
-}
-
-double f2M2O1() {
-    return pow(fM2(), 2) * fO1();
-}
-
-double u2M2pL2mK2() {
-    return 2 * uM2() + uL2() - uK2();
-}
-
-double f2M2L2K2() {
-    return pow(fM2(), 2) * fL2() * fK2();
-}
-
-double f2K2() {
-    return pow(fK2(), 2);
-}
-
-double u2M2pO1() {
-    return 2 * uM2() + uO1();
-}
-
-double u3M2pK1() {
-    return 3 * uM2() + uK1();
-}
-
-double u3M2mK1() {
-    return 3 * uM2() - uK1();
-}
-
-double u3M2mO1() {
-    return 3 * uM2() - uO1();
-}
-
-double f3M2O1() {
-    return pow(fM2(), 3) * fO1();
-}
-
-double u3K1pM2() {
-    return 3 * uK1() + uM2();
-}
-
-double f3K1M2() {
-    return pow(fK1(), 3) * fM2();
-}
-
-double uK1pK2() {
-    return uK1() + uK2();
-}
-
-double fK1K2() {
-    return fK1() * fK2();
-}
-
-double u5M2mK2() {
-    return 5 * uM2() - uK2();
-}
-
-double f5M2K2() {
-    return pow(fM2(), 5) * fK2();
-}
-
-double u3M2pO1() {
-    return 3 * uM2() + uO1();
-}
-
-double uM2pL2() {
-    return uM2() + uL2();
-}
-
-double fM2L2() {
-    return fM2() * fL2();
-}
-
-double uM2pL2pK2() {
-    return uM2() + uL2() + uK2();
-}
-
-double u4M2mO1() {
-    return 4 * uM2() - uO1();
-}
-
-double f4M2O1() {
-    return pow(fM2(), 4) * fO1();
-}
-
-double u2M2pK2pO1() {
-    return 2 * uM2() + uK2() + uO1();
-}
-
-double f2M2K2O1() {
-    return pow(fM2(), 2) * fK2() * fO1();
-}
-
-double uM2pK2pO1() {
-    return uM2() + uK2() + uO1();
-}
-
-double fM2K2O1() {
-    return fM2() * fK2() * fO1();
-}
-
-double u4M2pK2() {
-    return 4 * uM2() + uK2();
-}
-
-double u3M2pL2() {
-    return 3 * uM2() + uL2();
-}
-
-double f3M2L2() {
-    return pow(fM2(), 3) * fL2();
-}
-
-double u2M2p2K2() {
-    return 2 * uM2() + 2 * uK2();
-}
-
-double u4M2pK1() {
-    return 4 * uM2() + uK1();
-}
-
-double f4M2K1() {
-    return pow(fM2(), 4) * fK1();
-}
-
-double u5M2pK2() {
-    return 5 * uM2() + uK2();
-}
-
-double f7M2() {
-    return pow(fM2(), 7);
-}
-
-double u7M2() {
-    return 7 * uM2();
-}
-
-double u4M2pL2() {
-    return 4 * uM2() + uL2();
-}
-
-double f4M2L2() {
-    return pow(fM2(), 4) * fL2();
-}
-
-double u6M2pK2() {
-    return 6 * uM2() + uK2();
-}
-
-double f6M2K2() {
-    return pow(fM2(), 6) * fK2();
-}
-
-double u6M2mK2() {
-    return 6 * uM2() - uK2();
-}
-
-
-
-TideStack::TideStack(int daysToCalculate)
-    : stackSize(daysToCalculate), count(0) {
-    stack = new TideInfo[stackSize];
-}
-
-TideStack::~TideStack() {
-    delete[] stack;
-}
-
-void TideStack::push(TideInfo& tideInfo) {
-    // Shift elements left
-    for (int i = 0; i < stackSize - 1; i++) {
-        stack[i] = stack[i + 1];
-    }
-
-    // Place the new element at the end
-    stack[stackSize - 1] = tideInfo;
-
-    // Ensure count does not exceed stackSize
-    if (count < stackSize) count++;
-}
-
-TideInfo* TideStack::getStack() {
-    return stack;
-}
-
-int TideStack::getCount() {
-    return count;
-}
-
-int TideStack::getTop() {
-    return count - 1;
-}
-
-TideInfo& TideStack::peek(int index) {
-    return stack[index];
-}
-
-
-
-// Function to convert date to Julian Day Number
-double dateToJulianDay(int year, int month, int day) {
-
-    // Adjust month and year for the Julian Day Number calculation
-    if (month <= 2) {
-        year -= 1;
-        month += 12;
-    }
-
-    // Calculate the Julian Day Number
-    int A = year / 100;
-    int B = 2 - A + A / 4;
-
-    double JDN = int(365.25 * (year + 4716)) + int(30.6001 * (month + 1)) + day + B - 1524.5;
-
-    return JDN;
-}
-
-// Function to convert a Julian day to Julian century
-double julianDateToCentury(double julianDay) {
-    return (julianDay - 2451545.0) / 36525.0;
-}
-
-
-
-// Function to perform astronomical calculations
-void astroCalculations(time_t epoch) {
-
-    tmElements_t tm;
-    breakTime(epoch, tm);
-  
-    double julianDay = dateToJulianDay(tmYearToCalendar(tm.Year), tm.Month, tm.Day);
-    T = julianDateToCentury(julianDay);
-    s = reduc360(218.3164591 + 481267.88134236 * T - 0.0013268 * T * T + T * T * T / 538841.0 - T * T * T * T / 65194000.0);
-    ls = reduc360(280.46645 + 36000.76983 * T + 0.0003032 * T * T);
-    p = reduc360(83.3532430 + 4069.0137111 * T - 0.0103238 * T * T - T * T * T / 80053.0 + T * T * T * T / 18999000.0);
-    M = 357.52910 + 35999.05030 * T - 0.0001559 * T * T - 0.00000048 * T * T * T;
-    p1 = reduc360(ls - M);
-    N = reduc360(125.04452 - 1934.136261 * T + 0.0020708 * T * T + T * T * T / 450000.0);
-    
-    //Serial.println("Astro Values: ");
-    //Serial.print("JD: "); Serial.print(julianDay, 10);
-    //Serial.print("T: "); Serial.print(T, 10);
-    //Serial.print(", s: "); Serial.print(s,10);
-    //Serial.print(", ls: "); Serial.print(ls,10);
-    //Serial.print(", p: "); Serial.print(p,10);
-    //Serial.print(", M: "); Serial.print(M,10);
-    //Serial.print(", p1: "); Serial.print(p1,10);
-    //Serial.print(", N: "); Serial.println(N,10);
-}
-
-// Custom hash function for String
-struct StringHash {
-    size_t operator()(const String& s) const {
-        size_t hash = 0;
-        for (size_t i = 0; i < s.length(); ++i) {
-            hash = hash * 31 + s[i];  // A simple hash function
-        }
-        return hash;
-    }
-};
-
-
-
-class Table2NCDef {
-private:
-    std::unordered_map<String, Table2NC, StringHash> tableMap;  // Use custom hash function
-
-public:
-    // Constructor to initialize the table
-    template <size_t N>
-    Table2NCDef(Table2NC (&array)[N]) {
-        for (int i = 0; i < N; i++) {
-            tableMap[array[i].name] = array[i]; // Insert into the hash map
-        }
-    }
-    ~Table2NCDef() {
-      tableMap.clear();
-    }
-    Table2NC get_constituent(const String& name) const {
-        auto it = tableMap.find(name);
-        if (it != tableMap.end()) {
-            return it->second;  // Return the found element
-        }
-        // Return an empty object if not found
-        return Table2NC{"", 0, 0, 0, 0, 0, 0, 0, nullptr, nullptr};
-    }
-};
- 
 struct Harmonic {
     String name;
     double amplitude;
     double phase;
 };
 
-
-class HarmonicModel {
-private:
-    Harmonic* harmonics; // Pointer to dynamically allocated array of harmonics
-    Harmonic z0Harmonic;
-    int harmonicCount;   // Number of harmonics
-
-public:
-    template <size_t N>
-    // Constructor: initialize with harmonics array and its size
-    HarmonicModel(Harmonic (&harmonicsArray)[N], Harmonic z0) {
-        harmonicCount = N;
-        harmonics = new Harmonic[harmonicCount];
-        z0Harmonic = z0;
-        for (int i = 0; i < harmonicCount; ++i) {
-            harmonics[i] = harmonicsArray[i]; // Deep copy of harmonics
-        }
-    }
-
-    // Destructor to free allocated memory
-    ~HarmonicModel() {
-        delete[] harmonics;
-    }
-
-    // Getter for harmonics array
-    Harmonic* get_harmonics() {
-        return harmonics; // Return pointer to harmonics array
-    }
-
-    Harmonic get_z0_harmonic() {
-        return z0Harmonic;
-    }
-
-    // Getter for harmonic count
-    int get_harmonic_count() const {
-        return harmonicCount;
+struct StringHash {
+    size_t operator()(const String& str) const {
+        size_t hash = 0;
+        for (size_t i = 0; i < str.length(); ++i)
+            hash = hash * 31 + str[i];
+        return hash;
     }
 };
 
-int getFranceTimezoneOffset(time_t epoch) {
-    struct tm *timeinfo = gmtime(&epoch);
-    int year = timeinfo->tm_year + 1900;
+// ── Table2NC lookup (built once from the compile-time table) ──────────────
 
-    // Calculate the start and end of DST for the given year
-    struct tm startDST;
-    startDST.tm_year = year - 1900;
-    startDST.tm_mon = 2; // March
-    startDST.tm_mday = 31;
-    startDST.tm_hour = 1;
-    startDST.tm_min = 0;
-    startDST.tm_sec = 0;
-    startDST.tm_isdst = -1;
-    time_t startDSTEpoch = mktime(&startDST);
-    while (gmtime(&startDSTEpoch)->tm_wday != 0) { // Find the last Sunday in March
-        startDSTEpoch -= 24 * 3600;
+class Table2NCDef {
+private:
+    std::unordered_map<String, Table2NC, StringHash> tableMap;
+public:
+    Table2NCDef(Table2NC* array, int count) {
+        for (int i = 0; i < count; i++)
+            tableMap[String(array[i].name)] = array[i];
     }
+    ~Table2NCDef() { tableMap.clear(); }
 
-    struct tm endDST;
-    endDST.tm_year = year - 1900;
-    endDST.tm_mon = 9; // October
-    endDST.tm_mday = 31;
-    endDST.tm_hour = 1;
-    endDST.tm_min = 0;
-    endDST.tm_sec = 0;
-    endDST.tm_isdst = -1;
-    time_t endDSTEpoch = mktime(&endDST);
-    while (gmtime(&endDSTEpoch)->tm_wday != 0) { // Find the last Sunday in October
-        endDSTEpoch -= 24 * 3600;
+    Table2NC get_constituent(const String& name) const {
+        auto it = tableMap.find(name);
+        if (it != tableMap.end()) return it->second;
+        return Table2NC{nullptr, 0, 0, 0, 0, 0, 0, 0, nullptr, nullptr};
     }
+};
 
-    // Check if the given epoch falls within the DST period
-    if (epoch >= startDSTEpoch && epoch < endDSTEpoch) {
-        return 120; // DST is in effect
-    } else {
-        return 60; // Standard time
+// ── HarmonicModel ─────────────────────────────────────────────────────────
+
+class HarmonicModel {
+private:
+    Harmonic* harmonics;
+    Harmonic  z0Harmonic;
+    int       harmonicCount;
+public:
+    // Copies station data from compile-time StationDef into heap-allocated Harmonics.
+    HarmonicModel(const StationDef* def) : harmonicCount(def->harmonicCount) {
+        harmonics = new Harmonic[harmonicCount];
+        for (int i = 0; i < harmonicCount; i++) {
+            harmonics[i] = {
+                String(def->harmonics[i].name),
+                def->harmonics[i].amplitude,
+                def->harmonics[i].phase
+            };
+        }
+        z0Harmonic = {"Z0", def->z0, 0.0};
     }
-}
+    ~HarmonicModel() { delete[] harmonics; }
+
+    Harmonic* get_harmonics()            { return harmonics; }
+    Harmonic  get_z0_harmonic()          { return z0Harmonic; }
+    int       get_harmonic_count() const { return harmonicCount; }
+};
+
+// ── HarmonicCalculator ────────────────────────────────────────────────────
 
 class HarmonicCalculator {
 private:
-    HarmonicModel &harmonic_model;
-    Table2NCDef &table2NCDef;
+    HarmonicModel& model;
+    Table2NCDef&   tableDef;
     std::map<String, double> equilbrm;
     std::map<String, double> nodefctr;
 
-
 public:
-    HarmonicCalculator(HarmonicModel& model, Table2NCDef& table_def)
-        : harmonic_model(model), table2NCDef(table_def) {
-        Serial.println("Harmonic Calculator constructor");
-    }
+    HarmonicCalculator(HarmonicModel& m, Table2NCDef& t) : model(m), tableDef(t) {}
+    ~HarmonicCalculator() { equilbrm.clear(); nodefctr.clear(); }
 
-    ~HarmonicCalculator() {
-        equilbrm.clear();
-        nodefctr.clear();
-    }
-
+    // Called once per day — computes equilibrium arguments and node factors.
     void equi_tide() {
-      static const double T = 180.0;
-      for (int i = 0; i < harmonic_model.get_harmonic_count(); i++) {
-          Harmonic& harmonic = harmonic_model.get_harmonics()[i]; 
-          Table2NC constituent = table2NCDef.get_constituent(harmonic.name);
-          equilbrm[harmonic.name] = (constituent.T * T +
-                                      constituent.s * s +
-                                      constituent.ls * ls +
-                                      constituent.p * p +
-                                      constituent.p1 * p1 +
-                                      constituent.deg +
-                                      constituent.u_func());
-          equilbrm[harmonic.name] = reduc360(equilbrm[harmonic.name]);
-          nodefctr[harmonic.name] = constituent.f_func();
-      }
-  }
+        static const double Thalf = 180.0;
+        for (int i = 0; i < model.get_harmonic_count(); i++) {
+            Harmonic& h = model.get_harmonics()[i];
+            Table2NC c = tableDef.get_constituent(h.name);
+            if (c.u_func == nullptr) continue;
+            equilbrm[h.name] = reduc360(
+                c.T * Thalf + c.s * s + c.ls * ls +
+                c.p * p + c.p1 * p1 + c.deg + c.u_func());
+            nodefctr[h.name] = c.f_func();
+        }
+    }
 
-
-    // h'(t) = -Σ f_i · A_i · ω_i · sin(ω_i·t + φ_i)   [ω in rad/hr]
-    // Sign of h'(t): positive = rising tide, negative = falling tide.
-    // h'(t) = 0 at every high/low tide.
     double derivative(double t) {
         double total = 0.0;
-        for (int i = 0; i < harmonic_model.get_harmonic_count(); i++) {
-            Harmonic& harmonic = harmonic_model.get_harmonics()[i];
-            if (harmonic.amplitude > 0.0) {
-                Table2NC constituent = table2NCDef.get_constituent(harmonic.name);
-                double var = reduc360(constituent.speed * t + equilbrm[harmonic.name] - harmonic.phase);
-                total -= nodefctr[harmonic.name] * harmonic.amplitude
-                         * radians(constituent.speed) * sin(radians(var));
-            }
+        for (int i = 0; i < model.get_harmonic_count(); i++) {
+            Harmonic& h = model.get_harmonics()[i];
+            if (h.amplitude <= 0.0) continue;
+            Table2NC c = tableDef.get_constituent(h.name);
+            if (c.u_func == nullptr) continue;
+            double var = reduc360(c.speed * t + equilbrm[h.name] - h.phase);
+            total -= nodefctr[h.name] * h.amplitude
+                     * radians(c.speed) * sin(radians(var));
         }
         return total;
     }
 
-    // Finds high/low tides by detecting sign changes in h'(t) with a coarse
-    // 20-minute scan, then bisects each interval to sub-second precision.
-    // Replaces the old 1440-sample brute-force approach (~15× fewer evaluations).
-    TideInfo findTidesAndTimes(int utcOffsetMinutes) {
+    double amplitude(double t) {
+        double total = 0.0;
+        Harmonic z0 = model.get_z0_harmonic();
+        for (int i = 0; i < model.get_harmonic_count(); i++) {
+            Harmonic& h = model.get_harmonics()[i];
+            if (h.amplitude <= 0.0) continue;
+            Table2NC c = tableDef.get_constituent(h.name);
+            if (c.u_func == nullptr) continue;
+            double var = reduc360(c.speed * t + equilbrm[h.name] - h.phase);
+            total += nodefctr[h.name] * h.amplitude * cos(radians(var));
+        }
+        return z0.amplitude + total;
+    }
+
+    TideInfo findTidesAndTimes(int utcOffsetMinutes, double coeffDivisor = 6.1) {
         TideInfo tideInfo;
         TideEvent tideEvents[4];
         int eventCount = 0;
 
-        // 20-minute coarse step covers the full local day in UTC coordinates.
-        const double COARSE_STEP  = 20.0 / 60.0;  // hours
-        const int    BISECT_STEPS = 14;            // 2^14 subdivisions of 20 min ≈ 0.07 s precision
+        const double COARSE_STEP  = 20.0 / 60.0;
+        const int    BISECT_STEPS = 14;
 
         double utcStart = -(utcOffsetMinutes / 60.0);
         double utcEnd   = utcStart + 24.0;
-
-        double prevT = utcStart;
-        double prevD = derivative(prevT);
+        double prevT    = utcStart;
+        double prevD    = derivative(prevT);
 
         for (double t = utcStart + COARSE_STEP;
              t <= utcEnd + COARSE_STEP * 0.5 && eventCount < 4;
              t += COARSE_STEP) {
 
             double curD = derivative(t);
-
             if (prevD * curD < 0.0) {
-                // Sign change → bracket the zero of h'(t) and bisect.
                 double a = prevT, da = prevD;
                 double b = t,     db = curD;
-
                 for (int k = 0; k < BISECT_STEPS; k++) {
                     double mid = (a + b) * 0.5;
                     double dm  = derivative(mid);
                     if (da * dm <= 0.0) { b = mid; db = dm; }
                     else                { a = mid; da = dm; }
                 }
-
                 double extremumT = (a + b) * 0.5;
                 double extremumH = amplitude(extremumT);
-                bool   isPeak    = (prevD > 0.0);  // + → − transition = high tide
-
-                // Convert UTC extremum time to local time.
-                float localT = (float)(extremumT + utcOffsetMinutes / 60.0);
+                bool   isPeak    = (prevD > 0.0);
+                float  localT    = (float)(extremumT + utcOffsetMinutes / 60.0);
                 while (localT <  0.0f) localT += 24.0f;
                 while (localT >= 24.0f) localT -= 24.0f;
-
                 tideEvents[eventCount++] = { extremumH, localT, isPeak };
             }
-
             prevT = t;
             prevD = curD;
         }
 
-        // Events are found in UTC (= local) order; sort defensively.
-        for (int i = 0; i < eventCount; i++) {
-            for (int j = i + 1; j < eventCount; j++) {
+        for (int i = 0; i < eventCount; i++)
+            for (int j = i + 1; j < eventCount; j++)
                 if (tideEvents[i].time > tideEvents[j].time) {
-                    TideEvent tmp  = tideEvents[i];
-                    tideEvents[i]  = tideEvents[j];
-                    tideEvents[j]  = tmp;
+                    TideEvent tmp = tideEvents[i];
+                    tideEvents[i] = tideEvents[j];
+                    tideEvents[j] = tmp;
                 }
-            }
-        }
 
         tideInfo.numEvents = eventCount;
         for (int i = 0; i < eventCount; i++) tideInfo.events[i] = tideEvents[i];
 
         if (tideInfo.numEvents >= 2) {
-            if (tideInfo.events[0].isPeak != tideInfo.events[1].isPeak) {
+            if (tideInfo.events[0].isPeak != tideInfo.events[1].isPeak)
                 tideInfo.morningCoefficient = abs(round(
-                    (tideInfo.events[0].amplitude - tideInfo.events[1].amplitude) / 6.1 * 100));
-            }
+                    (tideInfo.events[0].amplitude - tideInfo.events[1].amplitude)
+                    / coeffDivisor * 100));
             if (tideInfo.events[tideInfo.numEvents - 2].isPeak !=
-                tideInfo.events[tideInfo.numEvents - 1].isPeak) {
+                tideInfo.events[tideInfo.numEvents - 1].isPeak)
                 tideInfo.afternoonCoefficient = abs(round(
                     (tideInfo.events[tideInfo.numEvents - 2].amplitude -
-                     tideInfo.events[tideInfo.numEvents - 1].amplitude) / 6.1 * 100));
-            }
+                     tideInfo.events[tideInfo.numEvents - 1].amplitude)
+                    / coeffDivisor * 100));
         }
-
         return tideInfo;
-    }
-
-
-    double amplitude(double t) {
-      double total_amplitude = 0;
-      Harmonic harmonicZ0 = harmonic_model.get_z0_harmonic();
-       for (int i = 0; i < harmonic_model.get_harmonic_count(); i++) {
-           Harmonic& harmonic = harmonic_model.get_harmonics()[i]; 
-           Table2NC constituent = table2NCDef.get_constituent(harmonic.name);
-
-           if (harmonic.amplitude > 0.0) {  
-               double var = reduc360(constituent.speed * t + equilbrm[harmonic.name] - harmonic.phase);
-               total_amplitude += nodefctr[harmonic.name] * harmonic.amplitude * cos(radians(var));
-           }
-        }
-        return harmonicZ0.amplitude + total_amplitude;
     }
 };
 
-double reduc360(double angle) {
-    double result = fmod(angle, 360.0);
-    return result < 0 ? result + 360.0 : result;
+// ── TideStack ─────────────────────────────────────────────────────────────
+
+TideStack::TideStack(int daysToCalculate) : stackSize(daysToCalculate), count(0) {
+    stack = new TideInfo[stackSize];
+}
+TideStack::~TideStack() { delete[] stack; }
+
+void TideStack::push(TideInfo& tideInfo) {
+    for (int i = 0; i < stackSize - 1; i++) stack[i] = stack[i + 1];
+    stack[stackSize - 1] = tideInfo;
+    if (count < stackSize) count++;
+}
+TideInfo* TideStack::getStack()      { return stack; }
+int       TideStack::getCount()      { return count; }
+int       TideStack::getTop()        { return count - 1; }
+TideInfo& TideStack::peek(int index) { return stack[index]; }
+
+// ── Astronomical calculations ─────────────────────────────────────────────
+
+static double dateToJulianDay(int year, int month, int day) {
+    if (month <= 2) { year -= 1; month += 12; }
+    int A = year / 100;
+    int B = 2 - A + A / 4;
+    return int(365.25 * (year + 4716)) + int(30.6001 * (month + 1)) + day + B - 1524.5;
 }
 
-  static Harmonic nonRefHarmonics[] = {
-      {"E2", 0.010830917, 5.015839},
-      {"J1", 0.003194284, 139.93358},
-      {"K1", 0.06072261, 74.710915},
-      {"K2", 0.1555091, 127.51676},
-      {"L2", 0.03386434, 104.686165},
-      {"M1", 0.005852548, 16.775864},
-      {"M2", 1.5953193, 98.47019},
-      {"M4", 0.11206561, 23.436436},
-      {"M6", 0.018795298, 6.350185},
-      {"MF", 0.020645503, 150.76256},
-      {"MM", 0.018996427, -142.2232},
-      {"N2", 0.3303059, 78.88077},
-      {"O1", 0.064897336, -32.013294},
-      {"P1", 0.024959715, 54.412617},
-      {"Q1", 0.022134459, -80.21075},
-      {"R2", 0.00512981, 120.21165},
-      {"S2", 0.58522826, 131.7675},
-      {"T2", 0.031807724, 124.00578},
-      {"2N2", 0.044024024, 54.857944},
-      {"2Q1", 0.003559956, -107.30296},
-      {"KI1", 0.00161238, -6.171758},
-      {"KJ2", 0.005639474, 141.04358},
-      {"KQ1", 4.11604E-4, -132.51723},
-      {"LAMBDA2", 0.014586009, 113.8545},
-      {"MK4", 0.0153186, 103.52293},
-      {"MN4", 0.044745367, -38.25004},
-      {"MP1", 0.00157135, 77.29319},
-      {"MS4", 0.040891398, 106.30928},
-      {"MU2", 0.053256232, 54.468468},
-      {"OO1", 0.001467735, -116.3549},
-      {"PI1", 0.002542759, 17.953857},
-      {"RO1", 0.005720264, -106.69113},
-      {"PHI1", 0.001111132, 152.33963},
-      {"PSI1", 0.002002684, 36.60781},
-      {"SIGMA1", 0.005182066, -123.58492},
-      {"THETA1", 0.001797353, 96.83272}
-  };
-  static Harmonic nonRefZ0Harmonic = {"Z0", 3, 0};
+static double julianDateToCentury(double julianDay) {
+    return (julianDay - 2451545.0) / 36525.0;
+}
 
-  static Harmonic refHarmonics[] = {
-      {"2MN2S2", 0.0018, 283.54},
-      {"2NS2", 0.0029, 104.91},
-      {"3M2S2", 0.0038, 314.69},
-      {"OQ2", 0.0042, 184.05},
-      {"MNS2", 0.0189, 116.93},
-      {"MNUS2", 0.0059, 130.58},
-      {"2MK2", 0.0110, 192.58},
-      {"2N2", 0.0566, 100.08},
-      {"MU2", 0.0848, 132.92},
-      {"N2", 0.4151, 118.87},
-      {"NU2", 0.0779, 115.09},
-      {"OP2", 0.0090, 211.87},
-      {"GAMMA2", 0.0069, 307.03},
-      {"M2", 2.0474, 137.79},
-      {"MKS2", 0.0080, 203.54},
-      {"LAMBDA2", 0.0259, 105.23},
-      {"L2", 0.0658, 130.22},
-      {"NKM2", 0.0116, 265.01},
-      {"T2", 0.0419, 168.22},
-      {"S2", 0.7489, 178.09},
-      {"R2", 0.0050, 186.42},
-      {"K2", 0.2140, 175.78},
-      {"MSN2", 0.0139, 320.59},
-      {"KJ2", 0.0090, 217.77},
-      {"2SM2", 0.0168, 342.36},
-      {"SKM2", 0.0079, 325.18},
-      {"M(SK)2", 0.0109, 350.98},
-      {"M(KS)2", 0.0115, 206.71},
-  };
-  static Harmonic z0RefHarmonic = {"Z0", 4.1364, 0.0};
+static void astroCalculations(time_t epoch) {
+    tmElements_t tm;
+    breakTime(epoch, tm);
+    double julianDay = dateToJulianDay(tmYearToCalendar(tm.Year), tm.Month, tm.Day);
+    T  = julianDateToCentury(julianDay);
+    s  = reduc360(218.3164591 + 481267.88134236 * T - 0.0013268 * T * T
+                  + T * T * T / 538841.0 - T * T * T * T / 65194000.0);
+    ls = reduc360(280.46645 + 36000.76983 * T + 0.0003032 * T * T);
+    p  = reduc360(83.3532430 + 4069.0137111 * T - 0.0103238 * T * T
+                  - T * T * T / 80053.0 + T * T * T * T / 18999000.0);
+    M  = 357.52910 + 35999.05030 * T - 0.0001559 * T * T - 0.00000048 * T * T * T;
+    p1 = reduc360(ls - M);
+    N  = reduc360(125.04452 - 1934.136261 * T + 0.0020708 * T * T + T * T * T / 450000.0);
+}
 
-  static Table2NC table2NcDefArray[]  = {
-      {"E2", 2, -5, 4, 1, 0, 0, 27.423834, uM2, fM2},
-      {"J1", 1, 1, 1, -1, 0, 90, 15.5854433, uJ1, fJ1},
-      {"K1", 1, 0, 1, 0, 0, 90, 15.0410686, uK1, fK1},
-      {"K2", 2, 0, 2, 0, 0, 0, 30.0821373, uK2, fK2},
-      {"L2", 2, -1, 2, -1, 0, 180, 29.5284789, uL2, fL2},
-      {"M1", 1, -1, 1, 1, 0, 90, 14.4966939, uM1, fM1},
-      {"M2", 2, -2, 2, 0, 0, 0, 28.9841042, uM2, fM2},
-      {"M4", 4, -4, 4, 0, 0, 0, 57.9682084, u2M2, f2M2},
-      {"M6", 6, -6, 6, 0, 0, 0, 86.9523127, u3M2, f3M2},
-      {"MF", 0, 2, 0, 0, 0, 0, 1.0980331, uMf, fMf},
-      {"MM", 0, 1, 0, -1, 0, 0, 0.5443747,  zero, fMm},
-      {"N2", 2, -3, 2, 1, 0, 0, 28.4397295, uM2, fM2},
-      {"O1", 1, -2, 1, 0, 0, -90, 13.9430356, uO1, fO1},
-      {"P1", 1, 0, -1, 0, 0, -90, 14.9589314, zero,  one},
-      {"Q1", 1, -3, 1, 1, 0, -90, 13.3986609, uO1, fO1},
-      {"R2", 2, 0, 1, 0, -1, 180, 30.0410667, zero,  one},
-      {"S2", 2, 0, 0, 0, 0, 0, 30.0,zero,  one},
-      {"T2", 2, 0, -1, 0, 1, 0, 29.9589333,  zero,  one},
-      {"2N2", 2, -4, 2, 2, 0, 0, 27.8953548, uM2, fM2},
-      {"2Q1", 1, -4, 1, 2, 0, -90, 12.8542862, uO1, fO1},
-      {"MN4", 4, -5, 4, 1, 0, 0, 57.4238337, u2M2, f2M2},
-      {"MK4", 4, -2, 4, 0, 0, 0, 59.0662415, uM2pK2, fM2K2},
-      {"KI1", 1, -1, 3, -1, 0, -90, 14.5695476, uJ1, fJ1},
-      {"KI1" ,1,-1,3,-1,0,-90,14.5695476,uJ1,fJ1},
-      {"KJ2", 2, 1, 2, -1, 0, 0, 30.6265120, uK1pJ1, fK1J1},
-      {"KQ1", 1, 3, 1, -1, 0, 90, 16.683476, uK2mQ1, fK2Q1},
-      {"LAMBDA2", 2, -1, 0, 1, 0, 180, 29.4556253, uM2, fM2},
-      {"MP1", 1, -2, 3, 0, 0, 0, 14.0251729, uM2, fM2},
-      {"MS4", 4, -2, 2, 0, 0, 0, 58.9841042, uM2, fM2},
-      {"MU2", 2, -4, 4, 0, 0, 0, 27.9682084, uM2, fM2},
-      {"OO1", 1, 2, 1, 0, 0, 90, 16.1391017, uK2mQ1, fK2Q1},
-      {"PI1", 1, 0, -2, 0, 1, -90, 14.9178647,  zero,  one},
-      {"RO1" ,1,-3,3,-1, 0,-90,13.471515,uO1,fO1},
-      {"PHI1", 1, 0, 3, 0, 0, 90, 15.1232059, uJ1, fJ1},
-      {"PSI1", 1, 0, 2, 0, -1, 90, 15.0821353,  zero,  one},
-      {"SIGMA1", 1, -4, 3, 0, 0, -90, 12.9271398, uO1, fO1},
-      {"THETA1", 1, 1, -1, 1, 0, 90, 15.5125897, uJ1, fJ1},
-      {"M3"      , 3,-3, 3, 0, 0,180, 43.4761563, uM3,      fM3},
-      {"M8"      , 8,-8, 8, 0, 0,   0, 115.9364169, u4M2,    f4M2},
-      {"2MN2S2" , 2,-7, 6, 1, 0, 0, 26.407938, u3M2,f3M2},
-      {"2NS2" , 2,-6, 4, 2, 0, 0, 26.879459,u2M2,f2M2}, 
-      {"3M2S2" , 2,-6, 6, 0, 0, 0, 26.952313,u3M2,f3M2},
-      {"OQ2" , 2,-5, 2, 1, 0, 0, 27.341696,u2O1,f2O1},
-      {"MNS2" , 2,-5, 4, 1, 0, 0, 27.423834,u2M2,f2M2},
-      {"MNUS2" , 2,-5, 6,-1, 0, 0, 27.496687,u2M2,f2M2},
-      {"2MK2" , 2,-4, 2, 0, 0, 0, 27.886071,u2M2mK2,f2M2K2},
-      {"2N2" , 2,-4, 2, 2, 0, 0, 27.895355,uM2,fM2},
-      {"MU2" , 2,-4, 4, 0, 0, 0, 27.968208,uM2,fM2},
-      {"N2" , 2,-3, 2, 1, 0, 0, 28.439730,uM2,fM2},
-      {"NU2" , 2,-3, 4,-1, 0, 0, 28.512583,uM2,fM2},
-      {"OP2" ,2,-2, 0, 0, 0, 0, 28.901967,uO1,fO1},
-      {"GAMMA2" , 2,-2, 0, 2, 0,180, 28.911251,uGamma2,fGamma2},
-      {"M(SK)2" , 2,-2, 1, 0, 1,180, 28.943038,uM2pK1,fM2K1},
-      {"M2" , 2,-2, 2, 0, 0, 0, 28.984104,uM2,fM2},
-      {"M(KS)2" , 2,-2, 3, 0,-1, 0, 29.025171,uM2pK1,fM2K1},
-      {"MKS2" , 2,-2, 4, 0, 0, 0, 29.066242,uM2pK2,fM2K2},
-      {"LAMBDA2", 2,-1, 0, 1, 0,180, 29.455625,uM2,fM2},
-      {"L2" , 2,-1, 2,-1, 0,180, 29.528479,uL2,fL2},
-      {"NKM2" , 2,-1, 2, 1, 0, 0, 29.537763,uK2,f2M2K2},
-      {"T2" ,2, 0,-1, 0, 1, 0, 29.958933,zero,one},
-      {"S2" ,2, 0, 0, 0, 0, 0, 30.000000,zero,one},
-      {"R2" ,2, 0, 1, 0, -1,180, 30.041067,zero,one},
-      {"MSN2" ,2, 1, 0,-1, 0, 0, 30.544375,zero,f2M2},
-      {"2SM2" , 2, 2,-2, 0, 0, 0, 31.015896,uminusM2,fM2},
-      {"SKM2" , 2, 2, 0, 0, 0, 0, 31.098033,uK2mM2,fM2K2},
-      {"S1"      , 1, 0, 0, 0, 0, -90, 15.0      , zero,    one},
-      {"S4"      , 4, 0, 0, 0, 0,   0, 60.0      , zero,     one},
-      {"S6" ,6, 0,0, 0, 0, 0, 90.000000,zero,one},
-      {"RHO1"    , 1,-3, 3,-1, 0, -90, 13.4715145, uO1,     fO1},
-      {"MK3"     , 3,-2, 3, 0, 0, +90, 44.0251729, uM2pK1,   fM2K1},
-      {"2MK3"    , 3,-4, 3, 0, 0, -90, 42.9271398, u2M2pK1, f2M2K1},
-      {"MSF"     , 0, 2,-2, 0, 0,   0,  1.0158958, uminusM2,fM2},
-      {"SA"      , 0, 0, 1, 0, 0,   0,  0.0410686, zero,    one},
-      {"SSA"     , 0, 0, 2, 0, 0,   0,  0.0821373, zero,    one},
-      {"MS1"     , 1,-2, 2, 0, 0,180, 13.9841042, uM2,     fM2},
-      {"MS3"     , 3,-2, 2, 0, 0,180, 43.9841042, uM2,      fM2},
-      {"SP3"     , 3, 0,-1, 0, 0,   0, 44.9589314, zero,     one},
-      {"S3"      , 3, 0, 0, 0, 0,   0, 45.0      , zero,     one},
-      {"SK3"     , 3, 0, 1, 0, 0, +90, 45.0410686, uK1,      fK1},
-      {"2MNS4"   , 4,-7, 6, 1, 0,   0, 56.4079380, u3M2,     f3M2},
-      {"N4"      , 4,-6, 4, 2, 0,   0, 56.8794591, u2M2,     f2M2},
-      {"3MS4"    , 4,-6, 6, 0, 0,   0, 56.9523127, u3M2,     f3M2},
-      {"MNU4"    , 4,-5, 6,-1, 0,   0, 57.4966874, u2M2,     f2M2},
-      {"2MSK4"   , 4,-4, 2, 0, 0,   0, 57.8860712, u2M2mK2,  f2M2K2},
-      {"SN4"     , 4,-3, 2, 1, 0,   0, 58.4397295, uM2,      fM2},
-      {"3MN4"    , 4,-3, 4,-1, 0,   0, 58.5125832, u2M2,     f4M2},
-      {"NK4"     , 4,-3, 4, 1, 0,   0, 58.5218667, uM2pK2,   fM2K2},
-      {"MT4"     , 4,-2, 1, 0, 1,   0, 58.9430375, uM2,      fM2},
-      {"2SNM4"   , 4,-1, 0, 1, 0,   0, 59.4556253, zero,     f2M2},
-      {"2MSN4"   , 4,-1, 2,-1, 0,   0, 59.5284789, uM2,      f3M2},
-      {"SK4"     , 4, 0, 2, 0, 0,   0, 60.0821372, uK2,      fK2},
-      {"3MNK6"   , 6,-9, 6, 1, 0,   0, 85.3099049, u4M2mK2, f4M2K2},
-      {"3MNUS6"  , 6,-9,10,-1, 0,   0, 85.4648958, u4M2,    f4M2},
-      {"4MK6"    , 6,-8, 6, 0, 0,   0, 85.8542796, u4M2mK2, f4M2K2},
-      {"2NM6"    , 6,-8, 6, 2, 0,   0, 85.8635632, u3M2,    f3M2},
-      {"4MS6"    , 6,-8, 8, 0, 0,   0, 85.9364169, u4M2,    f4M2},
-      {"2MN6"    , 6,-7, 6, 1, 0,   0, 86.4079380, u3M2,    f3M2},
-      {"2MNU6"   , 6,-7, 8,-1, 0,   0, 86.4807915, u3M2,    f3M2},
-      {"3MSK6"   , 6,-6, 4, 0, 0,   0, 86.8701754, u3M2mK2, f3M2K2},
-      {"3MNS6"   , 6,-9, 8, 1, 0,   0, 85.3920422, u4M2,    f4M2},
-      {"M6"      , 6,-6, 6, 0, 0,   0, 86.9523127, u3M2,    f3M2},
-      {"3MKS6"   , 6,-6, 8, 0, 0,   0, 87.0344499, u3M2pK2, f3M2K2},
-      {"MSN6"    , 6,-5, 4, 1, 0,   0, 87.4238337, u2M2,    f2M2},
-      {"4MN6"    , 6,-5, 6,-1, 0,   0, 87.4966874, u3M2,    f5M2},
-      {"MNK6"    , 6,-5, 6, 1, 0,   0, 87.5059709, u2M2pK2, f2M2K2},
-      {"2MT6"    , 6,-4, 3, 0, 1,   0, 87.9271417, u2M2,    f2M2},
-      {"2MS6"    , 6,-4, 4, 0, 0,   0, 87.9682084, u2M2,    f2M2},
-      {"2MK6"    , 6,-4, 6, 0, 0,   0, 88.0503457, u2M2pK2, f2M2K2},
-      {"2SN6"    , 6,-3, 2, 1, 0,   0, 88.4397295, uM2,     fM2},
-      {"3MSN6"   , 6,-3, 4,-1, 0,   0, 88.5125831, u2M2,    f4M2},
-      {"3MKN6"   , 6,-3, 6,-1, 0,   0, 88.5947203, u2M2pK2, f4M2K2},
-      {"2SM6"    , 6,-2, 2, 0, 0,   0, 88.9841042, uM2,     fM2},
-      {"MSK6"    , 6,-2, 4, 0, 0,   0, 89.0662415, uM2pK2,  fM2K2},
-      {"2(MN)8"  , 8,-10,8, 2, 0,   0, 114.8476675, u4M2,    f4M2},
-      {"3MN8"    , 8,-9, 8, 1, 0,   0, 115.3920422, u4M2,    f4M2},
-      {"3MNU8"   , 8,-9,10,-1, 0,   0, 115.4648957, u4M2,    f4M2},
-      {"M8"      , 8,-8, 8, 0, 0,   0, 115.9364169, u4M2,    f4M2},
-      {"2MSN8"   , 8,-7, 6, 1, 0,   0, 116.4079380, u3M2,    f3M2},
-      {"3MS8"    , 8,-6, 6, 0, 0,   0, 116.9523127, u3M2,    f3M2},
-      {"3MK8"    , 8,-6, 8, 0, 0,   0, 117.0344499, u3M2pK2, f3M2K2},
-      {"4MSN8"   , 8,-5, 6,-1, 0,   0, 117.4966873, u3M2,    f5M2},
-      {"2(MS)8"  , 8,-4, 4, 0, 0,   0, 117.9682084, u2M2,    f2M2},
-      {"4MN10"   ,10,-11,10, 1, 0,  0, 144.3761463, u5M2,    f5M2},
-      {"M10"     ,10,-10,10, 0, 0,  0, 144.9205210, u5M2,    f5M2},
-      {"3MSN10"  ,10, -9, 8, 1, 0,  0, 145.3920421, u4M2,    f4M2},
-      {"4MS10"   ,10, -8, 8, 0, 0,  0, 145.9364168, u4M2,    f4M2},
-      {"5MSN10"  ,10, -7, 8,-1, 0,  0, 146.4807915, u4M2,    f6M2},
-      {"3M2S10"  ,10, -6, 6, 0, 0,  0, 146.9523126, u3M2,    f3M2}
-  };
+int getFranceTimezoneOffset(time_t epoch) {
+    struct tm* timeinfo = gmtime(&epoch);
+    int year = timeinfo->tm_year + 1900;
+
+    struct tm startDST = {};
+    startDST.tm_year = year - 1900; startDST.tm_mon = 2; startDST.tm_mday = 31;
+    startDST.tm_hour = 1; startDST.tm_isdst = -1;
+    time_t startDSTEpoch = mktime(&startDST);
+    while (gmtime(&startDSTEpoch)->tm_wday != 0) startDSTEpoch -= 86400;
+
+    struct tm endDST = {};
+    endDST.tm_year = year - 1900; endDST.tm_mon = 9; endDST.tm_mday = 31;
+    endDST.tm_hour = 1; endDST.tm_isdst = -1;
+    time_t endDSTEpoch = mktime(&endDST);
+    while (gmtime(&endDSTEpoch)->tm_wday != 0) endDSTEpoch -= 86400;
+
+    return (epoch >= startDSTEpoch && epoch < endDSTEpoch) ? 120 : 60;
+}
+
+// ── Global state ──────────────────────────────────────────────────────────
+
+// Lazy singleton — initialised on first call, after all global constructors
+// have run, which guarantees table2NcDefArray is fully constructed.
+static Table2NCDef& getTableDef() {
+    static Table2NCDef instance(table2NcDefArray, TABLE2NC_COUNT);
+    return instance;
+}
+
+static HarmonicModel*      g_model         = nullptr;
+static HarmonicCalculator* g_calculator    = nullptr;
+static HarmonicModel*      g_modelRef      = nullptr;
+static HarmonicCalculator* g_calculatorRef = nullptr;
+static double              g_coeffDivisor  = 6.1;
+
+static void clearStation() {
+    delete g_calculator;  g_calculator = nullptr;
+    delete g_model;       g_model      = nullptr;
+}
+static void clearRef() {
+    delete g_calculatorRef; g_calculatorRef = nullptr;
+    delete g_modelRef;      g_modelRef      = nullptr;
+}
+
+// Auto-loads Brest as the coefficient reference whenever a station is set.
+static bool loadRef() {
+    const StationDef* def = findStation("Brest");
+    if (!def) {
+        Serial.println("[Tides] Brest reference station not found in registry");
+        return false;
+    }
+    clearRef();
+    g_coeffDivisor  = def->refHigh;
+    g_modelRef      = new HarmonicModel(def);
+    g_calculatorRef = new HarmonicCalculator(*g_modelRef, getTableDef());
+    Serial.println("[Tides] Loaded Brest reference ("
+                   + String(def->harmonicCount) + " constituents)");
+    return true;
+}
 
 
+bool setStation(const char* id) {
+    const StationDef* def = findStation(id);
+    if (!def) {
+        Serial.println("[Tides] Station not found: " + String(id));
+        return false;
+    }
+    clearStation();
+    g_model      = new HarmonicModel(def);
+    g_calculator = new HarmonicCalculator(*g_model, getTableDef());
+    Serial.println("[Tides] Loaded " + String(id) +
+                   " (" + String(def->harmonicCount) + " constituents)");
+    return loadRef();
+}
 
-Table2NCDef table2NCDef(table2NcDefArray);
-HarmonicModel model(nonRefHarmonics,  nonRefZ0Harmonic);
-HarmonicModel modelRef(refHarmonics, z0RefHarmonic);  
-HarmonicCalculator calculator(model, table2NCDef);
-HarmonicCalculator calculatorRef(modelRef, table2NCDef);
+TideInfo tides(time_t epoch) {
+    if (!g_calculator || !g_calculatorRef) {
+        Serial.println("[Tides] No station loaded — call setStation() first");
+        return TideInfo();
+    }
 
+    tmElements_t tm;
+    breakTime(epoch, tm);
+    Serial.println("[Tides] Calculating " +
+                   String(tm.Day) + "/" + String(tm.Month) + "/" +
+                   String(tmYearToCalendar(tm.Year)));
 
-TideInfo run_calculations(time_t epoch) {
+    astroCalculations(epoch);
+    int utcOffset = getFranceTimezoneOffset(epoch);
 
-  tmElements_t tm;
-  breakTime(epoch, tm);
+    g_calculator->equi_tide();
+    TideInfo result = g_calculator->findTidesAndTimes(utcOffset);
 
-  Serial.println("Calculating Astronomical references for date: " + String(tm.Day) + "/" + String(tm.Month) + "/" + String(tmYearToCalendar(tm.Year)));
-  astroCalculations(epoch);
-  int utcOffsetMinutes = getFranceTimezoneOffset(epoch);
-  Serial.println("Calculating tide times for Belle-ile...");
-  calculator.equi_tide();
-  TideInfo tides = calculator.findTidesAndTimes(utcOffsetMinutes);
-  Serial.println("Calculating Coefficients (based on Brest Harmonics)...");
-  calculatorRef.equi_tide();
-  TideInfo tides_ref = calculatorRef.findTidesAndTimes(utcOffsetMinutes);
+    g_calculatorRef->equi_tide();
+    TideInfo refResult = g_calculatorRef->findTidesAndTimes(utcOffset, g_coeffDivisor);
 
-  tides.morningCoefficient = tides_ref.morningCoefficient;
-  tides.afternoonCoefficient = tides_ref.afternoonCoefficient;
-  tides.epoch = epoch;
-  return tides;
+    result.morningCoefficient   = refResult.morningCoefficient;
+    result.afternoonCoefficient = refResult.afternoonCoefficient;
+    result.epoch = epoch;
+    return result;
+}
+
+TideInfo tides(int year, int month, int day) {
+    tmElements_t tm = {};
+    tm.Year  = CalendarYrToTm(year);
+    tm.Month = month;
+    tm.Day   = day;
+    tm.Hour  = 12;  // noon UTC — safe midpoint
+    return tides(makeTime(tm));
 }

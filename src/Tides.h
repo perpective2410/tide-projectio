@@ -1,64 +1,63 @@
+#pragma once
 #include <Arduino.h>
 #include <TimeLib.h>
-
-double reduc360(double angle);
-int    getFranceTimezoneOffset(time_t epoch);
+#include "TideHarmonics.h"
 
 struct TideEvent {
     double amplitude;
-    float time;
-    bool isPeak; // true if peak, false if trough
+    float  time;     // local time, decimal hours (e.g. 14.5 = 14h30)
+    bool   isPeak;   // true = high tide, false = low tide
 };
 
 struct TideInfo {
-    TideEvent events[4]; // Up to 2 peaks and 2 troughs
-    int numEvents;
-    int morningCoefficient;
-    int afternoonCoefficient;
+    TideEvent events[4];   // up to 2 peaks + 2 troughs per day
+    int    numEvents;
+    int    morningCoefficient;    // French tide coefficient (Brest-based), morning range
+    int    afternoonCoefficient;  // French tide coefficient, afternoon range
     time_t epoch;
 
     float getEventTime(int index) const {
-        if (index >= 0 && index < numEvents) {
-            return events[index].time;
-        }
-        return 0; // Invalid index
+        if (index >= 0 && index < numEvents) return events[index].time;
+        return 0.0f;
     }
 
     TideInfo() : numEvents(0), morningCoefficient(0), afternoonCoefficient(0), epoch(-1) {
-        for (int i = 0; i < 4; i++) {
-            events[i] = TideEvent();
-        }
+        for (int i = 0; i < 4; i++) events[i] = TideEvent();
     }
 };
 
 class TideStack {
-    private:
-        int stackSize;
-        TideInfo* stack;
-        int count;
-    
-    public:
-        TideStack(int daysToCalculate);
-        ~TideStack();
-    
-        void push(TideInfo& tideInfo);
-    
-        // Getter methods for printing
-        TideInfo* getStack();
-        int getCount();
-    
-        // Method to get the top index
-        int getTop();
-    
-        // Method to peek at an index
-        TideInfo& peek(int index);
-    };
-    
-TideInfo run_calculations(time_t epoch);
+private:
+    int       stackSize;
+    TideInfo* stack;
+    int       count;
 
-struct Table2NC {
-    String name;
-    double T, s, ls, p, p1, deg, speed;
-    double (*u_func)();
-    double (*f_func)();
+public:
+    TideStack(int daysToCalculate);
+    ~TideStack();
+
+    void      push(TideInfo& tideInfo);
+    TideInfo* getStack();
+    int       getCount();
+    int       getTop();
+    TideInfo& peek(int index);
 };
+
+// ── Public API ──────────────────────────────────────────────────────────────
+
+// Call once in setup() — mounts LittleFS
+bool tidesBegin();
+
+// Load a station from /stations/<filename> stored in LittleFS.
+// Brest reference is loaded automatically for coefficient calculation.
+// Example: setStation("Le Palais.tide")
+bool setStation(const char* filename);
+
+// Calculate tides for the calendar day that contains 'epoch' (UTC).
+TideInfo tides(time_t epoch);
+
+// Convenience overload — builds a noon-UTC epoch for the given date.
+TideInfo tides(int year, int month, int day);
+
+// France timezone offset in minutes (+60 winter / +120 summer DST)
+int getFranceTimezoneOffset(time_t epoch);
