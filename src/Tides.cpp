@@ -240,78 +240,6 @@ double fL2() {
     return sqrt(pow(fsinL2(), 2) + pow(fcosL2(), 2));
 }
 
-double fsinM1B() {
-    return (2.783 * sin(radians(2 * p)) + (0.558 * radians((2 * p) - N))) + (0.184 * sin(radians(N)));
-}
-
-double fcosM1B() {
-    return (1.0 + (2.783 * cos(radians(2 * p)))) + (0.558 * sin(radians((2 * p) - N))) + (0.184 * sin(radians(N)));
-}
-
-double uM1B() {
-    return degrees(atan2(fsinM1B(), fcosM1B()));
-}
-
-double fM1B() {
-    return sqrt(pow(fsinM1B(), 2) + pow(fcosM1B(), 2));
-}
-
-double fsinM1A() {
-    return -(0.3593 * sin(radians(2 * p))) - (0.2 * sin(radians(N))) - (0.066 * sin(radians((2 * p) - N)));
-}
-
-double fcosM1A() {
-    return 1.0 + (0.3593 * cos(radians(2 * p))) + (0.2 * cos(radians(N))) + (0.066 * cos(radians((2 * p) - N)));
-}
-
-double uM1A() {
-    return degrees(atan2(fsinM1A(), fcosM1A()));
-}
-
-double fM1A() {
-    return sqrt(pow(fsinM1A(), 2) + pow(fcosM1A(), 2));
-}
-
-double fsinalpha2() {
-    return -(0.0446 * sin(radians(p - p1)));
-}
-
-double fcosalpha2() {
-    return 1.0 - (0.0446 * cos(radians(p - p1)));
-}
-
-double ualpha2() {
-    return degrees(atan2(fsinalpha2(), fcosalpha2()));
-}
-
-double falpha2() {
-    return sqrt(pow(fsinalpha2(), 2) + pow(fcosalpha2(), 2));
-}
-
-double fsindelta2() {
-    return 0.477 * sin(radians(N));
-}
-
-double fcosdelta2() {
-    return 1.0 - (0.477 * cos(radians(N)));
-}
-
-double udelta2() {
-    return degrees(atan2(fsindelta2(), fcosdelta2()));
-}
-
-double fdelta2() {
-    return sqrt(pow(fsindelta2(), 2) + pow(fcosdelta2(), 2));
-}
-
-double uE2() {
-    return degrees(atan2(-0.439 * sin(radians(N)), 1.0 + (0.439 * cos(radians(N)))));
-}
-
-double fE2() {
-    return sqrt(pow(-0.439 * sin(radians(N)), 2) + pow(1.0 + (0.439 * cos(radians(N))), 2));
-}
-
 double uK1pJ1() {
     return uK1() + uJ1();
 }
@@ -440,29 +368,6 @@ double f3M2K1() {
     return pow(fM2(), 3) * fK1();
 }
 
-double uMS3() {
-    return uM3();
-}
-
-double fMS3() {
-    return fM3();
-}
-
-double uMS5() {
-    return -5 * (1.07 * sin(radians(N)));
-}
-
-double fMS5() {
-    return pow(sqrt(fM2()), 5);
-}
-
-double uMS7() {
-    return -7 * (1.07 * sin(radians(N)));
-}
-
-double fMS7() {
-    return pow(sqrt(fM2()), 7);
-}
 
 double u2M2mO1() {
     return 2 * uM2() - uO1();
@@ -624,13 +529,6 @@ double u6M2mK2() {
     return 6 * uM2() - uK2();
 }
 
-double u2SM() {
-    return -2 * uM2();
-}
-
-double f2SM() {
-    return pow(fM2(), 2);
-}
 
 
 TideStack::TideStack(int daysToCalculate)
@@ -723,28 +621,6 @@ void astroCalculations(time_t epoch) {
     //Serial.print(", p1: "); Serial.print(p1,10);
     //Serial.print(", N: "); Serial.println(N,10);
 }
-
-String convertDecimalTimeToHM(float decimalTime) {
-  if (decimalTime > 24) {
-    return "-";
-  }
-  
-  if (decimalTime == 0) {
-    return " ";
-  }
-
-  int hours = (int)decimalTime;  // Extract the integer part for hours
-  int minutes = (int)((decimalTime - hours) * 60);  // Calculate the remaining minutes
-
-  // Create a formatted string for hours and minutes
-  String timeString = String(hours) + "h";
-  if (minutes < 10) {
-    timeString += "0";  // Add leading zero for single-digit minutes
-  }
-  timeString += String(minutes);
-  return timeString;
-}
-
 
 // Custom hash function for String
 struct StringHash {
@@ -1212,51 +1088,3 @@ TideInfo run_calculations(time_t epoch) {
   tides.epoch = epoch;
   return tides;
 }
-
-
-
-//void loop() {
-//    
-//    static unsigned long lastUpdate = 0;
-//    static const unsigned long updateInterval = 1000; // Update every second for testing
-//    unsigned long currentMillis = millis();
-//
-//    if (currentMillis - lastUpdate >= updateInterval) {
-//        lastUpdate = currentMillis;
-//        if (!useNtpTime) {
-//            // Update the currentEpoch based on the elapsed time
-//            currentEpoch += (currentMillis - lastMillis) / 1000;
-//            lastMillis = currentMillis;
-//        }
-//        int currentDay = day();
-//        if (currentDay != lastDay) {
-//            Serial.println("Midnight transition detected! Updating tide data...");
-//            lastDay = currentDay;
-//            time_t newEpoch = currentEpoch + (daysToCalculate - 1) * SECS_PER_DAY;
-//            run_calculations(newEpoch);
-//        }
-//    }
-//        
-//    for (int i = 0; i <= tideStack.getTop(); i++) {
-//      const TideInfo& tideInfo = tideStack.peek(i);
-//      Serial.print(daysOfWeek[weekday(tideInfo.epoch) - 1]);
-//      Serial.println(" " + String(epochToDate(tideInfo.epoch).day) + "/" + String(epochToDate(tideInfo.epoch).month) + "/" + String(epochToDate(tideInfo.epoch).year));
-//      for (int j = 0; j < tideInfo.numEvents; ++j) {
-//        const TideEvent& event = tideInfo.events[j];
-//        Serial.print(event.isPeak ? "Marée Haute: " : "Marée Basse: ");
-//        Serial.print(convertDecimalTimeToHM(event.time));
-//        Serial.print(" (");
-//        Serial.print(event.amplitude);
-//        Serial.print("m");
-//        Serial.println(")");
-//      }
-//      Serial.print("Coefficient matin: ");
-//      Serial.println(tideInfo.morningCoefficient);
-//      Serial.print("Coefficient aprem: ");
-//      Serial.println(tideInfo.afternoonCoefficient);
-//      Serial.println("---");
-//    }
-//  
-//    delay(1000);  // Check every second
-//}
-

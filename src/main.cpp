@@ -1,10 +1,7 @@
-// Créé le 07/02/25
-
-//------------- Library and settings --------------
+// Station météo-marée de Bangor — Créé le 07/02/25, réécrit pour maintenabilité
 
 #include <ArduinoOTA.h>
 #include <WiFi.h>
-//#include <Wire.h>
 #include <OneWire.h>
 #include "ThingSpeak.h"
 #include <DallasTemperature.h>
@@ -13,626 +10,376 @@
 #include <SolarPosition.h>
 #include <NTPClient.h>
 #include <Tides.h>
-
-unsigned long myChannelNumber = 1275039;
-const char* myWriteAPIKey = "D9S73UER1TAUP4OL";
-
-constexpr int daysToCalculate = 4;
-WiFiClient client;
-TideStack tideStack(daysToCalculate);
-TideInfo tideInfo;
-
-
-//--- SETTINGS ------------------------------------------------
-//const char* ssid     = "SFR_1198";    // Your ssid
-const char* ssid = "SFR_5360";
-const char* password = "0123456789";  // Your Password
-
-//const char* ssid = "Wokwi-GUEST";  // Your ssid
-//const char* password = "";  // Your Password
-
-
-WiFiServer server(8002);              // Default Virtuino Server port
-
-//-------------VirtuinoCM  Library and settings --------------
-
 #include "VirtuinoCM.h"
-VirtuinoCM virtuino;
-#define V_memory_count 250  // the size of V memory. You can change it to a number <=255)
-float V[V_memory_count];    // This array is synchronized with Virtuino V memory. You can change the type to int, long etc.
-String Text_1 = "";         // This text variable is synchronized with the Virtuino pin Text_1
-String Text_2 = "";
-String Text_3 = "";
-String Text_4 = "";
-String Text_5 = "";
-String Text_6 = "";
-String Text_7 = "";
-String Text_8 = "";
-String Text_9 = "";
-String Text_10 = "";
-String Text_11 = "";
-String Text_12 = "";
-String Text_13 = "";
-String Text_14 = "";
-String Text_15 = "";
-String Text_16 = "";
-String Text_17 = "";
-String Text_18 = "";
-String Text_19 = "";
-String Text_20 = "";
-String Text_21 = "";
-String Text_22 = "";
 
-#define ONE_WIRE_BUS 4
+// ─── Configuration ────────────────────────────────────────────────────────────
 
-WiFiUDP ntpUDP;
-NTPClient timeClient(ntpUDP, "pool.ntp.org", 0, 86400000);  // UTC time with 24h refresh
-OneWire oneWire(ONE_WIRE_BUS);                              // R à ajouter
+const char* WIFI_SSID     = "Wokwi-GUEST";
+const char* WIFI_PASSWORD = "";
+
+const float LATITUDE  =  47.32275f;   // Bangor, Belle-Île-en-Mer
+const float LONGITUDE =  -3.16908f;
+
+const unsigned long THINGSPEAK_CHANNEL_ID = 1275039;
+const char*         THINGSPEAK_WRITE_KEY  = "D9S73UER1TAUP4O";
+
+constexpr int  DAYS_FORECAST        = 4;
+constexpr int  VIRTUINO_PORT        = 8002;
+constexpr int  ONEWIRE_PIN          = 4;
+constexpr long SENSOR_PERIOD_MS     = 10000;   // lecture capteurs toutes les 10s
+constexpr long THINGSPEAK_PERIOD_MS = 60000;   // envoi ThingSpeak toutes les 60s
+constexpr int  TEMP_BUFFER_SIZE     = 5;       // taille du buffer de moyenne glissante
+
+// Adresses des sondes DS18B20 sur le bus OneWire
+DeviceAddress SENSOR_OUT = { 0x28, 0xFF, 0x63, 0x44, 0x81, 0x16, 0x04, 0x17 };
+DeviceAddress SENSOR_IN  = { 0x28, 0xFF, 0xD7, 0x1B, 0x84, 0x16, 0x04, 0x30 };
+
+const char* JOURS[] = {
+    "Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"
+};
+
+// ─── Mémoire Virtuino ─────────────────────────────────────────────────────────
+// V[1]   = température extérieure (°C)
+// V[2]   = température intérieure (°C)
+// V[3]   = azimut solaire courant (360 si sous l'horizon)
+// V[4]   = élévation solaire courante (°)
+// V[5]   = azimut lever du soleil (°)
+// V[6]   = azimut coucher du soleil (°)
+// V[7..22]   = amplitudes marées (4 jours × 4 événements)
+// V[107..122] = coefficients de marée
+// V[200..204] = flèches marée basse
+// V[210..214] = flèches marée haute
+// Text[1] = lever du soleil     Text[2] = coucher du soleil
+// Text[3] = midi solaire / élévation
+// Text[4..6]  = noms J+1, J+2, J+3
+// Text[7..22] = heures de marée (4 jours × 4 événements)
+
+#define V_COUNT 250
+float  V[V_COUNT];
+String Text[23];  // index 1..22 ; index 0 inutilisé
+
+// ─── Matériel ─────────────────────────────────────────────────────────────────
+
+WiFiClient        wifiClient;
+WiFiServer        server(VIRTUINO_PORT);
+WiFiUDP           ntpUDP;
+NTPClient         timeClient(ntpUDP, "pool.ntp.org", 0, 86400000);
+OneWire           oneWire(ONEWIRE_PIN);
 DallasTemperature sensors(&oneWire);
-DeviceAddress sensor_in = { 0x28, 0xFF, 0xD7, 0x1B, 0x84, 0x16, 0x04, 0x30 };   //sonde intérieure
-DeviceAddress sensor_out = { 0x28, 0xFF, 0x63, 0x44, 0x81, 0x16, 0x04, 0x17 };  //sonde extérieure
-TimeLord myLord;
+TimeLord          myLord;
+SolarPosition     solarBangor(LATITUDE, LONGITUDE);
+VirtuinoCM        virtuino;
+TideStack         tideStack(DAYS_FORECAST);
 
+// ─── Moyenne glissante températures ──────────────────────────────────────────
 
-//int decal_TU = 1;                // Heure hiver
-int decal_TU = 2;  // Heure été
-int timeZone = decal_TU;
-int LONGITUDE = -3.16908;
-int LATITUDE = 47.32275;
+float outBuf[TEMP_BUFFER_SIZE] = {};
+float inBuf[TEMP_BUFFER_SIZE]  = {};
+float outSum = 0, inSum = 0;
+float avgOut = 0, avgIn  = 0;
+int   tempIdx = 0;
 
-const int numReadings = 5;
-int indice = 0;
+// ─── Chronomètres ─────────────────────────────────────────────────────────────
 
-float outTemp_reading[numReadings];
-float total_outTemp_reading;
-float average_outTemp = 0;
+unsigned long prevSensor     = 0;
+unsigned long prevThingSpeak = 0;
+int lastDay = -1;
 
-float inTemp_reading[numReadings];
-float total_inTemp_reading;
-float average_inTemp = 0;
+// ─── Fuseau horaire (mis à jour automatiquement, été/hiver) ───────────────────
 
-String SunRise_time, SunSet_time, SunNoon_time, Noon, h, m;
+int utcOffsetMin = 60;  // 60 = heure d'hiver, 120 = heure d'été
 
-const char* joursSemaine[] = { "Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi" };
-const char* joursSuivants[3];
+// ─── Virtuino : callbacks ─────────────────────────────────────────────────────
 
-SolarPosition Bangor(LATITUDE, LONGITUDE);  // Bangor
-int elevation;
-int azimut;
+void onReceived(char type, uint8_t idx, String val) {
+    if      (type == 'V' && idx < V_COUNT)           V[idx]   = val.toFloat();
+    else if (type == 'T' && idx >= 1 && idx <= 22)   Text[idx] = val;
+}
 
-unsigned long currentMillis;       // chrono
-unsigned long previousMillis = 0;  // last updated
-const long interval = 10000;       // interval between update (10s)
+String onRequested(char type, uint8_t idx) {
+    if (type == 'V' && idx < V_COUNT)          return String(V[idx]);
+    if (type == 'T' && idx >= 1 && idx <= 22)  return Text[idx];
+    return "";
+}
 
-int h_TU, SunSet_h, SunSet_m, SunSet_mn, azimut_Set, SunRise_h, SunRise_m, SunRise_mn, SunNoon_h, SunNoon_mn, elev_Noon, azimut_Rise, PresentTime_mn;
-
-bool PassageMaJ = false;
-
-unsigned long currentEpoch;
-unsigned long lastMillis;
-int lastDay;
-bool useNtpTime = true;  // Set this to true to use NTP time, false to use the manually set time
-
-//============================================================== virtuinoRun
 void virtuinoRun() {
-  WiFiClient client = server.available();
-  if (client) {
-    virtuino.readBuffer = "";  // clear Virtuino input buffer. The inputBuffer stores the incoming characters
-    if (client.connected()) {
-      while (client.available() > 0) {
-        char c = client.read();    // read the incoming data
-        virtuino.readBuffer += c;  // add the incoming character to Virtuino input buffer
-      }
-      String* response = virtuino.getResponse();  // get the text that has to be sent to Virtuino as reply. The library will check the inptuBuffer and it will create the response text
-      if (response->length() > 0) {
-        client.print(*response);
-      }
-      client.stop();
+    WiFiClient cl = server.available();
+    if (!cl) return;
+    virtuino.readBuffer = "";
+    if (cl.connected()) {
+        while (cl.available()) virtuino.readBuffer += (char)cl.read();
+        String* resp = virtuino.getResponse();
+        if (resp->length() > 0) cl.print(*resp);
+        cl.stop();
     }
-  }
 }
 
-
-//============================================================== vDelay
-void vDelay(int delayInMillis) {
-  long t = millis() + delayInMillis;
-  while (millis() < t) virtuinoRun();
+// Attente non-bloquante : continue de servir Virtuino pendant la pause.
+void vDelay(int ms) {
+    long t = millis() + ms;
+    while (millis() < t) virtuinoRun();
 }
 
+// ─── Utilitaires ──────────────────────────────────────────────────────────────
 
-
-void onReceived(char variableType, uint8_t variableIndex, String valueAsText) {
-  if (variableType == 'V') {
-    float value = valueAsText.toFloat();                           // convert the value to float. The valueAsText have to be numerical
-    if (variableIndex < V_memory_count) V[variableIndex] = value;  // copy the received value to arduino V memory array
-  } else if (variableType == 'T') {
-    if (variableIndex == 1) Text_1 = valueAsText;  // Store the text to the text variable Text_1
-    else if (variableIndex == 2) Text_2 = valueAsText;
-    else if (variableIndex == 3) Text_3 = valueAsText;
-    else if (variableIndex == 4) Text_4 = valueAsText;
-    else if (variableIndex == 5) Text_5 = valueAsText;
-    else if (variableIndex == 6) Text_6 = valueAsText;
-    else if (variableIndex == 7) Text_7 = valueAsText;
-    else if (variableIndex == 8) Text_8 = valueAsText;
-    else if (variableIndex == 9) Text_9 = valueAsText;
-    else if (variableIndex == 10) Text_10 = valueAsText;
-    else if (variableIndex == 11) Text_11 = valueAsText;
-    else if (variableIndex == 12) Text_12 = valueAsText;
-    else if (variableIndex == 13) Text_13 = valueAsText;
-    else if (variableIndex == 14) Text_14 = valueAsText;
-    else if (variableIndex == 15) Text_15 = valueAsText;
-    else if (variableIndex == 16) Text_16 = valueAsText;
-    else if (variableIndex == 17) Text_17 = valueAsText;
-    else if (variableIndex == 18) Text_18 = valueAsText;
-    else if (variableIndex == 19) Text_19 = valueAsText;
-    else if (variableIndex == 20) Text_20 = valueAsText;
-    else if (variableIndex == 21) Text_21 = valueAsText;
-    else if (variableIndex == 22) Text_22 = valueAsText;
-  }
+// Formate un temps décimal (ex : 10.5) en "10h30". Retourne " " pour zéro.
+String formatHM(float h) {
+    if (fabsf(h) < 0.0001f) return " ";
+    while (h >= 24.0f) h -= 24.0f;
+    while (h <   0.0f) h += 24.0f;
+    int hh = (int)h;
+    int mm = (int)((h - hh) * 60.0f + 0.5f);
+    if (mm == 60) { hh++; mm = 0; }
+    char buf[8];
+    snprintf(buf, sizeof(buf), "%02dh%02d", hh, mm);
+    return String(buf);
 }
 
-
-String onRequested(char variableType, uint8_t variableIndex) {
-  if (variableType == 'V') {
-    if (variableIndex < V_memory_count) return String(V[variableIndex]);  // return the value of the arduino V memory array
-  } else if (variableType == 'T') {
-    if (variableIndex == 1) return Text_1;
-    else if (variableIndex == 2) return Text_2;
-    else if (variableIndex == 3) return Text_3;
-    else if (variableIndex == 4) return Text_4;
-    else if (variableIndex == 5) return Text_5;
-    else if (variableIndex == 6) return Text_6;
-    else if (variableIndex == 7) return Text_7;
-    else if (variableIndex == 8) return Text_8;
-    else if (variableIndex == 9) return Text_9;
-    else if (variableIndex == 10) return Text_10;
-    else if (variableIndex == 11) return Text_11;
-    else if (variableIndex == 12) return Text_12;
-    else if (variableIndex == 13) return Text_13;
-    else if (variableIndex == 14) return Text_14;
-    else if (variableIndex == 15) return Text_15;
-    else if (variableIndex == 16) return Text_16;
-    else if (variableIndex == 17) return Text_17;
-    else if (variableIndex == 18) return Text_18;
-    else if (variableIndex == 19) return Text_19;
-    else if (variableIndex == 20) return Text_20;
-    else if (variableIndex == 21) return Text_21;
-    else if (variableIndex == 22) return Text_22;
-  }
-
-  return "";
+// Heure locale courante en heures décimales (hour() est UTC car setTime() = UTC).
+float localHourNow() {
+    float h = hour() + (utcOffsetMin / 60.0f) + (minute() / 60.0f) + (second() / 3600.0f);
+    if (h >= 24.0f) h -= 24.0f;
+    return h;
 }
 
+// ─── Soleil ───────────────────────────────────────────────────────────────────
 
-//************** Calcul heure lever - heure coucher soleil ***************************
+void updateSolar() {
+    int offsetH = utcOffsetMin / 60;
 
-void Lever_Coucher() {
-  byte Today[] = { 0, 0, 12, day(), month(), year() };
+    // TimeLord travaille en heure locale et retourne l'heure locale.
+    byte date[] = { 0, 0, 12, (byte)day(), (byte)month(), (byte)year() };
 
-  myLord.SunRise(Today);
-  h = Today[tl_hour];
-  m = Today[tl_minute];
-  if (m.toInt() < 10) {
-    SunRise_time = "Lever du soleil : " + h + "h0" + m;
-  } else {
-    SunRise_time = "Lever du soleil : " + h + "h" + m;
-  }
-  Text_1 = SunRise_time;
-  SunRise_h = h.toInt();
-  SunRise_m = m.toInt();
-  SunRise_mn = h.toInt() * 60 + m.toInt();
+    myLord.SunRise(date);
+    int rH = date[tl_hour], rM = date[tl_minute];
+    char buf[10];
+    snprintf(buf, sizeof(buf), "%dh%02d", rH, rM);
+    Text[1] = "Lever du soleil : " + String(buf);
 
-  myLord.SunSet(Today);
-  h = Today[tl_hour];
-  m = Today[tl_minute];
-  if (m.toInt() < 10) {
-    SunSet_time = "Coucher du soleil : " + h + "h0" + m;
-  } else {
-    SunSet_time = "Coucher du soleil : " + h + "h" + m;
-  }
-  Text_2 = SunSet_time;
-  SunSet_h = h.toInt();
-  SunSet_m = m.toInt();
-  SunSet_mn = h.toInt() * 60 + m.toInt();
+    myLord.SunSet(date);
+    int sH = date[tl_hour], sM = date[tl_minute];
+    snprintf(buf, sizeof(buf), "%dh%02d", sH, sM);
+    Text[2] = "Coucher du soleil : " + String(buf);
 
-  SunNoon_mn = round((SunRise_mn + SunSet_mn) / 2.);  //Affichage heure midi soleil
-  SunNoon_h = SunNoon_mn / 60;
-  SunNoon_mn = SunNoon_mn - SunNoon_h * 60;
+    // Midi solaire = milieu entre lever et coucher
+    int riseMin = rH * 60 + rM;
+    int setMin  = sH * 60 + sM;
+    int noonMin = (riseMin + setMin) / 2;
+    int nH = noonMin / 60, nM = noonMin % 60;
 
-  //************** Calcul azimut lever  ***********************************
+    // SolarPosition attend du temps UTC ; on soustrait le décalage horaire.
+    auto epochUTC = [&](int lh, int lm) -> time_t {
+        tmElements_t t = { 0, (byte)lm, (byte)(lh - offsetH), 0,
+                           (byte)day(), (byte)month(), (byte)CalendarYrToTm(year()) };
+        return makeTime(t);
+    };
 
-  tmElements_t someTimeLever = { 0, SunRise_m, SunRise_h - decal_TU, 0, day(), month(), CalendarYrToTm(year()) };
-  time_t someEpochTimeLever = makeTime(someTimeLever);
-  azimut_Rise = round(Bangor.getSolarAzimuth(someEpochTimeLever));
-  V[5] = azimut_Rise;
+    V[5] = roundf(solarBangor.getSolarAzimuth(epochUTC(rH, rM)));   // azimut lever
+    V[6] = roundf(solarBangor.getSolarAzimuth(epochUTC(sH, sM)));   // azimut coucher
 
-  //************** Calcul azimut coucher  ***********************************
-
-  tmElements_t someTimeCoucher = { 0, SunSet_m, SunSet_h - decal_TU, 0, day(), month(), CalendarYrToTm(year()) };
-  time_t someEpochTimeCoucher = makeTime(someTimeCoucher);
-
-  azimut_Set = round(Bangor.getSolarAzimuth(someEpochTimeCoucher));
-  V[6] = azimut_Set;
+    int elev = roundf(solarBangor.getSolarElevation(epochUTC(nH, nM)));
+    snprintf(buf, sizeof(buf), "%dh%02d", nH, nM);
+    Text[3] = String(buf) + " / " + String(elev);
 }
 
-//************** Calcul azimut - élévation midi  ***********************************
+// ─── Noms des jours suivants (J+1, J+2, J+3) ─────────────────────────────────
 
-void Elevation_Noon() {
-  if (SunNoon_mn < 10) {
-    SunNoon_time = String(SunNoon_h) + "h0" + String(SunNoon_mn) + " / ";
-  } else {
-    SunNoon_time = String(SunNoon_h) + "h" + String(SunNoon_mn) + " / ";
-  }
-  tmElements_t someTime = { 0, SunNoon_mn, SunNoon_h - decal_TU, 0, day(), month(), CalendarYrToTm(year()) };
-  time_t someEpochTime = makeTime(someTime);
-
-  elev_Noon = round(Bangor.getSolarElevation(someEpochTime));
-  Noon = SunNoon_time + elev_Noon;
-  Text_3 = Noon;
-}
-
-//************** 3 jours suivants  ***********************************
-
-void J_Semaine() {
-  int today = weekday();  // Stocke le jour actuel (1 = Dimanche, ..., 7 = Samedi)
-
-  for (int i = 0; i < 3; i++) {
-    int nextDay = today + (i + 1);                 // Ajoute 1, 2, 3 jours
-    if (nextDay > 7) nextDay -= 7;                 // Corrige dépassement de la semaine
-    joursSuivants[i] = joursSemaine[nextDay - 1];  // Stocke dans le tableau
-  }
-  Text_4 = joursSuivants[0];
-  Text_5 = joursSuivants[1];
-  Text_6 = joursSuivants[2];
-}
-
-//************** Fonction de conversion avec décalage horaire ***********************************
-
-String convertDecimalTimeToHM_WithOffset(float decimalTime, int offsetHours) {
-  const float epsilon = 0.0001;
-  if (fabs(decimalTime) < epsilon) {
-    return " ";
-  }
-  decimalTime += offsetHours;
-
-  // Gérer le passage de minuit
-  if (decimalTime >= 24.0) {
-    decimalTime -= 24.0;
-  } else if (decimalTime < 0.0) {
-    decimalTime += 24.0;
-  }
-
-  int hours = (int)decimalTime;
-  int minutes = (int)((decimalTime - hours) * 60);
-
-  String result = "";
-  if (hours < 10) result += "0";
-  result += String(hours);
-  result += "h";
-  if (minutes < 10) result += "0";
-  result += String(minutes);
-
-  return result;
-}
-
-//**************** Marées avec correction horaire ***************************************
-
-void Marees() {
-  for (int i = 0; i <= tideStack.getTop(); i++) {
-    const TideInfo& tideInfo = tideStack.peek(i);
-    Serial.println(joursSemaine[weekday(tideInfo.epoch) - 1]);
-
-    for (int j = 0; j < tideInfo.numEvents; ++j) {
-      const TideEvent& event = tideInfo.events[j];
-      Serial.print(event.isPeak ? "Marée Haute: " : "Marée Basse: ");
-      Serial.print(convertDecimalTimeToHM_WithOffset(event.time, 0));  // CHANGÉ : 0 au lieu de decal_TU
-      Serial.print(" (");
-      Serial.print(event.amplitude);
-      Serial.print("m");
-      Serial.println(")");
+void updateDayNames() {
+    int today = weekday();  // 1=Dimanche, 7=Samedi
+    for (int i = 0; i < 3; i++) {
+        // (today + i) % 7 donne l'indice 0-basé du jour suivant grâce au décalage
+        // introduit par l'encodage 1-basé de weekday().
+        Text[4 + i] = JOURS[(today + i) % 7];
     }
-    Serial.print("Coefficient matin: ");
-    Serial.println(tideInfo.morningCoefficient);
-    Serial.print("Coefficient aprem: ");
-    Serial.println(tideInfo.afternoonCoefficient);
-    Serial.println("---");
-  }
-
-  //**************** Jour J - TOUS CHANGÉS ***********************************************
-  V[7] = tideStack.peek(0).events[0].amplitude;
-  V[107] = tideStack.peek(0).morningCoefficient;
-  Text_7 = convertDecimalTimeToHM_WithOffset(tideStack.peek(0).getEventTime(0), 0);  // CHANGÉ
-
-  V[8] = tideStack.peek(0).events[1].amplitude;
-  V[108] = 0;
-  Text_8 = convertDecimalTimeToHM_WithOffset(tideStack.peek(0).getEventTime(1), 0);  // CHANGÉ
-
-  V[9] = tideStack.peek(0).events[2].amplitude;
-  V[109] = tideStack.peek(0).afternoonCoefficient;
-  Text_9 = convertDecimalTimeToHM_WithOffset(tideStack.peek(0).getEventTime(2), 0);  // CHANGÉ
-
-  V[10] = tideStack.peek(0).events[3].amplitude;
-  V[110] = 0;
-  Text_10 = convertDecimalTimeToHM_WithOffset(tideStack.peek(0).getEventTime(3), 0);
-
-
-
-
-  //**************** Jour J+1 - TOUS CHANGÉS ***********************************************
-  V[11] = tideStack.peek(1).events[0].amplitude;
-  V[111] = tideStack.peek(1).morningCoefficient;
-  Text_11 = convertDecimalTimeToHM_WithOffset(tideStack.peek(1).getEventTime(0), 0);  // CHANGÉ
-
-  V[12] = tideStack.peek(1).events[1].amplitude;
-  V[112] = 0;
-  Text_12 = convertDecimalTimeToHM_WithOffset(tideStack.peek(1).getEventTime(1), 0);  // CHANGÉ
-
-  V[13] = tideStack.peek(1).events[2].amplitude;
-  V[113] = tideStack.peek(1).afternoonCoefficient;
-  Text_13 = convertDecimalTimeToHM_WithOffset(tideStack.peek(1).getEventTime(2), 0);  // CHANGÉ
-
-  V[14] = tideStack.peek(1).events[3].amplitude;
-  V[114] = 0;
-  Text_14 = convertDecimalTimeToHM_WithOffset(tideStack.peek(1).getEventTime(3), 0);  // CHANGÉ
-
-  //**************** Jour J+2 - TOUS CHANGÉS ***********************************************
-  V[15] = tideStack.peek(2).events[0].amplitude;
-  V[115] = tideStack.peek(2).morningCoefficient;
-  Text_15 = convertDecimalTimeToHM_WithOffset(tideStack.peek(2).getEventTime(0), 0);  // CHANGÉ
-
-  V[16] = tideStack.peek(2).events[1].amplitude;
-  V[116] = 0;
-  Text_16 = convertDecimalTimeToHM_WithOffset(tideStack.peek(2).getEventTime(1), 0);  // CHANGÉ
-
-  V[17] = tideStack.peek(2).events[2].amplitude;
-  V[117] = tideStack.peek(2).afternoonCoefficient;
-  Text_17 = convertDecimalTimeToHM_WithOffset(tideStack.peek(2).getEventTime(2), 0);  // CHANGÉ
-
-  V[18] = tideStack.peek(2).events[3].amplitude;
-  V[118] = 0;
-  Text_18 = convertDecimalTimeToHM_WithOffset(tideStack.peek(2).getEventTime(3), 0);  // CHANGÉ
-
-  //**************** Jour J+3 - TOUS CHANGÉS ***********************************************
-  V[19] = tideStack.peek(3).events[0].amplitude;
-  V[119] = tideStack.peek(3).morningCoefficient;
-  Text_19 = convertDecimalTimeToHM_WithOffset(tideStack.peek(3).getEventTime(0), 0);  // CHANGÉ
-
-  V[20] = tideStack.peek(3).events[1].amplitude;
-  V[120] = 0;
-  Text_20 = convertDecimalTimeToHM_WithOffset(tideStack.peek(3).getEventTime(1), 0);  // CHANGÉ
-
-  V[21] = tideStack.peek(3).events[2].amplitude;
-  V[121] = tideStack.peek(3).afternoonCoefficient;
-  Text_21 = convertDecimalTimeToHM_WithOffset(tideStack.peek(3).getEventTime(2), 0);  // CHANGÉ
-
-  V[22] = tideStack.peek(3).events[3].amplitude;
-  V[122] = 0;
-  Text_22 = convertDecimalTimeToHM_WithOffset(tideStack.peek(3).getEventTime(3), 0);  // CHANGÉ
-  // Print all Text_7 to Text_22 values (which are set using convertDecimalTimeToHM_WithOffset)
-
-}
-//************** M à J données journalières ********************************************
-
-void MaJ() {
-  Lever_Coucher();
-  Elevation_Noon();
-  J_Semaine();
-  Marees();
 }
 
-//**************************************************************************************
+// ─── Marées ───────────────────────────────────────────────────────────────────
+// Mapping Virtuino :
+//   V[7  + d*4 + e] = amplitude (m)         pour le jour d (0..3), événement e (0..3)
+//   Text[7 + d*4 + e] = heure formatée       même indices
+//   V[107 + d*4 + 0] = coefficient matin
+//   V[107 + d*4 + 2] = coefficient après-midi
+//   V[107 + d*4 + 1] = V[107 + d*4 + 3] = 0
+
+void updateTides() {
+    for (int d = 0; d < DAYS_FORECAST; d++) {
+        const TideInfo& ti = tideStack.peek(d);
+
+        Serial.print(JOURS[weekday(ti.epoch) - 1]);
+        Serial.print(" — coef matin: "); Serial.print(ti.morningCoefficient);
+        Serial.print("  aprèm: ");       Serial.println(ti.afternoonCoefficient);
+
+        for (int e = 0; e < 4; e++) {
+            int base = 7 + d * 4 + e;
+            V[base]    = ti.events[e].amplitude;
+            Text[base] = formatHM(ti.getEventTime(e));
+
+            int coefBase = 107 + d * 4 + e;
+            if      (e == 0) V[coefBase] = ti.morningCoefficient;
+            else if (e == 2) V[coefBase] = ti.afternoonCoefficient;
+            else             V[coefBase] = 0;
+
+            Serial.print(ti.events[e].isPeak ? "  HM " : "  BM ");
+            Serial.print(Text[base]);
+            Serial.print("  "); Serial.print(ti.events[e].amplitude, 2);
+            Serial.println("m");
+        }
+    }
+}
+
+// ─── Flèches : prochain événement de marée ────────────────────────────────────
+// V[200+i] = 1 → flèche marée basse à l'événement i du jour J
+// V[210+i] = 1 → flèche marée haute à l'événement i du jour J
+// V[204] / V[214] = premier événement du lendemain (débordement de la journée)
+
+void updateArrows() {
+    float now = localHourNow();
+
+    for (int i = 0; i <= 4; i++) { V[200 + i] = 0; V[210 + i] = 0; }
+
+    const TideInfo& today    = tideStack.peek(0);
+    const TideInfo& tomorrow = tideStack.peek(1);
+
+    for (int i = 0; i < 4; i++) {
+        float t = today.getEventTime(i);
+        if (t > 0.0f && t > now) {
+            (today.events[i].isPeak ? V[210 + i] : V[200 + i]) = 1;
+            return;
+        }
+    }
+
+    // Plus d'événement aujourd'hui → premier événement de demain (slot 4)
+    if (tomorrow.events[0].time >= 0) {
+        (tomorrow.events[0].isPeak ? V[214] : V[204]) = 1;
+    }
+}
+
+// ─── Mise à jour quotidienne ──────────────────────────────────────────────────
+
+void dailyUpdate() {
+    timeClient.update();
+    utcOffsetMin = getFranceTimezoneOffset(timeClient.getEpochTime());
+    myLord.TimeZone(utcOffsetMin);
+    updateSolar();
+    updateDayNames();
+    updateTides();
+}
+
+// ─── setup ────────────────────────────────────────────────────────────────────
 
 void setup() {
-  Serial.begin(9600);
-  
-  while (!Serial);
-  if (strlen(password) > 0) {
-    WiFi.begin(ssid, password);
-  } else {
-    WiFi.begin(ssid);
-  }
-  //WiFi.setMinSecurity(WIFI_AUTH_WPA_PSK);  // Set minimum security to WPA2
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
-  }
-  Serial.println("Connected");
-  ArduinoOTA.begin();
-  timeClient.begin();
-  if (useNtpTime) {
+    Serial.begin(9600);
+    while (!Serial);
+
+    // Connexion WiFi
+    if (strlen(WIFI_PASSWORD) > 0) WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+    else                            WiFi.begin(WIFI_SSID);
+    while (WiFi.status() != WL_CONNECTED) { delay(500); Serial.print('.'); }
+    Serial.println("\nWiFi connecté : " + WiFi.localIP().toString());
+
+    ArduinoOTA.begin();
+
+    // Synchronisation NTP (heure UTC)
+    timeClient.begin();
     timeClient.update();
-    currentEpoch = timeClient.getEpochTime();
-  } else {
-    currentEpoch = 1739577500;  // Manually set epoch time for my tests (to test midnight transition)
-  }
-  setTime(currentEpoch);
-  lastMillis = millis();
-  lastDay = day();
+    time_t epoch = timeClient.getEpochTime();
+    setTime(epoch);
+    lastDay = day();
 
-  for (int i = 0; i < daysToCalculate; i++) {
-    time_t futureEpoch = currentEpoch + (i * SECS_PER_DAY);  // Add i days in seconds
-    tideInfo = run_calculations(futureEpoch);
-    tideStack.push(tideInfo);
-  }
+    // Fuseau horaire (gestion automatique été/hiver)
+    utcOffsetMin = getFranceTimezoneOffset(epoch);
+    myLord.TimeZone(utcOffsetMin);
+    myLord.Position(LATITUDE, LONGITUDE);
 
-  server.begin();
+    // Pré-calcul des marées sur DAYS_FORECAST jours
+    for (int i = 0; i < DAYS_FORECAST; i++) {
+        TideInfo ti = run_calculations(epoch + (time_t)i * SECS_PER_DAY);
+        tideStack.push(ti);
+    }
 
-  // Initialisation Virtuino
-  virtuino.begin(onReceived, onRequested, 256);
+    // Virtuino & serveur TCP
+    server.begin();
+    virtuino.begin(onReceived, onRequested, 256);
 
-  // Initialisation capteurs OneWire
-  sensors.begin();
-  vDelay(500);
-  sensors.setResolution(sensor_in, 10);
-  sensors.setResolution(sensor_out, 10);
+    // Sondes de température
+    sensors.begin();
+    vDelay(500);
+    sensors.setResolution(SENSOR_IN,  10);
+    sensors.setResolution(SENSOR_OUT, 10);
 
-  // Initialisation Thingspeak
-  ThingSpeak.begin(client);
+    // ThingSpeak
+    ThingSpeak.begin(wifiClient);
 
-  // Configurations supplémentaires
-  myLord.TimeZone(decal_TU * 60);
-  myLord.Position(LATITUDE, LONGITUDE);
-
-  // Initialisation des tableaux
-  for (int i = 0; i < numReadings; i++) {
-    outTemp_reading[i] = 0;
-    inTemp_reading[i] = 0;
-  }
-  MaJ();
-
-
+    dailyUpdate();
 }
 
+// ─── loop ─────────────────────────────────────────────────────────────────────
+
 void loop() {
+    ArduinoOTA.handle();
+    virtuinoRun();
 
-  ArduinoOTA.handle();
-  unsigned long currentMillis = millis();
+    unsigned long now = millis();
 
-  // if WiFi is down, try reconnecting every CHECK_WIFI_TIME seconds
-  if ((WiFi.status() != WL_CONNECTED) && (currentMillis - previousMillis >= interval)) {
-    Serial.print(millis());
-    Serial.println("Reconnecting to WiFi...");
-    WiFi.disconnect();
-    WiFi.reconnect();
-    previousMillis = currentMillis;
-  }
-
-  virtuinoRun();
-
-  //**************************** Lecture paramètres sondes toutes les xx secondes ***************************
-
-  PresentTime_mn = hour() * 60 + minute();
-
-  if (currentMillis - previousMillis >= interval) {
-    previousMillis = currentMillis;
-    int currentDay = day();
-    if (!useNtpTime) {
-      // Update the currentEpoch based on the elapsed time
-      currentEpoch += (currentMillis - lastMillis) / 1000;
-      lastMillis = currentMillis;
-    }
-    if (currentDay != lastDay) {
-      Serial.println("Midnight transition detected!");
-      lastDay = currentDay;
-      time_t newEpoch = timeClient.getEpochTime() + (daysToCalculate - 1) * SECS_PER_DAY;
-      tideInfo = run_calculations(newEpoch);
-      tideStack.push(tideInfo);
-      MaJ();
+    // Reconnexion WiFi si nécessaire
+    if (WiFi.status() != WL_CONNECTED && now - prevSensor >= SENSOR_PERIOD_MS) {
+        Serial.println("Reconnexion WiFi...");
+        WiFi.disconnect();
+        WiFi.reconnect();
     }
 
-    total_outTemp_reading = total_outTemp_reading - outTemp_reading[indice];
-    sensors.requestTemperaturesByAddress(sensor_out);
-    outTemp_reading[indice] = sensors.getTempC(sensor_out);
-    total_outTemp_reading = total_outTemp_reading + outTemp_reading[indice];
+    if (now - prevSensor < SENSOR_PERIOD_MS) return;
+    prevSensor = now;
 
-    total_inTemp_reading = total_inTemp_reading - inTemp_reading[indice];
-    sensors.requestTemperaturesByAddress(sensor_in);
-    inTemp_reading[indice] = sensors.getTempC(sensor_in);
-    total_inTemp_reading = total_inTemp_reading + inTemp_reading[indice];
+    // ── Passage minuit ───────────────────────────────────────────────────────
+    if (day() != lastDay) {
+        Serial.println("Passage minuit détecté");
+        lastDay = day();
+        time_t newEpoch = timeClient.getEpochTime() + (time_t)(DAYS_FORECAST - 1) * SECS_PER_DAY;
+        TideInfo ti = run_calculations(newEpoch);
+        tideStack.push(ti);
+        dailyUpdate();
+    }
+
+    // ── Lecture températures (moyenne glissante) ──────────────────────────────
+    outSum -= outBuf[tempIdx];
+    sensors.requestTemperaturesByAddress(SENSOR_OUT);
+    outBuf[tempIdx] = sensors.getTempC(SENSOR_OUT);
+    outSum += outBuf[tempIdx];
+
+    inSum -= inBuf[tempIdx];
+    sensors.requestTemperaturesByAddress(SENSOR_IN);
+    inBuf[tempIdx] = sensors.getTempC(SENSOR_IN);
+    inSum += inBuf[tempIdx];
 
     vDelay(500);
+    tempIdx = (tempIdx + 1) % TEMP_BUFFER_SIZE;
 
-    indice = indice + 1;
+    avgOut = outSum / TEMP_BUFFER_SIZE;
+    avgIn  = inSum  / TEMP_BUFFER_SIZE;
 
-    //************** Ecriture moyenne paramètres toutes les n lectures ***************************
+    // ── Position solaire courante (hour() = UTC car setTime() avec epoch UTC) ─
+    {
+        tmElements_t t = { (byte)second(), (byte)minute(), (byte)hour(), 0,
+                           (byte)day(), (byte)month(), (byte)CalendarYrToTm(year()) };
+        time_t et = makeTime(t);
+        int elev = roundf(solarBangor.getSolarElevation(et));
+        int azim = roundf(solarBangor.getSolarAzimuth(et));
 
-    if (indice >= numReadings) {
-      indice = 0;
-
-      average_outTemp = (total_outTemp_reading / numReadings) + 0;  //correction de 0.0°
-      average_inTemp = (total_inTemp_reading / numReadings) + 0;    //correction de 0.0°
-
-      h_TU = hour() - decal_TU;  // pour l'été
-      if (h_TU == -1) {
-        h_TU = 23;
-      }
-
-      //tmElements_t someTime = {second(), minute(), h_TU, 0, day(), month(), CalendarYrToTm(year()) };
-      tmElements_t someTime = { second(), minute(), hour(), 0, day(), month(), CalendarYrToTm(year()) };
-      time_t someEpochTime = makeTime(someTime);
-
-      elevation = round(Bangor.getSolarElevation(someEpochTime));
-      azimut = round(Bangor.getSolarAzimuth(someEpochTime));
-
-      //************** Ecriture Virtuino ***************************
-
-      V[1] = average_outTemp;  // write temp extérieure to virtual pin V1. On Virtuino panel add a value display or an analog instrument to pin V1
-      V[2] = average_inTemp;
-      V[4] = elevation;
-      if (elevation > 0) {
-        V[3] = azimut;
-      } else {
-        V[3] = 360;
-      }
-
-    }  //************************fin de la boucle de l'indice ****************************************
-
-    float currentTimeFloat = hour() + minute() / 60.0 + second() / 3600.0;
-    Serial.print("Current time: "); 
-    Serial.println(currentTimeFloat, 4);
-    
-    auto today = tideStack.peek(0);
-    auto tomorrow = tideStack.peek(1);
-    
-    int nextIndex = -1;
-    bool isPeak = false;
-    
-    // Display today's events
-    for (int i = 0; i < 4; i++) {
-      float eventTime = today.getEventTime(i);
-      Serial.print("Event time "); 
-      Serial.print(i); 
-      Serial.print(": "); 
-      Serial.println(eventTime, 4);
-    
-      if (nextIndex == -1 && eventTime > currentTimeFloat) {
-        nextIndex = i;
-        isPeak = today.events[i].isPeak;
-      }
+        V[1] = avgOut;
+        V[2] = avgIn;
+        V[4] = elev;
+        V[3] = (elev > 0) ? azim : 360;
     }
-    
-    // If no event left today → check tomorrow
-    if (nextIndex == -1) {
-      Serial.println("No more events today, checking next day...");
-      float eventTimeNextDay = tomorrow.getEventTime(0);
-      if (eventTimeNextDay >= 0) {
-        nextIndex = 100; // special code for "tomorrow"
-        isPeak = tomorrow.events[0].isPeak;
-      }
-    }
-    
-    // Reset V values
-    for (int i = 0; i <= 4; i++) {
-      V[200 + i] = 0;
-      V[210 + i] = 0;
-    }
-    
-    Serial.println("Next index: " + String(nextIndex));
-    
-    // Mark the right slot
-    if (nextIndex >= 0 && nextIndex < 4) {
-      Serial.println(today.getEventTime(nextIndex));
-      (isPeak ? V[210 + nextIndex] : V[200 + nextIndex]) = 1;
-    } else if (nextIndex == 100) {
-      Serial.println(tomorrow.getEventTime(0));
-      (isPeak ? V[214] : V[204]) = 1;
-    }
-    
-    // Print V states
-    for (int i = 0; i <= 4; i++) {
-      Serial.print("V"); Serial.print(200 + i); Serial.print(": "); Serial.println(V[200 + i]);
-      Serial.print("V"); Serial.print(210 + i); Serial.print(": "); Serial.println(V[210 + i]);
-    }
-    
-    Serial.print(" -> ");
-    Serial.println(isPeak ? "UP" : "DOWN");
 
-  }    //************************fin de la boucle de l'interval **************************************
+    // ── Flèches marée ────────────────────────────────────────────────────────
+    updateArrows();
 
-
-  //************** Thingspeak ***************************
-
-  ThingSpeak.setField(4, average_outTemp);
-  ThingSpeak.setField(5, average_inTemp);
-  ThingSpeak.writeFields(myChannelNumber, myWriteAPIKey);
+    // ── ThingSpeak (limité à 1 envoi par minute) ─────────────────────────────
+    if (now - prevThingSpeak >= THINGSPEAK_PERIOD_MS) {
+        prevThingSpeak = now;
+        ThingSpeak.setField(4, avgOut);
+        ThingSpeak.setField(5, avgIn);
+        ThingSpeak.writeFields(THINGSPEAK_CHANNEL_ID, THINGSPEAK_WRITE_KEY);
+    }
 }

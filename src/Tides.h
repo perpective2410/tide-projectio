@@ -1,7 +1,8 @@
 #include <Arduino.h>
+#include <TimeLib.h>
 
 double reduc360(double angle);
-String convertDecimalTimeToHM(float decimalTime);
+int    getFranceTimezoneOffset(time_t epoch);
 
 struct TideEvent {
     double amplitude;
