@@ -45,13 +45,11 @@ public:
 
 // ── Public API ──────────────────────────────────────────────────────────────
 
-// Call once in setup() — mounts LittleFS
-bool tidesBegin();
-
-// Load a station from /stations/<filename> stored in LittleFS.
-// Brest reference is loaded automatically for coefficient calculation.
-// Example: setStation("Le Palais.tide")
-bool setStation(const char* filename);
+// Select a station by id.  Station data is compiled into the firmware
+// (see src/stations/).  Brest is loaded automatically as the French
+// coefficient reference.
+// Example: setStation("Le Palais")
+bool setStation(const char* id);
 
 // Calculate tides for the calendar day that contains 'epoch' (UTC).
 TideInfo tides(time_t epoch);

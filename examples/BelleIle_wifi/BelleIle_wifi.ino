@@ -1,11 +1,16 @@
 // Tide station — Belle-Île-en-Mer (Le Palais)
 // Calculates tidal events for DAYS_FORECAST days, prints to Serial.
+//
+// DISCLAIMER: This library is designed for French Atlantic tidal stations only.
+// Results are approximations based on harmonic analysis and DO NOT replace
+// official tide tables published by the SHOM (Service Hydrographique et
+// Océanographique de la Marine — https://www.shom.fr).
+// Do not use this data for navigation or safety-critical purposes.
 
-#include <Arduino.h>
 #include <WiFi.h>
 #include <TimeLib.h>
 #include <NTPClient.h>
-#include "Tides.h"
+#include <Tides.h>
 
 // ─── Configuration ────────────────────────────────────────────────────────────
 
