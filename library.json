@@ -1,0 +1,25 @@
+{
+  "name": "Tides",
+  "version": "0.0.3",
+  "description": "Harmonic tidal prediction (high/low tide times and heights) for ESP32. Computes tidal events using classical harmonic analysis (Doodson constituents) with French tide coefficients. Station data is compiled into the firmware — no SD card or filesystem required.",
+  "keywords": "tide, tides, harmonic, prediction, esp32, ocean, coastal, France, SHOM",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/perpective2410/tide-projectio.git"
+  },
+  "authors": [
+    {
+      "name": "Florent Valdelievre",
+      "email": "florentvaldelievre@gmail.com",
+      "maintainer": true
+    }
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/perpective2410/tide-projectio",
+  "dependencies": {
+    "paulstoffregen/Time": "^1.6.1"
+  },
+  "frameworks": "arduino",
+  "platforms": "espressif32",
+  "headers": "Tides.h"
+}
