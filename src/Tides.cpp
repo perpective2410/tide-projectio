@@ -226,14 +226,17 @@ static void astroCalculations(time_t epoch) {
     breakTime(epoch, tm);
     double julianDay = dateToJulianDay(tmYearToCalendar(tm.Year), tm.Month, tm.Day);
     T  = julianDateToCentury(julianDay);
-    s  = reduc360(218.3164591 + 481267.88134236 * T - 0.0013268 * T * T
-                  + T * T * T / 538841.0 - T * T * T * T / 65194000.0);
-    ls = reduc360(280.46645 + 36000.76983 * T + 0.0003032 * T * T);
-    p  = reduc360(83.3532430 + 4069.0137111 * T - 0.0103238 * T * T
-                  - T * T * T / 80053.0 + T * T * T * T / 18999000.0);
-    M  = 357.52910 + 35999.05030 * T - 0.0001559 * T * T - 0.00000048 * T * T * T;
+    // Apply ΔT = 65 s correction (7.523148148148148e-4 days) to match the Java reference.
+    // All astronomical arguments (s, ls, p, N, p1) use the corrected century Tdt.
+    double Tdt = julianDateToCentury(julianDay + 7.523148148148148e-4);
+    s  = reduc360(218.3164591 + 481267.88134236 * Tdt - 0.0013268 * Tdt * Tdt
+                  + Tdt * Tdt * Tdt / 538841.0 - Tdt * Tdt * Tdt * Tdt / 65194000.0);
+    ls = reduc360(280.46645 + 36000.76983 * Tdt + 0.0003032 * Tdt * Tdt);
+    p  = reduc360(83.3532430 + 4069.0137111 * Tdt - 0.0103238 * Tdt * Tdt
+                  - Tdt * Tdt * Tdt / 80053.0 + Tdt * Tdt * Tdt * Tdt / 18999000.0);
+    M  = 357.52910 + 35999.05030 * Tdt - 0.0001559 * Tdt * Tdt - 0.00000048 * Tdt * Tdt * Tdt;
     p1 = reduc360(ls - M);
-    N  = reduc360(125.04452 - 1934.136261 * T + 0.0020708 * T * T + T * T * T / 450000.0);
+    N  = reduc360(125.04452 - 1934.136261 * Tdt + 0.0020708 * Tdt * Tdt + Tdt * Tdt * Tdt / 450000.0);
 }
 
 int getFranceTimezoneOffset(time_t epoch) {
