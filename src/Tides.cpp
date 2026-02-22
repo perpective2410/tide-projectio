@@ -243,7 +243,7 @@ static void astroCalculations(time_t epoch) {
     breakTime(epoch, tm);
     double julianDay = dateToJulianDay(tmYearToCalendar(tm.Year), tm.Month, tm.Day);
     T  = julianDateToCentury(julianDay);
-    // Apply ΔT = 65 s correction (7.523148148148148e-4 days) to match the Java reference.
+    // Apply ΔT = 65 s correction (7.523148148148148e-4 days).
     // All astronomical arguments (s, ls, p, N, p1) use the corrected century Tdt.
     double Tdt = julianDateToCentury(julianDay + 7.523148148148148e-4);
     s  = reduc360(218.3164591 + 481267.88134236 * Tdt - 0.0013268 * Tdt * Tdt

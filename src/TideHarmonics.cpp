@@ -81,7 +81,7 @@ static double fcosL2() {
 double uL2() { return degrees(atan2(fsinL2(), fcosL2())); }
 double fL2() { return sqrt(pow(fsinL2(), 2) + pow(fcosL2(), 2)); }
 
-// E2 — dedicated nodal functions (declared in header; table uses uM2/fM2 per Java reference)
+// E2 — dedicated nodal functions (declared in header; table uses uM2/fM2)
 double uE2() {
     return degrees(atan2(-0.439 * sin(radians(N)), 1.0 + (0.439 * cos(radians(N)))));
 }
@@ -328,7 +328,6 @@ Table2NC table2NcDefArray[] = {
     {"4MS10",   10, -8,  8,  0,  0,   0, 145.9364168, u4M2,      f4M2},
     {"5MSN10",  10, -7,  8, -1,  0,   0, 146.4807915, u4M2,      f6M2},
     {"3M2S10",  10, -6,  6,  0,  0,   0, 146.9523126, u3M2,      f3M2},
-    // --- Added to match Java table2NC1 ---
     {"MSM",      0,  1, -2,  1,  0,   0,  0.4715211,  zero,      f2M2},
     {"CHI1",     1, -1,  3, -1,  0, -90, 14.5695476,  uJ1,       fJ1},
     {"SO3",      3, -2,  1,  0,  0, -90, 43.9430356,  uO1,       fO1},
