@@ -1,8 +1,6 @@
 #include <Arduino.h>
 #include <TimeLib.h>
 #include <math.h>
-#include <unordered_map>
-#include <map>
 #include "Tides.h"
 #include "stations/StationDef.h"
 
@@ -17,30 +15,18 @@ struct Harmonic {
     double phase;
 };
 
-struct StringHash {
-    size_t operator()(const String& str) const {
-        size_t hash = 0;
-        for (size_t i = 0; i < str.length(); ++i)
-            hash = hash * 31 + str[i];
-        return hash;
-    }
-};
-
-// ── Table2NC lookup (built once from the compile-time table) ──────────────
+// ── Table2NC lookup (linear search over the compile-time array) ───────────
 
 class Table2NCDef {
 private:
-    std::unordered_map<String, Table2NC, StringHash> tableMap;
+    Table2NC* array;
+    int       count;
 public:
-    Table2NCDef(Table2NC* array, int count) {
-        for (int i = 0; i < count; i++)
-            tableMap[String(array[i].name)] = array[i];
-    }
-    ~Table2NCDef() { tableMap.clear(); }
+    Table2NCDef(Table2NC* arr, int cnt) : array(arr), count(cnt) {}
 
-    Table2NC get_constituent(const String& name) const {
-        auto it = tableMap.find(name);
-        if (it != tableMap.end()) return it->second;
+    Table2NC get_constituent(const char* name) const {
+        for (int i = 0; i < count; i++)
+            if (strcmp(array[i].name, name) == 0) return array[i];
         return Table2NC{nullptr, 0, 0, 0, 0, 0, 0, 0, nullptr, nullptr};
     }
 };
@@ -78,24 +64,36 @@ class HarmonicCalculator {
 private:
     HarmonicModel& model;
     Table2NCDef&   tableDef;
-    std::map<String, double> equilbrm;
-    std::map<String, double> nodefctr;
+    double*        equilbrm;     // indexed by harmonic position
+    double*        nodefctr;     // indexed by harmonic position
+    Table2NC*      constituents; // pre-resolved once at construction
 
 public:
-    HarmonicCalculator(HarmonicModel& m, Table2NCDef& t) : model(m), tableDef(t) {}
-    ~HarmonicCalculator() { equilbrm.clear(); nodefctr.clear(); }
+    HarmonicCalculator(HarmonicModel& m, Table2NCDef& t) : model(m), tableDef(t) {
+        int n        = model.get_harmonic_count();
+        equilbrm     = new double[n]();
+        nodefctr     = new double[n]();
+        constituents = new Table2NC[n];
+        for (int i = 0; i < n; i++)
+            constituents[i] = t.get_constituent(m.get_harmonics()[i].name.c_str());
+    }
+    ~HarmonicCalculator() {
+        delete[] equilbrm;
+        delete[] nodefctr;
+        delete[] constituents;
+    }
 
     // Called once per day — computes equilibrium arguments and node factors.
     void equi_tide() {
         static const double Thalf = 180.0;
         for (int i = 0; i < model.get_harmonic_count(); i++) {
-            Harmonic& h = model.get_harmonics()[i];
-            Table2NC c = tableDef.get_constituent(h.name);
+            const Table2NC& c = constituents[i];
             if (c.u_func == nullptr) continue;
-            equilbrm[h.name] = reduc360(
+            Harmonic& h = model.get_harmonics()[i];
+            equilbrm[i] = reduc360(
                 c.T * Thalf + c.s * s + c.ls * ls +
                 c.p * p + c.p1 * p1 + c.deg + c.u_func());
-            nodefctr[h.name] = c.f_func();
+            nodefctr[i] = c.f_func();
         }
     }
 
@@ -104,10 +102,10 @@ public:
         for (int i = 0; i < model.get_harmonic_count(); i++) {
             Harmonic& h = model.get_harmonics()[i];
             if (h.amplitude <= 0.0) continue;
-            Table2NC c = tableDef.get_constituent(h.name);
+            const Table2NC& c = constituents[i];
             if (c.u_func == nullptr) continue;
-            double var = reduc360(c.speed * t + equilbrm[h.name] - h.phase);
-            total -= nodefctr[h.name] * h.amplitude
+            double var = reduc360(c.speed * t + equilbrm[i] - h.phase);
+            total -= nodefctr[i] * h.amplitude
                      * radians(c.speed) * sin(radians(var));
         }
         return total;
@@ -119,10 +117,10 @@ public:
         for (int i = 0; i < model.get_harmonic_count(); i++) {
             Harmonic& h = model.get_harmonics()[i];
             if (h.amplitude <= 0.0) continue;
-            Table2NC c = tableDef.get_constituent(h.name);
+            const Table2NC& c = constituents[i];
             if (c.u_func == nullptr) continue;
-            double var = reduc360(c.speed * t + equilbrm[h.name] - h.phase);
-            total += nodefctr[h.name] * h.amplitude * cos(radians(var));
+            double var = reduc360(c.speed * t + equilbrm[i] - h.phase);
+            total += nodefctr[i] * h.amplitude * cos(radians(var));
         }
         return z0.amplitude + total;
     }
