@@ -10,7 +10,7 @@ double T, s, ls, p, M, p1, N;
 // ── Internal data structures ──────────────────────────────────────────────
 
 struct Harmonic {
-    String name;
+    const char* name;
     double amplitude;
     double phase;
 };
@@ -44,7 +44,7 @@ public:
         harmonics = new Harmonic[harmonicCount];
         for (int i = 0; i < harmonicCount; i++) {
             harmonics[i] = {
-                String(def->harmonics[i].name),
+                def->harmonics[i].name,
                 def->harmonics[i].amplitude,
                 def->harmonics[i].phase
             };
@@ -64,49 +64,70 @@ class HarmonicCalculator {
 private:
     HarmonicModel& model;
     Table2NCDef&   tableDef;
-    double*        equilbrm;     // indexed by harmonic position
-    double*        nodefctr;     // indexed by harmonic position
-    Table2NC*      constituents; // pre-resolved once at construction
+    double*        equilbrm;      // equilibrium argument in degrees (kept for equi_tide())
+    double*        nodefctr;      // nodal amplitude correction factor
+    Table2NC*      constituents;  // pre-resolved once at construction
+    // ── Per-harmonic cached constants (updated by equi_tide()) ────────────
+    double*        speed_rad;     // c.speed in radians/hour — set at construction
+    double*        base_phase_rad;// (equilbrm[i] - h.phase) in radians — updated in equi_tide()
+    double*        amp_f;         // nodefctr[i] * h.amplitude        — for amplitude()
+    double*        amp_d;         // amp_f[i] * speed_rad[i]          — for derivative()
+    double         minAmplitude;  // harmonics below this threshold are skipped
 
 public:
-    HarmonicCalculator(HarmonicModel& m, Table2NCDef& t) : model(m), tableDef(t) {
-        int n        = model.get_harmonic_count();
-        equilbrm     = new double[n]();
-        nodefctr     = new double[n]();
-        constituents = new Table2NC[n];
-        for (int i = 0; i < n; i++)
-            constituents[i] = t.get_constituent(m.get_harmonics()[i].name.c_str());
+    HarmonicCalculator(HarmonicModel& m, Table2NCDef& t, double minAmp = 0.0)
+        : model(m), tableDef(t), minAmplitude(minAmp) {
+        int n          = model.get_harmonic_count();
+        equilbrm       = new double[n]();
+        nodefctr       = new double[n]();
+        constituents   = new Table2NC[n];
+        speed_rad      = new double[n]();
+        base_phase_rad = new double[n]();
+        amp_f          = new double[n]();
+        amp_d          = new double[n]();
+        for (int i = 0; i < n; i++) {
+            constituents[i] = t.get_constituent(m.get_harmonics()[i].name);
+            speed_rad[i]    = radians(constituents[i].speed);
+        }
     }
     ~HarmonicCalculator() {
         delete[] equilbrm;
         delete[] nodefctr;
         delete[] constituents;
+        delete[] speed_rad;
+        delete[] base_phase_rad;
+        delete[] amp_f;
+        delete[] amp_d;
     }
 
-    // Called once per day — computes equilibrium arguments and node factors.
+    // Called once per day — computes equilibrium arguments, node factors,
+    // and derived per-harmonic constants used by amplitude() / derivative().
     void equi_tide() {
         static const double Thalf = 180.0;
         for (int i = 0; i < model.get_harmonic_count(); i++) {
             const Table2NC& c = constituents[i];
             if (c.u_func == nullptr) continue;
             Harmonic& h = model.get_harmonics()[i];
-            equilbrm[i] = reduc360(
+            equilbrm[i]       = reduc360(
                 c.T * Thalf + c.s * s + c.ls * ls +
                 c.p * p + c.p1 * p1 + c.deg + c.u_func());
-            nodefctr[i] = c.f_func();
+            nodefctr[i]       = c.f_func();
+            base_phase_rad[i] = radians(equilbrm[i] - h.phase);
+            if (h.amplitude < minAmplitude) {
+                amp_f[i] = amp_d[i] = 0.0;
+            } else {
+                amp_f[i] = nodefctr[i] * h.amplitude;
+                amp_d[i] = amp_f[i] * speed_rad[i];
+            }
         }
     }
 
+    // Hot path — sin/cos called once per harmonic; all other factors pre-cached.
     double derivative(double t) {
         double total = 0.0;
         for (int i = 0; i < model.get_harmonic_count(); i++) {
-            Harmonic& h = model.get_harmonics()[i];
-            if (h.amplitude <= 0.0) continue;
-            const Table2NC& c = constituents[i];
-            if (c.u_func == nullptr) continue;
-            double var = reduc360(c.speed * t + equilbrm[i] - h.phase);
-            total -= nodefctr[i] * h.amplitude
-                     * radians(c.speed) * sin(radians(var));
+            if (amp_d[i] == 0.0) continue;
+            total -= amp_d[i] * sin(speed_rad[i] * t + base_phase_rad[i]);
         }
         return total;
     }
@@ -115,12 +136,8 @@ public:
         double total = 0.0;
         Harmonic z0 = model.get_z0_harmonic();
         for (int i = 0; i < model.get_harmonic_count(); i++) {
-            Harmonic& h = model.get_harmonics()[i];
-            if (h.amplitude <= 0.0) continue;
-            const Table2NC& c = constituents[i];
-            if (c.u_func == nullptr) continue;
-            double var = reduc360(c.speed * t + equilbrm[i] - h.phase);
-            total += nodefctr[i] * h.amplitude * cos(radians(var));
+            if (amp_f[i] == 0.0) continue;
+            total += amp_f[i] * cos(speed_rad[i] * t + base_phase_rad[i]);
         }
         return z0.amplitude + total;
     }
@@ -272,6 +289,7 @@ static HarmonicCalculator* g_calculator    = nullptr;
 static HarmonicModel*      g_modelRef      = nullptr;
 static HarmonicCalculator* g_calculatorRef = nullptr;
 static double              g_coeffDivisor  = 6.1;
+static double              g_minAmplitude  = 0.005; // skip harmonics below 5 mm
 
 static void clearStation() {
     delete g_calculator;  g_calculator = nullptr;
@@ -299,15 +317,16 @@ static bool loadRef() {
 }
 
 
-bool setStation(const char* id) {
+bool setStation(const char* id, double minAmplitude) {
     const StationDef* def = findStation(id);
     if (!def) {
         Serial.println("[Tides] Station not found: " + String(id));
         return false;
     }
+    g_minAmplitude = minAmplitude;
     clearStation();
     g_model      = new HarmonicModel(def);
-    g_calculator = new HarmonicCalculator(*g_model, getTableDef());
+    g_calculator = new HarmonicCalculator(*g_model, getTableDef(), g_minAmplitude);
     Serial.println("[Tides] Loaded " + String(id) +
                    " (" + String(def->harmonicCount) + " constituents)");
     return loadRef();

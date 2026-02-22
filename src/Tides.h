@@ -48,8 +48,11 @@ public:
 // Select a station by id.  Station data is compiled into the firmware
 // (see src/stations/).  Brest is loaded automatically as the French
 // coefficient reference.
+// minAmplitude (metres): harmonics smaller than this are skipped for speed.
+//   0.005 (default) skips ~30% of minor harmonics with <5 mm accuracy impact.
+//   Pass 0.0 for full precision with all harmonics included.
 // Example: setStation("Le Palais")
-bool setStation(const char* id);
+bool setStation(const char* id, double minAmplitude = 0.005);
 
 // Calculate tides for the calendar day that contains 'epoch' (UTC).
 TideInfo tides(time_t epoch);
