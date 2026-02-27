@@ -108,20 +108,20 @@ void drawBigCenterArrow(int centerX, int centerY, bool isUp, uint16_t color, int
 }
 
 // -------- Draw small arrow icon for tide list --------
-// Draws a filled triangle arrow centered at (x, y), height ~14px
+// Draws a filled triangle arrow centered at (x, y), height ~18px
 void drawSmallArrow(int x, int y, bool isUp, uint16_t color)
 {
   if (isUp) {
     // Triangle pointing up: tip at top, base at bottom
-    canvas.fillTriangle(x, y - 7,
-                        x - 8, y + 7,
-                        x + 8, y + 7,
+    canvas.fillTriangle(x, y - 9,
+                        x - 10, y + 9,
+                        x + 10, y + 9,
                         color);
   } else {
     // Triangle pointing down: tip at bottom, base at top
-    canvas.fillTriangle(x, y + 7,
-                        x - 8, y - 7,
-                        x + 8, y - 7,
+    canvas.fillTriangle(x, y + 9,
+                        x - 10, y - 9,
+                        x + 10, y - 9,
                         color);
   }
 }
@@ -288,16 +288,16 @@ void drawUI()
   TideEvent prev = (prevIndex >= 0) ? today[prevIndex] : today[3];
 
   const int BAR_X = INNER_X;
-  const int BAR_Y = 318;   // vertically centered between divider lines (290 to 368)
+  const int BAR_Y = 308;   // vertically centered between divider lines (290 to 368) — moved 10px higher
   const int BAR_W = INNER_R - INNER_X;  // full inner width
   const int BAR_H = 45;    // thicker progress bar (was 30)
   const int BAR_R = 14;    // corner radius
 
   // Previous tide direction arrow — left side
-  drawSmallArrow(BAR_X + 20, 335, prev.isHigh, canvas.color565(80, 100, 130));
+  drawSmallArrow(BAR_X + 20, 345, prev.isHigh, canvas.color565(80, 100, 130));
 
   // Next tide direction arrow — right side
-  drawSmallArrow(INNER_R - 30, 335, next.isHigh,
+  drawSmallArrow(INNER_R - 30, 345, next.isHigh,
                  next.isHigh ? canvas.color565(0, 180, 220) : canvas.color565(100, 120, 150));
 
   // Bar background (dark)
@@ -351,7 +351,7 @@ void drawUI()
   for (int i = 0; i < 4; i++) {
     int rowTopY  = LIST_TOP + i * ROW_HEIGHT;
     int baselineY = rowTopY + 40;   // text baseline within the row (centered)
-    int arrowCY   = baselineY;      // arrow vertically centered with text baseline
+    int arrowCY   = baselineY + 10; // arrow vertically centered with text baseline, moved down 10px
 
     int tideMin = today[i].hour * 60 + today[i].minute;
     bool isPassed = tideMin < nowMin;
@@ -427,13 +427,35 @@ void drawUI()
   // Show 24-hour tide curve (2 complete tidal cycles: 2 peaks and 2 troughs)
   const int CHART_LEFT   = 560;   // start of chart area (extend further left)
   const int CHART_RIGHT  = INNER_R;  // end of chart area (extend to edge)
-  const int CHART_TOP    = LIST_TOP - 10;  // top of chart (extend above)
-  const int CHART_BOT    = LIST_TOP + 4 * ROW_HEIGHT + 10;  // bottom of chart (extend below)
+  const int CHART_TOP    = LIST_TOP - 50;  // top of chart (extend above) — moved up 30px total
+  const int CHART_BOT    = LIST_TOP + 4 * ROW_HEIGHT - 20;  // bottom of chart (extend below) — moved up 20px
   const int CHART_H      = CHART_BOT - CHART_TOP;
   const int CHART_W      = CHART_RIGHT - CHART_LEFT;
 
   // Vertical center for the sinusoid
   int chart_center_y = CHART_TOP + CHART_H / 2;
+
+  // Draw grid lines and height labels — equally distributed from bottom (0) to top (6)
+  canvas.setFont(&fonts::FreeSansBold9pt7b);
+  canvas.setTextColor(canvas.color565(100, 120, 150));
+  for (int h = 0; h <= 6; h++) {
+    // Position from bottom (CHART_BOT) to top (CHART_TOP), equally distributed
+    int labelY = CHART_BOT - (h * (CHART_BOT - CHART_TOP) / 6);
+
+    // Draw horizontal grid line
+    canvas.drawFastHLine(CHART_LEFT, labelY, CHART_W, canvas.color565(40, 60, 90));
+
+    // Draw height number on the left
+    canvas.setCursor(CHART_LEFT - 35, labelY + 4);
+    canvas.printf("%d", h);
+  }
+
+  // Draw vertical grid lines for hours
+  for (int hour = 0; hour <= 24; hour += 2) {
+    float hourProgress = hour / 24.0f;
+    int gridX = CHART_LEFT + (hourProgress * CHART_W);
+    canvas.drawFastVLine(gridX, CHART_TOP, CHART_H, canvas.color565(40, 60, 90));
+  }
 
   // Draw smooth tide curve - 24 hour period showing 2 complete cycles
   // Current tide determines the starting phase
@@ -480,8 +502,25 @@ void drawUI()
   int current_x = CHART_LEFT + (targetProgress * CHART_W);
   canvas.drawLine(current_x, CHART_TOP, current_x, CHART_BOT, canvas.color565(255, 200, 0));
 
+  // Draw knob at current tide height position
+  float currentWavePhase = tidePhase + (targetProgress * 6.28318f);
+  float currentTideHeight = sin(currentWavePhase);
+  int currentY = chart_center_y - (currentTideHeight * CHART_H / 2.4f);
+  canvas.fillCircle(current_x, currentY, 6, canvas.color565(255, 200, 0));  // yellow knob
+  canvas.drawCircle(current_x, currentY, 6, canvas.color565(255, 255, 255));  // white outline
+
   // Draw chart border
   canvas.drawRect(CHART_LEFT, CHART_TOP, CHART_W, CHART_H, canvas.color565(50, 80, 120));
+
+  // Add hour labels on horizontal axis (0 to 24 hours) — below the chart
+  canvas.setFont(&fonts::FreeSansBold9pt7b);
+  canvas.setTextColor(canvas.color565(100, 120, 150));
+  for (int hour = 0; hour <= 24; hour += 2) {
+    float hourProgress = hour / 24.0f;
+    int labelX = CHART_LEFT + (hourProgress * CHART_W);
+    canvas.setCursor(labelX - 8, CHART_BOT + 18);
+    canvas.printf("%d", hour);
+  }
 
   canvas.pushSprite(0, 0);
 }
