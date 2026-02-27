@@ -3,6 +3,10 @@
 #include <TimeLib.h>
 #include "TideHarmonics.h"
 
+// Number of amplitude samples per day (affects sinusoid smoothness)
+// 24 = hourly, 48 = every 30 min, 96 = every 15 min (recommended)
+#define TIDE_AMPLITUDE_SAMPLES 96
+
 struct TideEvent {
     double amplitude;
     float  time;     // local time, decimal hours (e.g. 14.5 = 14h30)
@@ -16,13 +20,18 @@ struct TideInfo {
     int    afternoonCoefficient;  // French tide coefficient, afternoon range
     time_t epoch;
 
+    // Pre-calculated amplitude points throughout the day (for sinusoid display)
+    double amplitudePoints[TIDE_AMPLITUDE_SAMPLES];
+    bool   amplitudeCalculated;
+
     float getEventTime(int index) const {
         if (index >= 0 && index < numEvents) return events[index].time;
         return 0.0f;
     }
 
-    TideInfo() : numEvents(0), morningCoefficient(0), afternoonCoefficient(0), epoch(-1) {
+    TideInfo() : numEvents(0), morningCoefficient(0), afternoonCoefficient(0), epoch(-1), amplitudeCalculated(false) {
         for (int i = 0; i < 4; i++) events[i] = TideEvent();
+        for (int i = 0; i < TIDE_AMPLITUDE_SAMPLES; i++) amplitudePoints[i] = 0.0;
     }
 };
 

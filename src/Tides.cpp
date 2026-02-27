@@ -145,6 +145,7 @@ public:
     TideInfo findTidesAndTimes(int utcOffsetMinutes, double coeffDivisor = 6.1) {
         TideInfo tideInfo;
         TideEvent tideEvents[4];
+        double extremumUTCTimes[4];  // parallel array: UTC time of each extremum
         int eventCount = 0;
 
         const double COARSE_STEP  = 20.0 / 60.0;
@@ -175,7 +176,9 @@ public:
                 float  localT    = (float)(extremumT + utcOffsetMinutes / 60.0);
                 while (localT <  0.0f) localT += 24.0f;
                 while (localT >= 24.0f) localT -= 24.0f;
-                tideEvents[eventCount++] = { extremumH, localT, isPeak };
+                tideEvents[eventCount] = { extremumH, localT, isPeak };
+                extremumUTCTimes[eventCount] = extremumT;  // store UTC for amplitude lookup
+                eventCount++;
             }
             prevT = t;
             prevD = curD;
@@ -187,6 +190,9 @@ public:
                     TideEvent tmp = tideEvents[i];
                     tideEvents[i] = tideEvents[j];
                     tideEvents[j] = tmp;
+                    double tmpUTC = extremumUTCTimes[i];
+                    extremumUTCTimes[i] = extremumUTCTimes[j];
+                    extremumUTCTimes[j] = tmpUTC;
                 }
 
         tideInfo.numEvents = eventCount;
@@ -204,6 +210,24 @@ public:
                      tideInfo.events[tideInfo.numEvents - 1].amplitude)
                     / coeffDivisor * 100));
         }
+
+        // Calculate amplitude points at regular intervals (for sinusoid display)
+        // Reuse pre-calculated extremum amplitudes where sample falls within 0.6 min
+        for (int i = 0; i < TIDE_AMPLITUDE_SAMPLES; i++) {
+            double localHours = i * (24.0 / TIDE_AMPLITUDE_SAMPLES);
+            double tUTC = localHours - (utcOffsetMinutes / 60.0);
+            bool found = false;
+            for (int j = 0; j < eventCount; j++) {
+                if (fabs(tUTC - extremumUTCTimes[j]) < 0.01) {
+                    tideInfo.amplitudePoints[i] = tideEvents[j].amplitude;
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) tideInfo.amplitudePoints[i] = amplitude(tUTC);
+        }
+        tideInfo.amplitudeCalculated = true;
+
         return tideInfo;
     }
 };
