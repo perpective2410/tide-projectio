@@ -7,6 +7,8 @@
 // Océanographique de la Marine — https://www.shom.fr).
 // Do not use this data for navigation or safety-critical purposes.
 
+// Station configuration is in StationConfig.h — edit that file to select stations.
+#include "StationConfig.h"
 #include <WiFi.h>
 #include <TimeLib.h>
 #include <NTPClient.h>

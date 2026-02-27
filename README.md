@@ -36,9 +36,32 @@ lib_deps =
 
 Download the repository as a ZIP and use **Sketch → Include Library → Add .ZIP Library…**
 
+Then copy an example sketch from the `examples/` folder:
+- Open `examples/BelleIle_minimal/BelleIle_minimal.ino` in Arduino IDE, or
+- Copy both `BelleIle_minimal.ino` and `StationConfig.h` to your sketch folder
+
 ---
 
 ## Quick Start
+
+### 1. Configure Stations
+
+Edit `StationConfig.h` in your sketch directory to select which stations to compile:
+
+**PlatformIO:**
+```cpp
+// examples/BelleIle_minimal/StationConfig.h
+#define INCLUDE_LE_PALAIS           // Belle-Île-en-Mer
+#define INCLUDE_SAINT_MALO          // Brittany
+// #define INCLUDE_SHEERNESS        // UK coast
+```
+
+**Arduino IDE:**
+Create `StationConfig.h` in the same folder as your `.ino` sketch and add your station definitions.
+
+Brest is **always included** by default as the reference station for French tide coefficients — you don't need to define it.
+
+### 2. Use in Your Code
 
 ```cpp
 #include <TimeLib.h>
@@ -67,6 +90,29 @@ void setup() {
 ```
 
 Complete examples are in [`examples/BelleIle_minimal/`](examples/BelleIle_minimal/) (static date, no WiFi) and [`examples/BelleIle_wifi/`](examples/BelleIle_wifi/) (WiFi + NTP, 4-day rolling forecast).
+
+---
+
+## Available Stations
+
+The library includes **170+ French Atlantic tidal stations** with harmonic data sourced from the SHOM. Station names use underscores to replace spaces and hyphens.
+
+**Examples:** `LE_PALAIS`, `SAINT_MALO`, `BOULOGNE_SUR_MER`, `SAINT_VAAST_LA_HOUGUE`
+
+See `src/StationConfig.h` for the complete list of available stations.
+
+### Memory Optimization
+
+Only stations you explicitly enable in `StationConfig.h` are compiled into your firmware:
+- **Brest:** ~8 KB (always included as the coefficient reference)
+- **Other stations:** ~5–15 KB each (depending on harmonic complexity)
+
+Example configurations:
+- **Minimal** (1 station): ~13 KB
+- **Coastal** (5 stations): ~40–60 KB
+- **Comprehensive** (20+ stations): ~150–250 KB
+
+This selective compilation is essential for small boards with limited flash memory (e.g., ESP32 with < 1 MB usable space).
 
 ---
 
@@ -156,25 +202,36 @@ extern const StationDef STATION_MY_CITY = {
 };
 ```
 
-2. **Register** the station in `src/stations/StationRegistry.cpp`:
+2. **Register** in `StationRegistry.cpp` — add an `extern` declaration in the conditional block and add to the REGISTRY array (the file has a template for this):
 
 ```cpp
-extern const StationDef STATION_MY_CITY;   // add this line
+#ifdef INCLUDE_MY_CITY
+extern const StationDef STATION_MY_CITY;
+#endif
 
-static const StationDef* const REGISTRY[] = {
-    &STATION_LE_PALAIS,
-    &STATION_BREST,
-    &STATION_MY_CITY,                       // add this line
+const StationDef* const REGISTRY[] = {
+#ifdef INCLUDE_MY_CITY
+    &STATION_MY_CITY,
+#endif
 };
 ```
 
-3. **Use** it in your sketch:
+3. **Enable** in your `StationConfig.h`:
+
+```cpp
+#define INCLUDE_MY_CITY
+```
+
+4. **Use** it in your sketch:
 
 ```cpp
 setStation("My City");
 ```
 
-Constituent names must match the entries in `src/TideHarmonics.cpp` (the Doodson table). Names are case-sensitive.
+**Notes:**
+- Constituent names must match entries in `src/TideHarmonics.cpp` (the Doodson table). Names are case-sensitive.
+- Station names in `StationDef` must match the station id used in `setStation()`.
+- Only stations you `#define` in `StationConfig.h` are compiled into the firmware, saving memory.
 
 ---
 
@@ -188,20 +245,30 @@ Open the project in VS Code with the [Wokwi extension](https://marketplace.visua
 
 ```
 src/
-  Tides.h / Tides.cpp          — public API and calculation engine
-  TideHarmonics.h / .cpp       — nodal correction functions and constituent table
+  Tides.h / Tides.cpp              — public API and calculation engine
+  TideHarmonics.h / .cpp           — nodal correction functions and constituent table
+  StationConfig.h                  — template configuration file (fallback if not in sketch dir)
   stations/
-    StationDef.h               — HarmonicConst / StationDef structs
-    LePalais.cpp               — Le Palais (Belle-Île-en-Mer) station data
-    Brest.cpp                  — Brest reference station data
-    StationRegistry.cpp        — registry and findStation() lookup
+    StationDef.h                   — HarmonicConst / StationDef structs
+    LePalais.cpp                   — Le Palais (Belle-Île-en-Mer) station data
+    Brest.cpp                      — Brest reference station data
+    *.cpp                          — 168+ additional station definitions
+    StationRegistry.cpp            — conditional registry and findStation() lookup
 examples/
   BelleIle_minimal/
-    BelleIle_minimal.ino       — static date, no WiFi
+    BelleIle_minimal.ino           — static date, no WiFi (works in both PlatformIO and Arduino IDE)
+    StationConfig.h                — station selection for this example
   BelleIle_wifi/
-    BelleIle_wifi.ino          — WiFi + NTP, 4-day rolling forecast
-library.properties             — Arduino Library Manager metadata
+    BelleIle_wifi.ino              — WiFi + NTP, 4-day rolling forecast (works in both PlatformIO and Arduino IDE)
+    StationConfig.h                — station selection for this example
+platformio.ini                     — build configuration
+library.properties                 — Arduino Library Manager metadata
 ```
+
+**Configuration:**
+- `StationConfig.h` in your sketch directory (PlatformIO examples or Arduino IDE sketch folder) controls which stations are compiled.
+- If no `StationConfig.h` is found, only **Brest** is compiled (default fallback).
+- See `src/StationConfig.h` for documentation on available stations.
 
 ---
 
