@@ -18,6 +18,6 @@ struct StationDef {
     int                  harmonicCount;
 };
 
-// Looks up a station by id.  Implemented in StationRegistry.cpp.
-// Returns nullptr if not found.
-const StationDef* findStation(const char* id);
+// Station lookup is provided by StationRegistry.cpp.
+// Use setStation(id) from Tides.h API instead of calling findStation directly.
+extern const StationDef* findStation(const char* id);

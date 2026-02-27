@@ -1,24 +1,19 @@
-// Station registry — maps station ids to their compiled-in StationDef objects.
-//
-// Configuration: Edit StationConfig.h in your sketch directory to select stations.
-// The sketch includes StationConfig.h before including Tides.h, so both the sketch
-// and this file see the same #define statements.
-//
-// If StationConfig.h is not found, only Brest is compiled (default fallback).
+#pragma once
 
 #include "StationDef.h"
 #include <string.h>
 
-// Try to include user config if available (for Arduino IDE & PlatformIO compatibility)
-// Use angle brackets so __has_include respects the include search paths
-#if __has_include(<StationConfig.h>)
-#include <StationConfig.h>
-#endif
+// ── Station Registry (Header-Only) ──────────────────────────────────────────
+// This header is included by Tides.h, so it's processed in the sketch's
+// translation unit. This allows #define statements in the sketch to control
+// which stations are compiled:
+//
+//   #define INCLUDE_LE_PALAIS
+//   #define INCLUDE_SHEERNESS
+//   #include <Tides.h>
 
-// Always include Brest
-#ifndef INCLUDE_BREST
+// Always include Brest (default station)
 #define INCLUDE_BREST
-#endif
 
 #ifdef INCLUDE_BREST
 extern const StationDef STATION_BREST;
@@ -537,12 +532,12 @@ extern const StationDef STATION_SOLENZARA;
 extern const StationDef STATION_MAJURO;
 #endif
 
-const StationDef* const REGISTRY[] = {
-#ifdef INCLUDE_BREST
-    &STATION_BREST,
-#endif
+static const StationDef* const REGISTRY[] = {
 #ifdef INCLUDE_LE_PALAIS
     &STATION_LE_PALAIS,
+#endif
+#ifdef INCLUDE_BREST
+    &STATION_BREST,
 #endif
 #ifdef INCLUDE_SHEERNESS
     &STATION_SHEERNESS,
@@ -1055,10 +1050,10 @@ const StationDef* const REGISTRY[] = {
     &STATION_MAJURO,
 #endif
 };
-static const int REGISTRY_SIZE = (int)(sizeof(REGISTRY) / sizeof(REGISTRY[0]));
 
-const StationDef* findStation(const char* id) {
-    for (int i = 0; i < REGISTRY_SIZE; i++) {
+static const StationDef* findStation(const char* id) {
+    static const int size = (int)(sizeof(REGISTRY) / sizeof(REGISTRY[0]));
+    for (int i = 0; i < size; i++) {
         if (strcmp(REGISTRY[i]->id, id) == 0)
             return REGISTRY[i];
     }

@@ -7,7 +7,10 @@
 // Océanographique de la Marine — https://www.shom.fr).
 // Do not use this data for navigation or safety-critical purposes.
 
-#include <Tides.h>
+// Station configuration is in StationConfig.h — edit that file to select stations.
+#include "StationConfig.h"
+#include <Tides.h>  
+
 
 void setup() {
     Serial.begin(115200);
