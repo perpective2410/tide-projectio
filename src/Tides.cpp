@@ -281,19 +281,20 @@ static void astroCalculations(time_t epoch) {
 }
 
 int getFranceTimezoneOffset(time_t epoch) {
-    int yr = year(epoch);  // calendar year via TimeLib (AVR-compatible)
+    struct tm* timeinfo = gmtime(&epoch);
+    int year = timeinfo->tm_year + 1900;
 
-    // Last Sunday of March at 1:00 UTC
-    tmElements_t tm;
-    tm.Year   = yr - 1970; tm.Month = 3; tm.Day = 31;
-    tm.Hour   = 1; tm.Minute = 0; tm.Second = 0;
-    time_t startDSTEpoch = makeTime(tm);
-    while (weekday(startDSTEpoch) != 1) startDSTEpoch -= 86400;  // 1 = Sunday
+    struct tm startDST = {};
+    startDST.tm_year = year - 1900; startDST.tm_mon = 2; startDST.tm_mday = 31;
+    startDST.tm_hour = 1; startDST.tm_isdst = -1;
+    time_t startDSTEpoch = mktime(&startDST);
+    while (gmtime(&startDSTEpoch)->tm_wday != 0) startDSTEpoch -= 86400;
 
-    // Last Sunday of October at 1:00 UTC
-    tm.Month = 10; tm.Day = 31;
-    time_t endDSTEpoch = makeTime(tm);
-    while (weekday(endDSTEpoch) != 1) endDSTEpoch -= 86400;
+    struct tm endDST = {};
+    endDST.tm_year = year - 1900; endDST.tm_mon = 9; endDST.tm_mday = 31;
+    endDST.tm_hour = 1; endDST.tm_isdst = -1;
+    time_t endDSTEpoch = mktime(&endDST);
+    while (gmtime(&endDSTEpoch)->tm_wday != 0) endDSTEpoch -= 86400;
 
     return (epoch >= startDSTEpoch && epoch < endDSTEpoch) ? 120 : 60;
 }

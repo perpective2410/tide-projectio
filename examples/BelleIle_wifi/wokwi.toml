@@ -1,4 +1,0 @@
-[wokwi]
-version  = 1
-firmware = "../../.pio/build/esp32wifi/firmware.bin"
-elf      = "../../.pio/build/esp32wifi/firmware.elf"
