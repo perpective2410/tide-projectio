@@ -53,6 +53,52 @@ DisplayTideEvent tomorrow[4] = {};
 TideInfo tideInfoToday;
 TideInfo tideInfoTomorrow;
 
+bool showTomorrow = false;  // Toggle with touch: false=Aujourd'hui, true=Demain
+
+// -------- Chart layout constants (must match drawUI() values) --------
+static const int CHART_L  = 560;
+static const int CHART_R  = 1224;  // INNER_R = CARD_X + CARD_W - 36 = 20+1240-36
+static const int CHART_T  = 380;   // LIST_TOP - 50 = 430 - 50
+static const int CHART_B  = 670;   // LIST_TOP + 4*ROW_HEIGHT - 20 = 430+260-20
+static const int CHART_CW = CHART_R - CHART_L;           // 664 pixels wide
+static const int CHART_CH = CHART_B - CHART_T;           // 290 pixels tall
+static const int CHART_CY = CHART_T + CHART_CH / 2;      // vertical centre = 525
+
+// Pre-computed Y pixel for each chart column — represents the daily tidal pattern
+int chartYToday[CHART_CW + 1];
+
+// -------- Get tide amplitude at a specific time by interpolating pre-calculated amplitude points --------
+double getTideAmplitudeAtTime(TideInfo& info, int timeMin)
+{
+  if (!info.amplitudeCalculated) return 0.0;
+
+  float minutesPerSample = 1440.0f / TIDE_AMPLITUDE_SAMPLES;
+  float index = (float)timeMin / minutesPerSample;
+  int idx1 = (int)index;
+  int idx2 = (idx1 + 1) % TIDE_AMPLITUDE_SAMPLES;
+  float frac = index - idx1;
+
+  return info.amplitudePoints[idx1] + (info.amplitudePoints[idx2] - info.amplitudePoints[idx1]) * frac;
+}
+
+void computeChartYCache(TideInfo& info, int* cache)
+{
+  double minAmp = 10.0, maxAmp = -10.0;
+  for (int i = 0; i < info.numEvents; i++) {
+    minAmp = min(minAmp, info.events[i].amplitude);
+    maxAmp = max(maxAmp, info.events[i].amplitude);
+  }
+  double range = maxAmp - minAmp;
+  if (range < 0.1) range = 1.0;
+
+  for (int i = 0; i <= CHART_CW; i++) {
+    int timeMin = (int)((float)i / CHART_CW * 1440.0f);
+    double amp = getTideAmplitudeAtTime(info, timeMin);
+    float norm = constrain((float)(amp - minAmp) / range * 2.0f - 1.0f, -1.0f, 1.0f);
+    cache[i] = CHART_CY - (int)(norm * CHART_CH / 2.4f);
+  }
+}
+
 // -------- Populate a DisplayTideEvent array from a TideInfo --------
 void populateTideEvents(TideInfo& info, DisplayTideEvent* events)
 {
@@ -78,33 +124,12 @@ void loadTideDataForToday(int year, int month, int day)
   // Load tomorrow so we can show its first tide after today's last passes
   tideInfoTomorrow = tides(tideInfoToday.epoch + 86400);
   populateTideEvents(tideInfoTomorrow, tomorrow);
+  // Pre-compute chart Y pixels using today's sinusoid (same pattern repeats daily)
+  computeChartYCache(tideInfoToday, chartYToday);
 }
-
-// -------- Get tide amplitude at a specific time by interpolating pre-calculated amplitude points --------
-double getTideAmplitudeAtTime(int timeMin)
-{
-  if (!tideInfoToday.amplitudeCalculated) return 0.0;
-
-  // Convert minutes since midnight to amplitude sample index
-  float minutesPerSample = 1440.0f / TIDE_AMPLITUDE_SAMPLES;  // minutes between samples
-  float index = (float)timeMin / minutesPerSample;
-  int idx1 = (int)index;
-  int idx2 = (idx1 + 1) % TIDE_AMPLITUDE_SAMPLES;
-  float frac = index - idx1;
-
-  // Linear interpolation between amplitude points
-  double amp1 = tideInfoToday.amplitudePoints[idx1];
-  double amp2 = tideInfoToday.amplitudePoints[idx2];
-
-  return amp1 + (amp2 - amp1) * frac;
-}
-
-const char* dayNames[] = {"Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"};
-const char* shortDayNames[] = {"Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"};
 
 // -------- Animation --------
-float animatedProgress = 0;
-float targetProgress   = 0;
+float targetProgress = 0;  // Progress in current tidal cycle (0-1)
 
 // -------- RTC Time Functions --------
 // Returns UTC time directly from RTC (used for NTP sync and tide calculations)
@@ -257,13 +282,6 @@ void syncNTPTime()
   }
 }
 
-// Get local time (timezone-adjusted from RTC)
-time_t getLocalTime()
-{
-  time_t t = time(nullptr);
-  return t;
-}
-
 DisplayTideEvent getNextTide(int nowMin)
 {
   for (int i = 0; i < 4; i++) {
@@ -349,7 +367,15 @@ void drawSmallArrow(int x, int y, bool isUp, uint16_t color)
 // -------- Main UI --------
 void drawUI()
 {
+  unsigned long t0 = millis();
+  unsigned long t1, t2, t3;
+
   canvas.fillScreen(canvas.color565(12, 16, 28));
+  t1 = millis();
+
+  // Select data source based on view mode
+  DisplayTideEvent* displayTides = showTomorrow ? tomorrow : today;
+  TideInfo& displayInfo = showTomorrow ? tideInfoTomorrow : tideInfoToday;
 
   int nowMin = getMinutesNow();
   DisplayTideEvent next = getNextTide(nowMin);
@@ -363,7 +389,6 @@ void drawUI()
   DisplayTideEvent prev = (prevIndex >= 0) ? today[prevIndex] : today[3];
 
   targetProgress = computeProgress(nowMin, prev, next);
-  animatedProgress += (targetProgress - animatedProgress) * 0.12f;
 
   int hour   = nowMin / 60;
   int minute = nowMin % 60;
@@ -582,7 +607,7 @@ void drawUI()
   canvas.setFont(&fonts::FreeSansBold18pt7b);
   canvas.setTextColor(canvas.color565(0, 180, 220));
   canvas.setCursor(INNER_X, 410);   // baseline at Y=410
-  canvas.print("Aujourd'hui");
+  canvas.print(showTomorrow ? "Demain" : "Aujourd'hui");
 
   // ===================== ZONE F — TIDE EVENT LIST ==================
   // 4 tides, each row 68px tall, starting at Y=430
@@ -604,70 +629,63 @@ void drawUI()
     int baselineY = rowTopY + 40;   // text baseline within the row (centered)
     int arrowCY   = baselineY + 10; // arrow vertically centered with text baseline, moved down 10px
 
-    int tideMin = today[i].hour * 60 + today[i].minute;
-    bool isPassed = tideMin < nowMin;
-
-    // Check if this is the "active" (next upcoming) row for special styling
-    bool isNextRow = (today[i].hour == next.hour && today[i].minute == next.minute);
+    int tideMin = displayTides[i].hour * 60 + displayTides[i].minute;
+    // Tides are "passed" only when viewing today and the tide time is before now
+    bool isPassed = !showTomorrow && (tideMin < nowMin);
+    // Highlight the first tide of tomorrow, or the next upcoming tide of today
+    bool isNextRow = showTomorrow ? (i == 0)
+                                  : (displayTides[i].hour == next.hour && displayTides[i].minute == next.minute);
 
     // Arrow color: muted gray for passed tides, colored for upcoming
     uint16_t arrowClr;
     if (isPassed) {
       arrowClr = canvas.color565(60, 75, 95);
-    } else if (today[i].isHigh) {
+    } else if (displayTides[i].isHigh) {
       arrowClr = canvas.color565(0, 180, 220);    // cyan for high tide
     } else {
       arrowClr = canvas.color565(120, 140, 165);  // muted blue-gray for low tide
     }
-    drawSmallArrow(ARROW_COL_X, arrowCY, today[i].isHigh, arrowClr);
+    drawSmallArrow(ARROW_COL_X, arrowCY, displayTides[i].isHigh, arrowClr);
 
-    // Time text (properly aligned with arrow)
+    // Time text
     canvas.setFont(&fonts::FreeSansBold18pt7b);
     uint16_t timeClr;
     if (isPassed) {
-      timeClr = canvas.color565(65, 80, 100);  // muted gray for passed
+      timeClr = canvas.color565(65, 80, 100);
     } else if (isNextRow) {
-      timeClr = canvas.color565(0, 220, 255);  // bright cyan for active/next
+      timeClr = canvas.color565(0, 220, 255);
     } else {
-      timeClr = canvas.color565(200, 220, 240);  // normal light color
+      timeClr = canvas.color565(200, 220, 240);
     }
     canvas.setTextColor(timeClr);
     canvas.setCursor(TIME_COL_X, baselineY);
-    canvas.printf("%02d:%02d", today[i].hour, today[i].minute);
+    canvas.printf("%02d:%02d", displayTides[i].hour, displayTides[i].minute);
 
     // PM / BM badge next to time
     canvas.setFont(&fonts::FreeSans18pt7b);
-    if (today[i].isHigh) {
-      // "PM coeff" — right next to time
+    if (displayTides[i].isHigh) {
       uint16_t labelClr, coeffClr;
       if (isPassed) {
         labelClr = canvas.color565(65, 80, 100);
         coeffClr = canvas.color565(65, 80, 100);
       } else if (isNextRow) {
-        labelClr = canvas.color565(0, 220, 255);  // bright cyan for active
-        coeffClr = canvas.color565(255, 200, 0);   // bright orange for active
+        labelClr = canvas.color565(0, 220, 255);
+        coeffClr = canvas.color565(255, 200, 0);
       } else {
         labelClr = canvas.color565(0, 180, 220);
         coeffClr = canvas.color565(255, 175, 50);
       }
-
       canvas.setTextColor(labelClr);
       canvas.setCursor(TIME_COL_X + 140, baselineY);
       canvas.print("PM");
-
       canvas.setTextColor(coeffClr);
       canvas.setCursor(TIME_COL_X + 200, baselineY);
-      canvas.printf("%d", today[i].coefficient);
+      canvas.printf("%d", displayTides[i].coefficient);
     } else {
-      // "BM" — right next to time
       uint16_t labelClr;
-      if (isPassed) {
-        labelClr = canvas.color565(65, 80, 100);
-      } else if (isNextRow) {
-        labelClr = canvas.color565(0, 220, 255);  // bright cyan for active
-      } else {
-        labelClr = canvas.color565(130, 150, 175);
-      }
+      if (isPassed)       labelClr = canvas.color565(65, 80, 100);
+      else if (isNextRow) labelClr = canvas.color565(0, 220, 255);
+      else                labelClr = canvas.color565(130, 150, 175);
       canvas.setTextColor(labelClr);
       canvas.setCursor(TIME_COL_X + 140, baselineY);
       canvas.print("BM");
@@ -675,130 +693,115 @@ void drawUI()
   }
 
   // ===================== TIDE CHART (Maree.info Style - 24 Hour) =======================
-  // Show 24-hour tide curve (2 complete tidal cycles: 2 peaks and 2 troughs)
-  const int CHART_LEFT   = 560;   // start of chart area (extend further left)
-  const int CHART_RIGHT  = INNER_R;  // end of chart area (extend to edge)
-  const int CHART_TOP    = LIST_TOP - 50;  // top of chart (extend above) — moved up 30px total
-  const int CHART_BOT    = LIST_TOP + 4 * ROW_HEIGHT - 20;  // bottom of chart (extend below) — moved up 20px
-  const int CHART_H      = CHART_BOT - CHART_TOP;
-  const int CHART_W      = CHART_RIGHT - CHART_LEFT;
-
-  // Vertical center for the sinusoid
-  int chart_center_y = CHART_TOP + CHART_H / 2;
+  // Y values are pre-computed in chartYToday — no float math per frame.
+  unsigned long chartStart = millis();
 
   // Draw grid lines and height labels — equally distributed from bottom (0) to top (6)
   canvas.setFont(&fonts::FreeSansBold9pt7b);
   canvas.setTextColor(canvas.color565(100, 120, 150));
   for (int h = 0; h <= 6; h++) {
-    // Position from bottom (CHART_BOT) to top (CHART_TOP), equally distributed
-    int labelY = CHART_BOT - (h * (CHART_BOT - CHART_TOP) / 6);
-
-    // Draw horizontal grid line
-    canvas.drawFastHLine(CHART_LEFT, labelY, CHART_W, canvas.color565(40, 60, 90));
-
-    // Draw height number on the left
-    canvas.setCursor(CHART_LEFT - 35, labelY + 4);
+    int labelY = CHART_B - (h * CHART_CH / 6);
+    canvas.drawFastHLine(CHART_L, labelY, CHART_CW, canvas.color565(40, 60, 90));
+    canvas.setCursor(CHART_L - 35, labelY + 4);
     canvas.printf("%d", h);
   }
 
   // Draw vertical grid lines for hours
   for (int hour = 0; hour <= 24; hour += 2) {
-    float hourProgress = hour / 24.0f;
-    int gridX = CHART_LEFT + (hourProgress * CHART_W);
-    canvas.drawFastVLine(gridX, CHART_TOP, CHART_H, canvas.color565(40, 60, 90));
+    int gridX = CHART_L + (int)(hour / 24.0f * CHART_CW);
+    canvas.drawFastVLine(gridX, CHART_T, CHART_CH, canvas.color565(40, 60, 90));
   }
 
-  // Draw tide curve using actual amplitude data from library
-  // Calculate current position within 24-hour day (0-1)
-  float dayProgress = (float)nowMin / 1440.0f;  // 1440 = 24 * 60 minutes
+  // ===================== TIDE CHART (Maree.info Style - 24 Hour) =======================
+  // Y values are pre-computed in chartYToday — no float math per frame.
 
-  // Find min/max amplitudes for scaling
-  double minAmplitude = 10.0, maxAmplitude = -10.0;
-  for (int i = 0; i < tideInfoToday.numEvents; i++) {
-    minAmplitude = min(minAmplitude, tideInfoToday.events[i].amplitude);
-    maxAmplitude = max(maxAmplitude, tideInfoToday.events[i].amplitude);
+  // Draw grid lines and height labels — equally distributed from bottom (0) to top (6)
+  canvas.setFont(&fonts::FreeSansBold9pt7b);
+  canvas.setTextColor(canvas.color565(100, 120, 150));
+  for (int h = 0; h <= 6; h++) {
+    int labelY = CHART_B - (h * CHART_CH / 6);
+    canvas.drawFastHLine(CHART_L, labelY, CHART_CW, canvas.color565(40, 60, 90));
   }
-  double amplitudeRange = maxAmplitude - minAmplitude;
-  if (amplitudeRange < 0.1) amplitudeRange = 1.0;  // Avoid division by zero
 
-  // Draw tide curve with smooth lines between points
-  int prevY = -1;
-  int prevX = CHART_LEFT;
-  for (int x = CHART_LEFT; x <= CHART_RIGHT; x++) {
-    // Convert x position to time of day in minutes
-    float progress = (float)(x - CHART_LEFT) / CHART_W;
-    int timeMin = (int)(progress * 1440.0f);  // 0 to 1440 minutes in 24 hours
+  // Draw vertical grid lines for hours
+  for (int hour = 0; hour <= 24; hour += 2) {
+    int gridX = CHART_L + (int)(hour / 24.0f * CHART_CW);
+    canvas.drawFastVLine(gridX, CHART_T, CHART_CH, canvas.color565(40, 60, 90));
+  }
 
-    // Get actual tide amplitude at this time
-    double amplitude = getTideAmplitudeAtTime(timeMin);
+  // Draw tide curve using pre-computed Y cache (no float math per pixel)
+  float dayProgress = showTomorrow ? 0.0f : (float)nowMin / 1440.0f;
+  int splitX = CHART_L + (int)(dayProgress * CHART_CW);
+  int* activeChartY = chartYToday;
 
-    // Normalize amplitude to chart height (-1 to 1 range)
-    float normalizedAmplitude = (amplitude - minAmplitude) / amplitudeRange * 2.0f - 1.0f;
-    normalizedAmplitude = constrain(normalizedAmplitude, -1.0f, 1.0f);
+  // Single pass: fill under curve + draw curve line
+  for (int x = CHART_L; x <= CHART_R; x++) {
+    int i = x - CHART_L;
+    int y = activeChartY[i];
+    bool is_past = (x < splitX);
 
-    // Convert to Y pixel position (invert: high tide at top, centered vertically)
-    int y = chart_center_y - (int)(normalizedAmplitude * CHART_H / 2.4f);
+    // Fill column from curve down to chart bottom
+    canvas.drawFastVLine(x, y, CHART_B - y,
+      is_past ? canvas.color565(0, 120, 180) : canvas.color565(30, 50, 80));
 
-    // Color: bright if before current time, muted after
-    bool is_past = (progress < dayProgress);
-    uint16_t lineColor = is_past
-      ? canvas.color565(0, 200, 255)     // bright cyan for past
-      : canvas.color565(50, 80, 120);    // muted for future
-
-    // Draw line from previous point to current point for smooth curve
-    if (prevY != -1) {
-      canvas.drawLine(prevX, prevY, x, y, lineColor);
+    // Curve line segment to previous pixel
+    if (i > 0) {
+      canvas.drawLine(x - 1, activeChartY[i - 1], x, y,
+        is_past ? canvas.color565(0, 200, 255) : canvas.color565(50, 80, 120));
     }
-
-    prevY = y;
-    prevX = x;
   }
 
-  // Fill area under curve
-  for (int x = CHART_LEFT; x < CHART_RIGHT; x++) {
-    float progress = (float)(x - CHART_LEFT) / CHART_W;
-    int timeMin = (int)(progress * 1440.0f);
-
-    double amplitude = getTideAmplitudeAtTime(timeMin);
-    float normalizedAmplitude = (amplitude - minAmplitude) / amplitudeRange * 2.0f - 1.0f;
-    normalizedAmplitude = constrain(normalizedAmplitude, -1.0f, 1.0f);
-
-    int y = chart_center_y - (int)(normalizedAmplitude * CHART_H / 2.4f);
-
-    bool is_past = (progress < dayProgress);
-    uint16_t fillColor = is_past
-      ? canvas.color565(0, 120, 180)     // semi-transparent bright cyan
-      : canvas.color565(30, 50, 80);     // dark blue
-
-    canvas.drawLine(x, y, x, CHART_BOT, fillColor);
-  }
-
-  // Draw current position vertical line and knob
-  int current_x = CHART_LEFT + (dayProgress * CHART_W);
-  canvas.drawLine(current_x, CHART_TOP, current_x, CHART_BOT, canvas.color565(255, 200, 0));
-
-  // Draw knob at current tide height position
-  double currentAmplitude = getTideAmplitudeAtTime(nowMin);
-  float normalizedCurrent = (currentAmplitude - minAmplitude) / amplitudeRange * 2.0f - 1.0f;
-  normalizedCurrent = constrain(normalizedCurrent, -1.0f, 1.0f);
-  int currentY = chart_center_y - (int)(normalizedCurrent * CHART_H / 2.4f);
-  canvas.fillCircle(current_x, currentY, 6, canvas.color565(255, 200, 0));  // yellow knob
-  canvas.drawCircle(current_x, currentY, 6, canvas.color565(255, 255, 255));  // white outline
+  // Current time: vertical line + knob (today only)
+  int current_x = splitX;
+  canvas.drawFastVLine(current_x, CHART_T, CHART_CH, canvas.color565(255, 200, 0));
+  int nowCacheIdx = constrain((int)(dayProgress * CHART_CW), 0, CHART_CW);
+  int currentY = activeChartY[nowCacheIdx];
+  canvas.fillCircle(current_x, currentY, 6, canvas.color565(255, 200, 0));
+  canvas.drawCircle(current_x, currentY, 6, canvas.color565(255, 255, 255));
 
   // Draw chart border
-  canvas.drawRect(CHART_LEFT, CHART_TOP, CHART_W, CHART_H, canvas.color565(50, 80, 120));
+  canvas.drawRect(CHART_L, CHART_T, CHART_CW, CHART_CH, canvas.color565(50, 80, 120));
 
   // Add hour labels on horizontal axis (0 to 24 hours) — below the chart
   canvas.setFont(&fonts::FreeSansBold9pt7b);
   canvas.setTextColor(canvas.color565(100, 120, 150));
   for (int hour = 0; hour <= 24; hour += 2) {
-    float hourProgress = hour / 24.0f;
-    int labelX = CHART_LEFT + (hourProgress * CHART_W);
-    canvas.setCursor(labelX - 8, CHART_BOT + 18);
+    int labelX = CHART_L + (int)(hour / 24.0f * CHART_CW);
+    canvas.setCursor(labelX - 8, CHART_B + 18);
     canvas.printf("%d", hour);
   }
 
+  unsigned long chartEnd = millis();
+  t2 = millis();
   canvas.pushSprite(0, 0);
+  t3 = millis();
+
+  static unsigned long lastPrint = 0;
+  if (millis() - lastPrint > 5000) {
+    Serial.printf("[Perf] header=%lums chart=%lums sprite=%lums total=%lums\n",
+                  chartStart-t0, chartEnd-chartStart, t3-t2, t3-t0);
+    lastPrint = millis();
+  }
+}
+
+// -------- Touch Detection Task (runs independently of render loop) --------
+// drawUI() can block for tens of milliseconds, causing short taps to be missed
+// by M5.update(). This task polls touch at 20 ms on a separate RTOS thread.
+volatile bool touchTogglePending = false;
+
+void touchDetectionTask(void* params)
+{
+  m5::touch_point_t pts[5];
+  bool prevTouching = false;
+  for (;;) {
+    int n = M5.Lcd.getTouchRaw(pts, 5);
+    bool isTouching = (n > 0);
+    if (isTouching && !prevTouching) {
+      touchTogglePending = true;
+    }
+    prevTouching = isTouching;
+    vTaskDelay(pdMS_TO_TICKS(20));
+  }
 }
 
 void setup()
@@ -861,11 +864,21 @@ void setup()
   // Trigger first NTP sync immediately when WiFi connects
   lastNTPSyncTime = 0;
 
+  xTaskCreate(touchDetectionTask, "touch", 2048, nullptr, 5, nullptr);
+
   Serial.println("Setup complete!\n");
 }
 
 void loop()
 {
+  // Touch toggle — set by touchDetectionTask independently of render loop
+  if (touchTogglePending) {
+    touchTogglePending = false;
+    showTomorrow = !showTomorrow;
+    Serial.printf("[Touch] Toggled to: %s\n", showTomorrow ? "Demain" : "Aujourd'hui");
+    // No forced redraw — display updates naturally on next frame (within 33ms)
+  }
+
   // Non-blocking WiFi & NTP updates
   updateWiFiStatus();
   syncNTPTime();
@@ -888,4 +901,5 @@ void loop()
     lastFrame = millis();
     drawUI();
   }
+
 }
