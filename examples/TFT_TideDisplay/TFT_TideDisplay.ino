@@ -1,27 +1,12 @@
+#include <M5Unified.h>
 #include <M5GFX.h>
-#include <WiFi.h>
-#include <time.h>
 
 // Station configuration is in StationConfig.h — edit that file to select stations.
 #include "StationConfig.h"
 #include <Tides.h>
 #include "FreeSansBold48pt7b.h"
 
-// ---- WiFi & Time Configuration ----
-const char* WIFI_SSID = "YOUR_SSID";
-const char* WIFI_PASS = "YOUR_PASSWORD";
-const char* NTP_SERVER = "pool.ntp.org";
-const long GMT_OFFSET_SEC = 0;           // UTC
-const int DAYLIGHT_OFFSET_SEC = 0;        // No DST
-const unsigned long NTP_SYNC_INTERVAL = 24 * 3600 * 1000;  // 24 hours in milliseconds
-
-// Time sync state
-unsigned long lastNTPSync = 0;
-bool wifiConnected = false;
-bool timeSet = false;
-
-M5GFX display;
-M5Canvas canvas(&display);
+M5Canvas canvas(&M5.Display);
 
 static const int W = 1280;
 static const int H = 720;
@@ -632,21 +617,21 @@ void drawUI()
 
 void setup()
 {
-  // Initialize Serial
   Serial.begin(115200);
-  delay(1000);  // Wait for serial to be ready
-  while (!Serial && millis() < 3000);  // Timeout after 3 seconds
-  Serial.flush();
+  delay(500);
 
   Serial.println("\n\n========== TFT TIDE DISPLAY SETUP ==========");
-  Serial.println("Initializing display...");
 
   // Initialize M5GFX display
-  display.init();
-  display.setRotation(1);
+  auto cfg = M5.config();
+  M5.begin(cfg);
 
-  Serial.println("Display initialized");
-  Serial.println("Creating canvas...");
+  Serial.println("M5Unified initialized");
+
+  Serial.println("Initializing display...");
+
+  // Set display rotation to landscape
+  M5.Display.setRotation(1);
 
   canvas.setColorDepth(16);
   canvas.createSprite(W, H);
@@ -655,18 +640,21 @@ void setup()
 
   // Initialize Tides Library
   Serial.println("Setting station: Le Palais");
+
   bool stationSet = setStation("Le Palais");
   Serial.print("Station set: ");
   Serial.println(stationSet ? "SUCCESS" : "FAILED");
 
-  // Load tide data for today (February 27, 2026 — static for now)
+  // Load tide data for Feb 27, 2026
   Serial.println("Loading tide data...");
   loadTideDataForToday(2026, 2, 27);
 
+  Serial.println("Setup complete!\n");
 }
 
 void loop()
 {
+  // Render frame
   if (millis() - lastFrame >= FRAME_TIME) {
     lastFrame = millis();
     drawUI();
