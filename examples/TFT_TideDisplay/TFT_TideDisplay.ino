@@ -9,14 +9,21 @@
 #include <Tides.h>
 #include "FreeSansBold48pt7b.h"
 
-// WiFi & NTP Configuration
-const char* WIFI_SSID = "Chez-nous";
-const char* WIFI_PASS = "Magenta2110";
+// WiFi & NTP Configuration — add all known networks here
+struct WiFiCredential { const char* ssid; const char* pass; };
+const WiFiCredential WIFI_NETWORKS[] = {
+  { "Chez-nous",   "Magenta2110" },
+  // { "OtherSSID",   "password2"   },
+  // { "Hotspot",     "password3"   },
+};
+const int WIFI_NETWORK_COUNT = sizeof(WIFI_NETWORKS) / sizeof(WIFI_NETWORKS[0]);
+
 const char* NTP_TIMEZONE = "CET-1CEST,M3.5.0,M10.5.0/3";  // France timezone
 const char* NTP_SERVER1 = "pool.ntp.org";
 const char* NTP_SERVER2 = "time.nist.gov";
 
 // WiFi state
+int currentNetworkIndex = 0;
 unsigned long lastWiFiCheckTime = 0;
 unsigned long lastNTPSyncTime = 0;
 unsigned long lastWiFiReconnectTime = 0;
@@ -41,34 +48,36 @@ struct DisplayTideEvent {
   double amplitude;  // Store actual amplitude from library
 };
 
-DisplayTideEvent today[4] = {};  // Will be populated from Tides Library
-TideInfo tideInfoToday;  // Store complete TideInfo for amplitude data
+DisplayTideEvent today[4]    = {};
+DisplayTideEvent tomorrow[4] = {};
+TideInfo tideInfoToday;
+TideInfo tideInfoTomorrow;
+
+// -------- Populate a DisplayTideEvent array from a TideInfo --------
+void populateTideEvents(TideInfo& info, DisplayTideEvent* events)
+{
+  for (int i = 0; i < 4; i++) events[i] = {0, 0, false, 0, 0.0};
+  for (int i = 0; i < info.numEvents && i < 4; i++) {
+    float h = info.events[i].time;
+    int hh = (int)h;
+    int mm = (int)((h - hh) * 60.0f + 0.5f);
+    if (mm == 60) { hh++; mm = 0; }
+    events[i].hour      = hh;
+    events[i].minute    = mm;
+    events[i].isHigh    = info.events[i].isPeak;
+    events[i].amplitude = info.events[i].amplitude;
+    events[i].coefficient = (hh >= 12) ? info.afternoonCoefficient : info.morningCoefficient;
+  }
+}
 
 // -------- Load tide data from Tides Library --------
 void loadTideDataForToday(int year, int month, int day)
 {
   tideInfoToday = tides(year, month, day);
-
-  // Clear the array
-  for (int i = 0; i < 4; i++) {
-    today[i] = {0, 0, false, 0, 0.0};
-  }
-
-  // Fill with tide events
-  for (int i = 0; i < tideInfoToday.numEvents && i < 4; i++) {
-    float h = tideInfoToday.events[i].time;
-    int hh = (int)h;
-    int mm = (int)((h - hh) * 60.0f + 0.5f);
-    if (mm == 60) { hh++; mm = 0; }
-
-    today[i].hour = hh;
-    today[i].minute = mm;
-    today[i].isHigh = tideInfoToday.events[i].isPeak;
-    today[i].amplitude = tideInfoToday.events[i].amplitude;
-
-    // Use afternoon coefficient if PM, morning if AM
-    today[i].coefficient = (hh >= 12) ? tideInfoToday.afternoonCoefficient : tideInfoToday.morningCoefficient;
-  }
+  populateTideEvents(tideInfoToday, today);
+  // Load tomorrow so we can show its first tide after today's last passes
+  tideInfoTomorrow = tides(tideInfoToday.epoch + 86400);
+  populateTideEvents(tideInfoTomorrow, tomorrow);
 }
 
 // -------- Get tide amplitude at a specific time by interpolating pre-calculated amplitude points --------
@@ -165,20 +174,16 @@ void updateWiFiStatus()
       lastWiFiReconnectTime = 0;  // Reset reconnect timer
       break;
     case WL_NO_SSID_AVAIL:
-      Serial.println("[WiFi] SSID not found - check network name");
-      break;
     case WL_CONNECT_FAILED:
-      Serial.println("[WiFi] Connection failed - check password");
-      if (now - lastWiFiReconnectTime > WIFI_RECONNECT_INTERVAL) {
-        WiFi.reconnect();
-        lastWiFiReconnectTime = now;
-      }
-      break;
     case WL_DISCONNECTED:
     case WL_CONNECTION_LOST:
       if (now - lastWiFiReconnectTime > WIFI_RECONNECT_INTERVAL) {
-        Serial.printf("[WiFi] Status: %d - Reconnecting...\n", status);
-        WiFi.reconnect();
+        currentNetworkIndex = (currentNetworkIndex + 1) % WIFI_NETWORK_COUNT;
+        Serial.printf("[WiFi] Trying network %d/%d: %s\n",
+                      currentNetworkIndex + 1, WIFI_NETWORK_COUNT,
+                      WIFI_NETWORKS[currentNetworkIndex].ssid);
+        WiFi.begin(WIFI_NETWORKS[currentNetworkIndex].ssid,
+                   WIFI_NETWORKS[currentNetworkIndex].pass);
         lastWiFiReconnectTime = now;
       }
       break;
@@ -265,7 +270,8 @@ DisplayTideEvent getNextTide(int nowMin)
     int t = today[i].hour * 60 + today[i].minute;
     if (t > nowMin) return today[i];
   }
-  return today[0];
+  // All of today's tides have passed — return tomorrow's first tide
+  return tomorrow[0];
 }
 
 float computeProgress(int nowMin, DisplayTideEvent prev, DisplayTideEvent next)
@@ -422,7 +428,7 @@ void drawUI()
   canvas.setTextColor(wifiColor);
   canvas.setCursor(wifiIconX + 26, 12);
   if (wifiOk) {
-    canvas.print(WIFI_SSID);
+    canvas.print(WiFi.SSID().c_str());
   } else {
     canvas.print("No WiFi");
   }
@@ -849,7 +855,8 @@ void setup()
                GPIO_NUM_10, GPIO_NUM_9, GPIO_NUM_8, GPIO_NUM_15);
 #endif
   WiFi.mode(WIFI_STA);
-  WiFi.begin(WIFI_SSID, WIFI_PASS);
+  currentNetworkIndex = 0;
+  WiFi.begin(WIFI_NETWORKS[0].ssid, WIFI_NETWORKS[0].pass);
 
   // Trigger first NTP sync immediately when WiFi connects
   lastNTPSyncTime = 0;
