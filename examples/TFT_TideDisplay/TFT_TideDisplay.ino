@@ -1,10 +1,25 @@
 #include <M5Unified.h>
 #include <M5GFX.h>
+#include <WiFi.h>
+#include <time.h>
 
 // Station configuration is in StationConfig.h — edit that file to select stations.
 #include "StationConfig.h"
 #include <Tides.h>
 #include "FreeSansBold48pt7b.h"
+
+// WiFi & NTP Configuration
+const char* WIFI_SSID = "Chez-nous";
+const char* WIFI_PASS = "Magenta2110";
+const char* NTP_TIMEZONE = "CET-1CEST,M3.5.0,M10.5.0/3";  // France timezone
+const char* NTP_SERVER1 = "pool.ntp.org";
+const char* NTP_SERVER2 = "time.nist.gov";
+
+// WiFi state
+unsigned long lastWiFiCheckTime = 0;
+unsigned long lastNTPSyncTime = 0;
+const unsigned long WIFI_CHECK_INTERVAL = 5000;      // Check WiFi status every 5 seconds
+const unsigned long NTP_SYNC_INTERVAL = 24 * 3600000; // Sync NTP every 24 hours
 
 M5Canvas canvas(&M5.Display);
 
@@ -79,32 +94,75 @@ const char* shortDayNames[] = {"Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"};
 float animatedProgress = 0;
 float targetProgress   = 0;
 
-// -------- Time Simulation --------
+// -------- RTC Time Functions --------
+void getRTCDateTime(int& year, int& month, int& day, int& hour, int& minute, int& second)
+{
+  auto dt = M5.Rtc.getDateTime();
+  year = dt.date.year;
+  month = dt.date.month;
+  day = dt.date.date;
+  hour = dt.time.hours;
+  minute = dt.time.minutes;
+  second = dt.time.seconds;
+}
+
 int getMinutesNow()
 {
-  unsigned long sec = millis() / 1000;
-  int base = 8 * 60 + 0;  // 8:00 AM
-  return (base + sec / 60) % 1440;
+  int year, month, day, hour, minute, second;
+  getRTCDateTime(year, month, day, hour, minute, second);
+  return hour * 60 + minute;
 }
 
-// Get current time with hours, minutes, seconds
+// Get current time with hours, minutes, seconds from RTC
 void getCurrentTime(int& hour, int& minute, int& second)
 {
-  unsigned long totalSeconds = millis() / 1000;
-  int baseSeconds = (8 * 60 + 0) * 60;  // 8:00 AM in seconds
-  totalSeconds = (baseSeconds + totalSeconds) % 86400;  // 86400 = seconds in a day
-
-  hour = totalSeconds / 3600;
-  minute = (totalSeconds % 3600) / 60;
-  second = totalSeconds % 60;
+  int year, month, day;
+  getRTCDateTime(year, month, day, hour, minute, second);
 }
 
-// Get current date (static: Feb 27, 2026)
+// Get current date from RTC
 void getCurrentDate(int& year, int& month, int& day)
 {
-  year = 2026;
-  month = 2;
-  day = 27;
+  int hour, minute, second;
+  getRTCDateTime(year, month, day, hour, minute, second);
+}
+
+// -------- Non-blocking WiFi & NTP Functions --------
+void updateWiFiStatus()
+{
+  unsigned long now = millis();
+  if (now - lastWiFiCheckTime < WIFI_CHECK_INTERVAL) return;
+  lastWiFiCheckTime = now;
+
+  wl_status_t status = WiFi.status();
+  if (status == WL_CONNECTED) {
+    // Connected — nothing to do
+  } else if (status == WL_DISCONNECTED || status == WL_CONNECTION_LOST) {
+    Serial.println("[WiFi] Reconnecting...");
+    WiFi.reconnect();
+  }
+}
+
+void syncNTPTime()
+{
+  unsigned long now = millis();
+
+  // Only attempt NTP sync if WiFi is connected and interval has passed
+  if (WiFi.status() != WL_CONNECTED) return;
+  if (now - lastNTPSyncTime < NTP_SYNC_INTERVAL) return;
+
+  Serial.println("[NTP] Syncing time with NTP server...");
+  lastNTPSyncTime = now;
+
+  // Configure timezone and NTP servers (non-blocking)
+  configTzTime(NTP_TIMEZONE, NTP_SERVER1, NTP_SERVER2);
+}
+
+// Get local time (timezone-adjusted from RTC)
+time_t getLocalTime()
+{
+  time_t t = time(nullptr);
+  return t;
 }
 
 DisplayTideEvent getNextTide(int nowMin)
@@ -622,11 +680,18 @@ void setup()
 
   Serial.println("\n\n========== TFT TIDE DISPLAY SETUP ==========");
 
-  // Initialize M5GFX display
+  // Initialize M5Unified (Tab5 built-in RTC is auto-detected)
   auto cfg = M5.config();
   M5.begin(cfg);
 
   Serial.println("M5Unified initialized");
+
+  // Check RTC availability
+  if (!M5.Rtc.isEnabled()) {
+    Serial.println("[RTC] ERROR: RTC not found!");
+    for (;;) { M5.delay(500); }
+  }
+  Serial.println("[RTC] RTC initialized");
 
   Serial.println("Initializing display...");
 
@@ -645,15 +710,43 @@ void setup()
   Serial.print("Station set: ");
   Serial.println(stationSet ? "SUCCESS" : "FAILED");
 
-  // Load tide data for Feb 27, 2026
+  // Load tide data based on current RTC date
+  int year, month, day, hour, minute, second;
+  getRTCDateTime(year, month, day, hour, minute, second);
+  Serial.printf("[RTC] Current date: %04d-%02d-%02d %02d:%02d:%02d\n",
+                year, month, day, hour, minute, second);
+
   Serial.println("Loading tide data...");
-  loadTideDataForToday(2026, 2, 27);
+  loadTideDataForToday(year, month, day);
+
+  // WiFi/NTP sync disabled for now
+  // (pioarduino fork doesn't support WiFi.setPins() for Tab5 SDIO2 pins yet)
+  // The display will use RTC time only. Set RTC manually if needed:
+  M5.Rtc.setDateTime({{2026, 2, 28, 0}, {15, 51, 0}});
 
   Serial.println("Setup complete!\n");
 }
 
 void loop()
 {
+  // WiFi & NTP disabled for now (pioarduino needs WiFi.setPins() support)
+  // Uncomment these when Arduino ESP32 >= 3.2.0 is available:
+  // updateWiFiStatus();
+  // syncNTPTime();
+
+  // Check if date has changed and reload tide data if needed
+  static int lastDay = -1;
+  int year, month, day, hour, minute, second;
+  getRTCDateTime(year, month, day, hour, minute, second);
+
+  if (day != lastDay && lastDay != -1) {
+    // Date changed, reload tide data
+    Serial.printf("[Time] Date changed to %04d-%02d-%02d, reloading tide data...\n",
+                  year, month, day);
+    loadTideDataForToday(year, month, day);
+  }
+  lastDay = day;
+
   // Render frame
   if (millis() - lastFrame >= FRAME_TIME) {
     lastFrame = millis();
