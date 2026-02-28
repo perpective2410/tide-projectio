@@ -2,6 +2,7 @@
 #include <M5GFX.h>
 #include <WiFi.h>
 #include <time.h>
+#include <esp_sntp.h>
 
 // Station configuration is in StationConfig.h — edit that file to select stations.
 #include "StationConfig.h"
@@ -18,7 +19,9 @@ const char* NTP_SERVER2 = "time.nist.gov";
 // WiFi state
 unsigned long lastWiFiCheckTime = 0;
 unsigned long lastNTPSyncTime = 0;
+unsigned long lastWiFiReconnectTime = 0;
 const unsigned long WIFI_CHECK_INTERVAL = 5000;      // Check WiFi status every 5 seconds
+const unsigned long WIFI_RECONNECT_INTERVAL = 10000; // Wait 10 seconds before reconnecting
 const unsigned long NTP_SYNC_INTERVAL = 24 * 3600000; // Sync NTP every 24 hours
 
 M5Canvas canvas(&M5.Display);
@@ -95,6 +98,7 @@ float animatedProgress = 0;
 float targetProgress   = 0;
 
 // -------- RTC Time Functions --------
+// Returns UTC time directly from RTC (used for NTP sync and tide calculations)
 void getRTCDateTime(int& year, int& month, int& day, int& hour, int& minute, int& second)
 {
   auto dt = M5.Rtc.getDateTime();
@@ -106,25 +110,44 @@ void getRTCDateTime(int& year, int& month, int& day, int& hour, int& minute, int
   second = dt.time.seconds;
 }
 
+// Returns France local time (applies timezone offset from configTzTime)
+void getLocalDateTime(int& year, int& month, int& day, int& hour, int& minute, int& second)
+{
+  // If NTP has configured the timezone, use localtime() for correct France time
+  // Otherwise fall back to RTC UTC time
+  time_t t = time(nullptr);
+  if (t > 0) {
+    struct tm* local = localtime(&t);
+    year   = local->tm_year + 1900;
+    month  = local->tm_mon + 1;
+    day    = local->tm_mday;
+    hour   = local->tm_hour;
+    minute = local->tm_min;
+    second = local->tm_sec;
+  } else {
+    getRTCDateTime(year, month, day, hour, minute, second);
+  }
+}
+
 int getMinutesNow()
 {
   int year, month, day, hour, minute, second;
-  getRTCDateTime(year, month, day, hour, minute, second);
+  getLocalDateTime(year, month, day, hour, minute, second);
   return hour * 60 + minute;
 }
 
-// Get current time with hours, minutes, seconds from RTC
+// Get current time with hours, minutes, seconds in France local time
 void getCurrentTime(int& hour, int& minute, int& second)
 {
   int year, month, day;
-  getRTCDateTime(year, month, day, hour, minute, second);
+  getLocalDateTime(year, month, day, hour, minute, second);
 }
 
-// Get current date from RTC
+// Get current date in France local time
 void getCurrentDate(int& year, int& month, int& day)
 {
   int hour, minute, second;
-  getRTCDateTime(year, month, day, hour, minute, second);
+  getLocalDateTime(year, month, day, hour, minute, second);
 }
 
 // -------- Non-blocking WiFi & NTP Functions --------
@@ -135,27 +158,98 @@ void updateWiFiStatus()
   lastWiFiCheckTime = now;
 
   wl_status_t status = WiFi.status();
-  if (status == WL_CONNECTED) {
-    // Connected — nothing to do
-  } else if (status == WL_DISCONNECTED || status == WL_CONNECTION_LOST) {
-    Serial.println("[WiFi] Reconnecting...");
-    WiFi.reconnect();
+
+  switch(status) {
+    case WL_CONNECTED:
+      Serial.println("[WiFi] Connected!");
+      lastWiFiReconnectTime = 0;  // Reset reconnect timer
+      break;
+    case WL_NO_SSID_AVAIL:
+      Serial.println("[WiFi] SSID not found - check network name");
+      break;
+    case WL_CONNECT_FAILED:
+      Serial.println("[WiFi] Connection failed - check password");
+      if (now - lastWiFiReconnectTime > WIFI_RECONNECT_INTERVAL) {
+        WiFi.reconnect();
+        lastWiFiReconnectTime = now;
+      }
+      break;
+    case WL_DISCONNECTED:
+    case WL_CONNECTION_LOST:
+      if (now - lastWiFiReconnectTime > WIFI_RECONNECT_INTERVAL) {
+        Serial.printf("[WiFi] Status: %d - Reconnecting...\n", status);
+        WiFi.reconnect();
+        lastWiFiReconnectTime = now;
+      }
+      break;
+    default:
+      // Status 6 = WL_IDLE_STATUS (in transition) - don't spam, just wait
+      break;
   }
 }
 
 void syncNTPTime()
 {
+  static bool ntpConfigured = false;
+  static unsigned long wifiLostTime = 0;
   unsigned long now = millis();
 
-  // Only attempt NTP sync if WiFi is connected and interval has passed
-  if (WiFi.status() != WL_CONNECTED) return;
-  if (now - lastNTPSyncTime < NTP_SYNC_INTERVAL) return;
+  // Only reset NTP if WiFi has been disconnected for more than 5 seconds
+  // (don't reset on brief status 6 glitches)
+  if (WiFi.status() != WL_CONNECTED) {
+    if (wifiLostTime == 0) {
+      wifiLostTime = now;
+    }
+    if (now - wifiLostTime > 5000) {  // 5 second threshold
+      ntpConfigured = false;
+    }
+    return;
+  }
 
-  Serial.println("[NTP] Syncing time with NTP server...");
-  lastNTPSyncTime = now;
+  // WiFi is connected - clear the lost timer
+  wifiLostTime = 0;
 
-  // Configure timezone and NTP servers (non-blocking)
-  configTzTime(NTP_TIMEZONE, NTP_SERVER1, NTP_SERVER2);
+  // If already successfully synced, check interval before trying again
+  if (lastNTPSyncTime > 0 && now - lastNTPSyncTime < NTP_SYNC_INTERVAL) {
+    return;  // Wait for interval to pass before syncing again
+  }
+
+  // First time: configure NTP servers
+  if (!ntpConfigured) {
+    Serial.println("[NTP] Configuring NTP servers...");
+    configTzTime(NTP_TIMEZONE, NTP_SERVER1, NTP_SERVER2);
+    ntpConfigured = true;
+    return;  // Wait for next loop to check if sync completed
+  }
+
+  // Check if NTP has actually completed a real sync from the internet
+  if (sntp_get_sync_status() == SNTP_SYNC_STATUS_COMPLETED) {
+    time_t t = time(nullptr);
+    struct tm* timeInfo = gmtime(&t);
+
+    // Update RTC with synced UTC time
+    auto rtcTime = M5.Rtc.getDateTime();
+    rtcTime.date.year = timeInfo->tm_year + 1900;
+    rtcTime.date.month = timeInfo->tm_mon + 1;
+    rtcTime.date.date = timeInfo->tm_mday;
+    rtcTime.time.hours = timeInfo->tm_hour;
+    rtcTime.time.minutes = timeInfo->tm_min;
+    rtcTime.time.seconds = timeInfo->tm_sec;
+    M5.Rtc.setDateTime(rtcTime);
+
+    Serial.printf("[NTP] RTC synced to: %04d/%02d/%02d %02d:%02d:%02d UTC\n",
+                  rtcTime.date.year, rtcTime.date.month, rtcTime.date.date,
+                  rtcTime.time.hours, rtcTime.time.minutes, rtcTime.time.seconds);
+
+    lastNTPSyncTime = now;
+    ntpConfigured = false;
+  } else {
+    static unsigned long lastWaitLog = 0;
+    if (now - lastWaitLog > 5000) {  // Log at most every 5 seconds
+      Serial.printf("[NTP] Waiting for sync... (status: %d)\n", sntp_get_sync_status());
+      lastWaitLog = now;
+    }
+  }
 }
 
 // Get local time (timezone-adjusted from RTC)
@@ -304,6 +398,34 @@ void drawUI()
   canvas.setTextColor(canvas.color565(200, 220, 240));
   canvas.setCursor(locIconX + 22, 12);  // moved up 4px
   canvas.print("Le Palais");
+
+  // WiFi icon + SSID — center of header
+  bool wifiOk = (WiFi.status() == WL_CONNECTED);
+  uint16_t wifiColor = wifiOk ? canvas.color565(80, 220, 100) : canvas.color565(80, 90, 110);
+  int wifiIconX = W / 2 - 60;
+  int wifiIconY = 26;
+
+  // Draw WiFi signal arcs (3 arcs = full signal when connected)
+  // Dot at bottom
+  canvas.fillCircle(wifiIconX, wifiIconY + 2, 3, wifiColor);
+  // Inner arc
+  canvas.drawArc(wifiIconX, wifiIconY + 2, 7, 5, 225, 315, wifiColor);
+  // Middle arc
+  canvas.drawArc(wifiIconX, wifiIconY + 2, 13, 11, 225, 315, wifiColor);
+  // Outer arc (only when connected)
+  if (wifiOk) {
+    canvas.drawArc(wifiIconX, wifiIconY + 2, 19, 17, 225, 315, wifiColor);
+  }
+
+  // SSID name or "No WiFi" label
+  canvas.setFont(&fonts::FreeSansBold18pt7b);
+  canvas.setTextColor(wifiColor);
+  canvas.setCursor(wifiIconX + 26, 12);
+  if (wifiOk) {
+    canvas.print(WIFI_SSID);
+  } else {
+    canvas.print("No WiFi");
+  }
 
   // Clock icon (bigger) + time + date — right side (inline)
   // Get current time and date
@@ -719,25 +841,32 @@ void setup()
   Serial.println("Loading tide data...");
   loadTideDataForToday(year, month, day);
 
-  // WiFi/NTP sync disabled for now
-  // (pioarduino fork doesn't support WiFi.setPins() for Tab5 SDIO2 pins yet)
-  // The display will use RTC time only. Set RTC manually if needed:
-  M5.Rtc.setDateTime({{2026, 2, 28, 0}, {15, 51, 0}});
+  // Start WiFi connection (non-blocking)
+  // Tab5 uses ESP32-C6 WiFi coprocessor on SDIO2 with non-standard GPIO pins
+  Serial.println("Starting WiFi connection...");
+#if defined(CONFIG_IDF_TARGET_ESP32P4)
+  WiFi.setPins(GPIO_NUM_12, GPIO_NUM_13, GPIO_NUM_11,
+               GPIO_NUM_10, GPIO_NUM_9, GPIO_NUM_8, GPIO_NUM_15);
+#endif
+  WiFi.mode(WIFI_STA);
+  WiFi.begin(WIFI_SSID, WIFI_PASS);
+
+  // Trigger first NTP sync immediately when WiFi connects
+  lastNTPSyncTime = 0;
 
   Serial.println("Setup complete!\n");
 }
 
 void loop()
 {
-  // WiFi & NTP disabled for now (pioarduino needs WiFi.setPins() support)
-  // Uncomment these when Arduino ESP32 >= 3.2.0 is available:
-  // updateWiFiStatus();
-  // syncNTPTime();
+  // Non-blocking WiFi & NTP updates
+  updateWiFiStatus();
+  syncNTPTime();
 
   // Check if date has changed and reload tide data if needed
   static int lastDay = -1;
   int year, month, day, hour, minute, second;
-  getRTCDateTime(year, month, day, hour, minute, second);
+  getLocalDateTime(year, month, day, hour, minute, second);
 
   if (day != lastDay && lastDay != -1) {
     // Date changed, reload tide data
