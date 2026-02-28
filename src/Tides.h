@@ -52,6 +52,15 @@ public:
     TideInfo& peek(int index);
 };
 
+// ── Station Configuration ───────────────────────────────────────────────────
+// Create StationConfig.h in your project/example directory with:
+//   #define INCLUDE_LE_PALAIS
+//   #define INCLUDE_SHEERNESS
+//
+// Each station adds ~5-15 KB to firmware (depends on harmonics).
+// Brest is always included (French tide coefficient reference).
+// Station names use underscores: LE_PALAIS, SAINT_MALO, BOULOGNE_SUR_MER, etc.
+
 // ── Public API ──────────────────────────────────────────────────────────────
 
 // Select a station by id.  Station data is compiled into the firmware
@@ -71,3 +80,8 @@ TideInfo tides(int year, int month, int day);
 
 // France timezone offset in minutes (+60 winter / +120 summer DST)
 int getFranceTimezoneOffset(time_t epoch);
+
+// ── Station Registry ────────────────────────────────────────────────────────
+// Include the user configuration first, then the registry
+#include "StationConfig.h"
+#include "stations/StationRegistry.h"

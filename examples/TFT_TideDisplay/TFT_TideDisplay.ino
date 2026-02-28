@@ -1,4 +1,7 @@
 #include <M5GFX.h>
+
+// Station configuration is in StationConfig.h — edit that file to select stations.
+#include "StationConfig.h"
 #include <Tides.h>
 #include "FreeSansBold48pt7b.h"
 
@@ -614,21 +617,50 @@ void drawUI()
 
 void setup()
 {
-  display.begin();
+  // Initialize Serial
+  Serial.begin(115200);
+  delay(1000);  // Wait for serial to be ready
+  while (!Serial && millis() < 3000);  // Timeout after 3 seconds
+  Serial.flush();
+
+  Serial.println("\n\n========== TFT TIDE DISPLAY SETUP ==========");
+  Serial.println("Initializing display...");
+
+  // Initialize M5GFX display
+  display.init();
   display.setRotation(1);
+
+  Serial.println("Display initialized");
+  Serial.println("Creating canvas...");
 
   canvas.setColorDepth(16);
   canvas.createSprite(W, H);
 
+  Serial.println("Canvas created - showing init message");
+
+  // Show loading message while initializing
+  canvas.fillScreen(canvas.color565(12, 16, 28));
+  canvas.setFont(&fonts::FreeSansBold18pt7b);
+  canvas.setTextColor(canvas.color565(0, 180, 220));
+  canvas.setCursor(W/2 - 100, H/2);
+  canvas.println("Initializing...");
+  canvas.pushSprite(0, 0);
+
+  Serial.println("Init message pushed to display");
+
   // Initialize Tides Library
-  setStation("Le Palais");
+  Serial.println("Setting station: Le Palais");
+  bool stationSet = setStation("Le Palais");
+  Serial.print("Station set: ");
+  Serial.println(stationSet ? "SUCCESS" : "FAILED");
 
   // Load tide data for today (February 27, 2026 — static for now)
+  Serial.println("Loading tide data...");
   loadTideDataForToday(2026, 2, 27);
 
   // ========== Performance Test: Calculate tides for next 10 days ==========
-  Serial.begin(115200);
-  delay(100);
+  // Uncomment below to run performance test (adds ~5 seconds to startup)
+  /*
   Serial.println("\n========== TIDE CALCULATION PERFORMANCE TEST ==========");
   Serial.println("Calculating tides for 10 consecutive days...\n");
 
@@ -674,6 +706,7 @@ void setup()
   Serial.printf("Amplitude samples: %d (every %.1f minutes)\n",
     TIDE_AMPLITUDE_SAMPLES, 1440.0 / TIDE_AMPLITUDE_SAMPLES);
   Serial.println("============================================\n");
+  */
 }
 
 void loop()

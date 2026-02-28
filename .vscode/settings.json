@@ -68,5 +68,6 @@
         "tuple": "cpp",
         "utility": "cpp",
         "cinttypes": "cpp"
-    }
+    },
+    "C_Cpp.dimInactiveRegions": false
 }
