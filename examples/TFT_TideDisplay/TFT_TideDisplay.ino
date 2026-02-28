@@ -1,9 +1,24 @@
 #include <M5GFX.h>
+#include <WiFi.h>
+#include <time.h>
 
 // Station configuration is in StationConfig.h — edit that file to select stations.
 #include "StationConfig.h"
 #include <Tides.h>
 #include "FreeSansBold48pt7b.h"
+
+// ---- WiFi & Time Configuration ----
+const char* WIFI_SSID = "YOUR_SSID";
+const char* WIFI_PASS = "YOUR_PASSWORD";
+const char* NTP_SERVER = "pool.ntp.org";
+const long GMT_OFFSET_SEC = 0;           // UTC
+const int DAYLIGHT_OFFSET_SEC = 0;        // No DST
+const unsigned long NTP_SYNC_INTERVAL = 24 * 3600 * 1000;  // 24 hours in milliseconds
+
+// Time sync state
+unsigned long lastNTPSync = 0;
+bool wifiConnected = false;
+bool timeSet = false;
 
 M5GFX display;
 M5Canvas canvas(&display);
@@ -636,17 +651,7 @@ void setup()
   canvas.setColorDepth(16);
   canvas.createSprite(W, H);
 
-  Serial.println("Canvas created - showing init message");
-
-  // Show loading message while initializing
-  canvas.fillScreen(canvas.color565(12, 16, 28));
-  canvas.setFont(&fonts::FreeSansBold18pt7b);
-  canvas.setTextColor(canvas.color565(0, 180, 220));
-  canvas.setCursor(W/2 - 100, H/2);
-  canvas.println("Initializing...");
-  canvas.pushSprite(0, 0);
-
-  Serial.println("Init message pushed to display");
+  Serial.println("Canvas created");
 
   // Initialize Tides Library
   Serial.println("Setting station: Le Palais");
@@ -658,55 +663,6 @@ void setup()
   Serial.println("Loading tide data...");
   loadTideDataForToday(2026, 2, 27);
 
-  // ========== Performance Test: Calculate tides for next 10 days ==========
-  // Uncomment below to run performance test (adds ~5 seconds to startup)
-  /*
-  Serial.println("\n========== TIDE CALCULATION PERFORMANCE TEST ==========");
-  Serial.println("Calculating tides for 10 consecutive days...\n");
-
-  unsigned long totalStartTime = millis();
-  int totalEvents = 0;
-  double totalMemoryUsed = 0.0;
-
-  for (int day = 0; day < 10; day++) {
-    unsigned long dayStart = millis();
-
-    TideInfo ti = tides(2026, 2, 27 + day);
-
-    unsigned long dayTime = millis() - dayStart;
-    double dayMemory = sizeof(TideInfo) / 1024.0;  // KB
-    totalMemoryUsed += dayMemory;
-    totalEvents += ti.numEvents;
-
-    Serial.printf("Day %d (Feb %d): ", day + 1, 27 + day);
-    Serial.printf("%d tides, ", ti.numEvents);
-    Serial.printf("%lu ms, ", dayTime);
-    Serial.printf("%.2f KB\n", dayMemory);
-
-    // Print tide details
-    for (int i = 0; i < ti.numEvents; i++) {
-      int h = (int)ti.events[i].time;
-      int m = (int)((ti.events[i].time - h) * 60);
-      Serial.printf("  - %02d:%02d %s %.2f m\n",
-        h, m,
-        ti.events[i].isPeak ? "HM" : "BM",
-        ti.events[i].amplitude);
-    }
-    Serial.printf("  Morning Coeff: %d, Afternoon Coeff: %d\n",
-      ti.morningCoefficient, ti.afternoonCoefficient);
-  }
-
-  unsigned long totalTime = millis() - totalStartTime;
-
-  Serial.println("\n========== SUMMARY ==========");
-  Serial.printf("Total time: %lu ms\n", totalTime);
-  Serial.printf("Average per day: %.1f ms\n", (float)totalTime / 10.0);
-  Serial.printf("Total events: %d\n", totalEvents);
-  Serial.printf("Total memory per day: %.2f KB\n", totalMemoryUsed / 10.0);
-  Serial.printf("Amplitude samples: %d (every %.1f minutes)\n",
-    TIDE_AMPLITUDE_SAMPLES, 1440.0 / TIDE_AMPLITUDE_SAMPLES);
-  Serial.println("============================================\n");
-  */
 }
 
 void loop()

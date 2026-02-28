@@ -13,7 +13,7 @@
             "request": "launch",
             "name": "PIO Debug",
             "executable": "/home/fvaldelievre/projects/pollinate-infrastructure/issues/tide-projectio/.pio/build/esp_wroom_02-usb/firmware.elf",
-            "projectEnvName": "m5stack_tab5",
+            "projectEnvName": "esp_wroom_02-usb",
             "toolchainBinDir": "/home/fvaldelievre/.platformio/packages/toolchain-xtensa-esp-elf/bin",
             "internalConsoleOptions": "openOnSessionStart",
             "preLaunchTask": {
@@ -26,7 +26,7 @@
             "request": "launch",
             "name": "PIO Debug (skip Pre-Debug)",
             "executable": "/home/fvaldelievre/projects/pollinate-infrastructure/issues/tide-projectio/.pio/build/esp_wroom_02-usb/firmware.elf",
-            "projectEnvName": "m5stack_tab5",
+            "projectEnvName": "esp_wroom_02-usb",
             "toolchainBinDir": "/home/fvaldelievre/.platformio/packages/toolchain-xtensa-esp-elf/bin",
             "internalConsoleOptions": "openOnSessionStart"
         },
@@ -35,7 +35,7 @@
             "request": "launch",
             "name": "PIO Debug (without uploading)",
             "executable": "/home/fvaldelievre/projects/pollinate-infrastructure/issues/tide-projectio/.pio/build/esp_wroom_02-usb/firmware.elf",
-            "projectEnvName": "m5stack_tab5",
+            "projectEnvName": "esp_wroom_02-usb",
             "toolchainBinDir": "/home/fvaldelievre/.platformio/packages/toolchain-xtensa-esp-elf/bin",
             "internalConsoleOptions": "openOnSessionStart",
             "loadMode": "manual"
