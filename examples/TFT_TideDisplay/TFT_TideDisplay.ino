@@ -730,7 +730,8 @@ void drawUI()
   }
 
   // Draw tide curve using pre-computed Y cache (no float math per pixel)
-  float dayProgress = showTomorrow ? 0.0f : (float)nowMin / 1440.0f;
+  // Always use current time for yellow line position, regardless of which day is displayed
+  float dayProgress = (float)nowMin / 1440.0f;
   int splitX = CHART_L + (int)(dayProgress * CHART_CW);
   int* activeChartY = chartYToday;
 
@@ -783,8 +784,7 @@ void drawUI()
 }
 
 // -------- Touch Detection Task (runs independently of render loop) --------
-// drawUI() can block for tens of milliseconds, causing short taps to be missed
-// by M5.update(). This task polls touch at 20 ms on a separate RTOS thread.
+// Polls touch at 20 ms on a separate RTOS thread for responsive touch detection.
 volatile bool touchTogglePending = false;
 
 void touchDetectionTask(void* params)
@@ -799,6 +799,27 @@ void touchDetectionTask(void* params)
     }
     prevTouching = isTouching;
     vTaskDelay(pdMS_TO_TICKS(20));
+  }
+}
+
+// -------- Display Render Task (runs independently of main loop) --------
+// Handles the expensive drawUI() operation in a background task.
+// This keeps the main loop fast and responsive to touch.
+volatile bool redrawRequested = true;  // Request initial redraw
+
+void renderTask(void* params)
+{
+  unsigned long lastRender = 0;
+  const unsigned long RENDER_INTERVAL = 800;  // Render every 800ms (hardware limit)
+
+  for (;;) {
+    unsigned long now = millis();
+    if (redrawRequested || (now - lastRender >= RENDER_INTERVAL)) {
+      drawUI();
+      lastRender = now;
+      redrawRequested = false;
+    }
+    vTaskDelay(pdMS_TO_TICKS(50));  // Check every 50ms if redraw needed
   }
 }
 
@@ -868,18 +889,24 @@ void setup()
   lastNTPSyncTime = 0;
 
   xTaskCreate(touchDetectionTask, "touch", 2048, nullptr, 5, nullptr);
+  xTaskCreate(renderTask, "render", 4096, nullptr, 4, nullptr);
 
   Serial.println("Setup complete!\n");
 }
 
 void loop()
 {
-  // Touch toggle — set by touchDetectionTask independently of render loop
+  // Touch toggle — set by touchDetectionTask independently of render task
+  static int touchCount = 0;
   if (touchTogglePending) {
     touchTogglePending = false;
     showTomorrow = !showTomorrow;
-    Serial.printf("[Touch] Toggled to: %s\n", showTomorrow ? "Demain" : "Aujourd'hui");
-    // No forced redraw — display updates naturally on next frame (within 33ms)
+    touchCount++;
+    unsigned long now = millis();
+    Serial.printf("[Touch] Toggled to: %s (touch #%d at %lu ms)\n",
+                  showTomorrow ? "Demain" : "Aujourd'hui", touchCount, now);
+    // Request immediate redraw on touch
+    redrawRequested = true;
   }
 
   // Non-blocking WiFi & NTP updates
@@ -896,13 +923,22 @@ void loop()
     Serial.printf("[Time] Date changed to %04d-%02d-%02d, reloading tide data...\n",
                   year, month, day);
     loadTideDataForToday(year, month, day);
+    redrawRequested = true;
   }
   lastDay = day;
 
-  // Render frame
-  if (millis() - lastFrame >= FRAME_TIME) {
-    lastFrame = millis();
-    drawUI();
+  // Keep loop fast and responsive — minimal delay
+  delay(1);
+
+  // Debug: show loop frequency
+  static unsigned long lastLoopPrint = 0;
+  static int loopCount = 0;
+  loopCount++;
+  if (millis() - lastLoopPrint > 5000) {
+    Serial.printf("[Loop] Frequency: %d cycles per 5 seconds (%.1f Hz)\n",
+                  loopCount, loopCount / 5.0f);
+    loopCount = 0;
+    lastLoopPrint = millis();
   }
 
 }
