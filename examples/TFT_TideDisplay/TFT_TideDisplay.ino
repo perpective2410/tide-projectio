@@ -83,20 +83,20 @@ double getTideAmplitudeAtTime(TideInfo& info, int timeMin)
 
 void computeChartYCache(TideInfo& info, int* cache)
 {
-  double minAmp = 10.0, maxAmp = -10.0;
-  for (int i = 0; i < info.numEvents; i++) {
-    minAmp = min(minAmp, info.events[i].amplitude);
-    maxAmp = max(maxAmp, info.events[i].amplitude);
-  }
+  // Use fixed 0-6m scale (matches grid labels)
+  double minAmp = 0.0;
+  double maxAmp = 6.0;
   double range = maxAmp - minAmp;
-  if (range < 0.1) range = 1.0;
 
-  for (int i = 0; i <= CHART_CW; i++) {
+  // Second pass: compute cache with correct min/max
+  for (int i = 0; i < CHART_CW; i++) {
     int timeMin = (int)((float)i / CHART_CW * 1440.0f);
     double amp = getTideAmplitudeAtTime(info, timeMin);
     float norm = constrain((float)(amp - minAmp) / range * 2.0f - 1.0f, -1.0f, 1.0f);
     cache[i] = CHART_CY - (int)(norm * CHART_CH / 2.4f);
   }
+  // Fill last pixel with same value as previous to avoid boundary artifact
+  if (CHART_CW > 0) cache[CHART_CW] = cache[CHART_CW - 1];
 }
 
 // -------- Populate a DisplayTideEvent array from a TideInfo --------
@@ -703,7 +703,7 @@ void drawUI()
   for (int h = 0; h <= 6; h++) {
     int labelY = CHART_B - (h * CHART_CH / 6);
     canvas.drawFastHLine(CHART_L, labelY, CHART_CW, canvas.color565(40, 60, 90));
-    canvas.setCursor(CHART_L - 35, labelY + 4);
+    canvas.setCursor(CHART_L - 35, labelY - 4);  // Moved up 4 pixels to align with grid line
     canvas.printf("%d", h);
   }
 
@@ -738,8 +738,9 @@ void drawUI()
 
   // Single pass: fill under curve + draw curve line
   // Always use the same fill regardless of time or view mode, so chart looks identical
-  for (int x = CHART_L; x <= CHART_R; x++) {
+  for (int x = CHART_L; x < CHART_R; x++) {
     int i = x - CHART_L;
+    if (i >= CHART_CW) break;  // Don't go past cache bounds
     int y = activeChartY[i];
 
     // Fill column from curve down to chart bottom (always the same color)
@@ -750,17 +751,6 @@ void drawUI()
       canvas.drawLine(x - 1, activeChartY[i - 1], x, y, canvas.color565(0, 200, 255));
     }
   }
-
-  // Current time: vertical line + knob (shown regardless of view mode)
-  int current_x = splitX;
-  canvas.drawFastVLine(current_x, CHART_T, CHART_CH, canvas.color565(255, 200, 0));
-  int nowCacheIdx = constrain((int)(dayProgress * CHART_CW), 0, CHART_CW);
-  int currentY = activeChartY[nowCacheIdx];
-  canvas.fillCircle(current_x, currentY, 6, canvas.color565(255, 200, 0));
-  canvas.drawCircle(current_x, currentY, 6, canvas.color565(255, 255, 255));
-
-  // Draw chart border
-  canvas.drawRect(CHART_L, CHART_T, CHART_CW, CHART_CH, canvas.color565(50, 80, 120));
 
   // Add hour labels on horizontal axis (0 to 24 hours) — below the chart
   canvas.setFont(&fonts::FreeSansBold9pt7b);
