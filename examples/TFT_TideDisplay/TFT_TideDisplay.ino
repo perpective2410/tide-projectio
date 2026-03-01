@@ -735,23 +735,21 @@ void drawUI()
   int* activeChartY = chartYToday;
 
   // Single pass: fill under curve + draw curve line
+  // Always use the same fill regardless of time or view mode, so chart looks identical
   for (int x = CHART_L; x <= CHART_R; x++) {
     int i = x - CHART_L;
     int y = activeChartY[i];
-    bool is_past = (x < splitX);
 
-    // Fill column from curve down to chart bottom
-    canvas.drawFastVLine(x, y, CHART_B - y,
-      is_past ? canvas.color565(0, 120, 180) : canvas.color565(30, 50, 80));
+    // Fill column from curve down to chart bottom (always the same color)
+    canvas.drawFastVLine(x, y, CHART_B - y, canvas.color565(0, 120, 180));
 
-    // Curve line segment to previous pixel
+    // Curve line segment to previous pixel (always the same color)
     if (i > 0) {
-      canvas.drawLine(x - 1, activeChartY[i - 1], x, y,
-        is_past ? canvas.color565(0, 200, 255) : canvas.color565(50, 80, 120));
+      canvas.drawLine(x - 1, activeChartY[i - 1], x, y, canvas.color565(0, 200, 255));
     }
   }
 
-  // Current time: vertical line + knob (today only)
+  // Current time: vertical line + knob (shown regardless of view mode)
   int current_x = splitX;
   canvas.drawFastVLine(current_x, CHART_T, CHART_CH, canvas.color565(255, 200, 0));
   int nowCacheIdx = constrain((int)(dayProgress * CHART_CW), 0, CHART_CW);
@@ -823,6 +821,11 @@ void setup()
     for (;;) { M5.delay(500); }
   }
   Serial.println("[RTC] RTC initialized");
+
+  // Configure France timezone immediately (even before NTP/WiFi)
+  // This ensures localtime() always applies France timezone to RTC time
+  configTzTime(NTP_TIMEZONE, NTP_SERVER1, NTP_SERVER2);
+  Serial.println("[TZ] France timezone configured");
 
   Serial.println("Initializing display...");
 
