@@ -568,20 +568,16 @@ void drawUI()
   const int BAR_H = 45;    // thicker progress bar (was 30)
   const int BAR_R = 14;    // corner radius
 
-  // Previous tide direction arrow — left side
-  drawSmallArrow(BAR_X + 20, 345, prev.isHigh, canvas.color565(80, 100, 130));
-
-  // Next tide direction arrow — right side
-  drawSmallArrow(INNER_R - 30, 345, next.isHigh,
+  // Arrows moved higher to avoid artifact at bottom of bar
+  drawSmallArrow(BAR_X + 20, 330, prev.isHigh, canvas.color565(80, 100, 130));
+  drawSmallArrow(INNER_R - 30, 330, next.isHigh,
                  next.isHigh ? canvas.color565(0, 180, 220) : canvas.color565(100, 120, 150));
 
-  // Bar background (dark)
+  // Bar background (dark) with rounded corners
   canvas.fillRoundRect(BAR_X, BAR_Y, BAR_W, BAR_H, BAR_R,
                        canvas.color565(28, 38, 55));
-  canvas.drawRoundRect(BAR_X, BAR_Y, BAR_W, BAR_H, BAR_R,
-                       canvas.color565(70, 90, 120));
 
-  // Filled portion (cyan progress) - static, not animated
+  // Filled portion (cyan progress) with rounded corners - static, not animated
   int fillW = (int)(BAR_W * targetProgress);
   if (fillW > BAR_R * 2) {
     canvas.fillRoundRect(BAR_X, BAR_Y, fillW, BAR_H, BAR_R,
@@ -590,13 +586,18 @@ void drawUI()
     canvas.fillRect(BAR_X, BAR_Y, fillW, BAR_H, canvas.color565(0, 180, 220));
   }
 
-  // White slider knob (circle) at progress position
-  int knobRadius = BAR_H / 2 + 2;  // Reduced to keep within bar bounds
+  // Draw rounded border
+  canvas.drawRoundRect(BAR_X, BAR_Y, BAR_W, BAR_H, BAR_R,
+                       canvas.color565(70, 90, 120));
+
+  // White slider knob (circle) at progress position - clipped to bar bounds
+  int knobRadius = BAR_H / 2 - 2;  // Smaller radius to prevent overflow
   int knobX = BAR_X + fillW;
-  knobX = constrain(knobX, BAR_X + knobRadius, BAR_X + BAR_W - knobRadius);
-  canvas.fillCircle(knobX, BAR_Y + BAR_H / 2, knobRadius,
+  knobX = constrain(knobX, BAR_X + knobRadius + 2, BAR_X + BAR_W - knobRadius - 2);
+  int knobY = BAR_Y + BAR_H / 2;
+  canvas.fillCircle(knobX, knobY, knobRadius,
                     canvas.color565(255, 255, 255));
-  canvas.fillCircle(knobX, BAR_Y + BAR_H / 2, knobRadius - 4,
+  canvas.fillCircle(knobX, knobY, knobRadius - 3,
                     canvas.color565(0, 180, 220));
 
   // Thin horizontal divider between progress zone and list
