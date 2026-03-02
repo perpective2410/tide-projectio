@@ -6,6 +6,12 @@
 
 Station data is compiled directly into the firmware; no SD card, SPIFFS, or LittleFS image is required. The library works identically in [Wokwi](https://wokwi.com) simulation and on real hardware.
 
+## Display Example
+
+M5Stack Tab5 live tide display with sinusoidal chart, real-time tide events, and French tide coefficients:
+
+![M5Stack Tab5 Tide Display](images/screenshot-m5stack-tab5.png)
+
 ---
 
 ## Features
@@ -22,19 +28,25 @@ Station data is compiled directly into the firmware; no SD card, SPIFFS, or Litt
 
 ## Installation
 
-### PlatformIO
+### PlatformIO Library Registry
 
-Add the GitHub repository to your `platformio.ini`:
+Add to your `platformio.ini`:
 
 ```ini
 lib_deps =
-  https://github.com/perpective2410/tide-projectio.git
+  perpective2410/Tides
   paulstoffregen/Time @ ^1.6.1
 ```
 
-### Arduino IDE
+Or search for **`Tides`** in the [PlatformIO Library Registry](https://registry.platformio.org/libraries/perpective2410/Tides).
 
-Download the repository as a ZIP and use **Sketch → Include Library → Add .ZIP Library…**
+### Arduino Library Manager
+
+Search for **`Tides`** in the Arduino IDE Library Manager (**Sketch → Include Library → Manage Libraries…**), or manually add the GitHub repository:
+
+```ini
+https://github.com/perpective2410/tide-projectio.git
+```
 
 Then copy an example sketch from the `examples/` folder:
 - Open `examples/BelleIle_minimal/BelleIle_minimal.ino` in Arduino IDE, or
