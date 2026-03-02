@@ -410,23 +410,31 @@ void drawUI()
   // ================================================================
 
   // ===================== ZONE A — HEADER BAR =======================
+  // Pre-calculate header bar colors
+  uint16_t headerBgColor = canvas.color565(18, 24, 38);
+  uint16_t locationIconColor = canvas.color565(0, 180, 220);
+  uint16_t locationTextColor = canvas.color565(200, 220, 240);
+  uint16_t clockIconColor = canvas.color565(100, 120, 150);
+  uint16_t timeTextColor = canvas.color565(160, 180, 200);
+  uint16_t headerDividerColor = canvas.color565(35, 50, 75);
+
   // Background strip
-  canvas.fillRect(0, 0, W, 44, canvas.color565(18, 24, 38));
+  canvas.fillRect(0, 0, W, 44, headerBgColor);
 
   // Location icon (bigger pin) — left side
   int locIconX = 30;
   int locIconY = 24;  // 2px down from original (5px down - 3px up)
   // Pin head (circle) — bigger
-  canvas.fillCircle(locIconX, locIconY - 4, 9, canvas.color565(0, 180, 220));
+  canvas.fillCircle(locIconX, locIconY - 4, 9, locationIconColor);
   // Pin tail (triangle pointing down) — bigger
   canvas.fillTriangle(locIconX,     locIconY + 10,
                       locIconX - 6, locIconY - 2,
                       locIconX + 6, locIconY - 2,
-                      canvas.color565(0, 180, 220));
+                      locationIconColor);
 
   // "Le Palais" text — right of location icon
   canvas.setFont(&fonts::FreeSansBold18pt7b);
-  canvas.setTextColor(canvas.color565(200, 220, 240));
+  canvas.setTextColor(locationTextColor);
   canvas.setCursor(locIconX + 22, 12);  // moved up 4px
   canvas.print("Le Palais");
 
@@ -449,7 +457,6 @@ void drawUI()
   }
 
   // SSID name or "No WiFi" label
-  canvas.setFont(&fonts::FreeSansBold18pt7b);
   canvas.setTextColor(wifiColor);
   canvas.setCursor(wifiIconX + 26, 12);
   if (wifiOk) {
@@ -469,19 +476,18 @@ void drawUI()
   int clockIconX = W - 380;
   int clockIconY = 24;  // icons stay at same vertical position
   // Clock face (circle outline) — bigger
-  canvas.drawCircle(clockIconX, clockIconY, 12, canvas.color565(100, 120, 150));
+  canvas.drawCircle(clockIconX, clockIconY, 12, clockIconColor);
   // Clock hands — bigger
-  canvas.drawLine(clockIconX, clockIconY, clockIconX,     clockIconY - 8, canvas.color565(100, 120, 150)); // 12 o'clock
-  canvas.drawLine(clockIconX, clockIconY, clockIconX + 7, clockIconY,     canvas.color565(100, 120, 150)); // 3 o'clock
+  canvas.drawLine(clockIconX, clockIconY, clockIconX,     clockIconY - 8, clockIconColor); // 12 o'clock
+  canvas.drawLine(clockIconX, clockIconY, clockIconX + 7, clockIconY,     clockIconColor); // 3 o'clock
 
   // Time and date inline
-  canvas.setFont(&fonts::FreeSansBold18pt7b);
-  canvas.setTextColor(canvas.color565(160, 180, 200));
+  canvas.setTextColor(timeTextColor);
   canvas.setCursor(clockIconX + 22, 12);  // same gap as location icon (22px)
   canvas.printf("%02d:%02d:%02d  %02d/%02d/%d", currHour, currMinute, currSecond, currDay, currMonth, currYear);
 
   // Thin separator line below header
-  canvas.drawFastHLine(0, 44, W, canvas.color565(35, 50, 75));
+  canvas.drawFastHLine(0, 44, W, headerDividerColor);
 
   // ===================== ZONE B — MAIN CARD ========================
   // Outer rounded rectangle card, 10px margin left/right, 10px below header
@@ -490,11 +496,12 @@ void drawUI()
   const int CARD_W = W - 40;
   const int CARD_H = H - 64;   // bottom at Y=710
   const int CARD_R = 18;       // corner radius
+  uint16_t cardBgColor = canvas.color565(20, 28, 42);
+  uint16_t cardBorderColor = canvas.color565(48, 68, 98);
+  uint16_t dividerColor = canvas.color565(35, 50, 75);
 
-  canvas.fillRoundRect(CARD_X, CARD_Y, CARD_W, CARD_H, CARD_R,
-                       canvas.color565(20, 28, 42));
-  canvas.drawRoundRect(CARD_X, CARD_Y, CARD_W, CARD_H, CARD_R,
-                       canvas.color565(48, 68, 98));
+  canvas.fillRoundRect(CARD_X, CARD_Y, CARD_W, CARD_H, CARD_R, cardBgColor);
+  canvas.drawRoundRect(CARD_X, CARD_Y, CARD_W, CARD_H, CARD_R, cardBorderColor);
 
   // Inner content left/right margins (relative to card)
   const int INNER_X = CARD_X + 36;       // X=56  — left edge of inner content
@@ -511,49 +518,52 @@ void drawUI()
   const int ARROW_CY = 170;         // vertical center of big arrow circle
   const int ARROW_R  = 85;          // smaller radius
 
+  // Pre-calculate top panel colors
+  uint16_t topPanelCoeffColor = canvas.color565(255, 175, 50);   // orange
+  uint16_t topPanelTimeColor = canvas.color565(240, 245, 255);
+  uint16_t topPanelPmBmColor = canvas.color565(130, 155, 185);
+  uint16_t topPanelCountdownColor = canvas.color565(255, 175, 50);
+  uint16_t topPanelRisingColor = canvas.color565(80, 220, 100);
+  uint16_t topPanelFallingColor = canvas.color565(0, 200, 255);
+
   // Coefficient number (same size as 15:36) — on the right side, vertically centered
   canvas.setFont(&FreeSansBold48pt7b);
-  canvas.setTextColor(canvas.color565(255, 175, 50));  // orange
+  canvas.setTextColor(topPanelCoeffColor);
   canvas.setCursor(INNER_R - 160, 155);  // vertically centered, right side
   canvas.printf("%d", next.coefficient);
 
   // Big arrow circle (right side, vertically centered in top panel)
-  uint16_t arrowColor = isRising ? canvas.color565(80, 220, 100) : canvas.color565(0, 200, 255);
+  uint16_t arrowColor = isRising ? topPanelRisingColor : topPanelFallingColor;
   drawBigCenterArrow(ARROW_CX, ARROW_CY, isRising, arrowColor, ARROW_R);
-
 
   // Large next-tide time — FreeSansBold48pt7b, baseline at Y=90
   // TOP OF TIME TEXT at ~Y=25, baseline at Y=90, bottom at ~Y=95
-  canvas.setFont(&FreeSansBold48pt7b);
-  canvas.setTextColor(canvas.color565(240, 245, 255));
+  canvas.setTextColor(topPanelTimeColor);
   canvas.setCursor(INNER_X, 90);   // baseline at Y=90 (moved higher)
   canvas.printf("%02d:%02d", next.hour, next.minute);
 
   // PM/BM label beside the time — use same big font, closer to time, aligned baseline
-  canvas.setFont(&FreeSansBold48pt7b);
-  canvas.setTextColor(canvas.color565(130, 155, 185));
+  canvas.setTextColor(topPanelPmBmColor);
   canvas.setCursor(INNER_X + 310, 90);  // same baseline as time, same font size
   canvas.print(next.isHigh ? "PM" : "BM");
 
   // Status text (MONTANTE / DESCENDANTE) — baseline at Y=190 (100px below time)
   canvas.setFont(&fonts::FreeSansBold18pt7b);
   const char* statusText = isRising ? "MONTANTE" : "DESCENDANTE";
-  uint16_t statusColor   = isRising ? canvas.color565(80, 220, 100) : canvas.color565(0, 200, 255);
+  uint16_t statusColor   = isRising ? topPanelRisingColor : topPanelFallingColor;
   canvas.setTextColor(statusColor);
   canvas.setCursor(INNER_X, 190);   // baseline at Y=190 — clear gap from time
-
   canvas.print(statusText);
 
   // Countdown "Xh YYm" — baseline at Y=245 (55px below status)
-  canvas.setFont(&fonts::FreeSansBold18pt7b);
-  canvas.setTextColor(canvas.color565(255, 175, 50));
+  canvas.setTextColor(topPanelCountdownColor);
   int countHours = diff / 60;
   int countMins  = diff % 60;
   canvas.setCursor(INNER_X, 245);   // baseline at Y=245
   canvas.printf("%dh%02dm", countHours, countMins);
 
   // Thin horizontal divider between top panel and progress bar zone
-  canvas.drawFastHLine(CARD_X + 10, 290, CARD_W - 20, canvas.color565(35, 50, 75));
+  canvas.drawFastHLine(CARD_X + 10, 290, CARD_W - 20, dividerColor);
 
   // ===================== ZONE D — PROGRESS BAR =====================
   // Y=295..370
@@ -568,40 +578,45 @@ void drawUI()
   const int BAR_H = 45;    // thicker progress bar (was 30)
   const int BAR_R = 14;    // corner radius
 
+  // Pre-calculate bar colors
+  uint16_t barArrowColor = canvas.color565(80, 100, 130);
+  uint16_t barNextHighColor = canvas.color565(0, 180, 220);
+  uint16_t barNextLowColor = canvas.color565(100, 120, 150);
+  uint16_t barBgColor = canvas.color565(28, 38, 55);
+  uint16_t barFillColor = canvas.color565(0, 180, 220);
+  uint16_t barBorderColor = canvas.color565(70, 90, 120);
+  uint16_t barKnobWhite = canvas.color565(255, 255, 255);
+  uint16_t barKnobCyan = canvas.color565(0, 180, 220);
+
   // Arrows moved higher to avoid artifact at bottom of bar
-  drawSmallArrow(BAR_X + 20, 330, prev.isHigh, canvas.color565(80, 100, 130));
+  drawSmallArrow(BAR_X + 20, 330, prev.isHigh, barArrowColor);
   drawSmallArrow(INNER_R - 30, 330, next.isHigh,
-                 next.isHigh ? canvas.color565(0, 180, 220) : canvas.color565(100, 120, 150));
+                 next.isHigh ? barNextHighColor : barNextLowColor);
 
   // Bar background (dark) with rounded corners
-  canvas.fillRoundRect(BAR_X, BAR_Y, BAR_W, BAR_H, BAR_R,
-                       canvas.color565(28, 38, 55));
+  canvas.fillRoundRect(BAR_X, BAR_Y, BAR_W, BAR_H, BAR_R, barBgColor);
 
   // Filled portion (cyan progress) with rounded corners - static, not animated
   int fillW = (int)(BAR_W * targetProgress);
   if (fillW > BAR_R * 2) {
-    canvas.fillRoundRect(BAR_X, BAR_Y, fillW, BAR_H, BAR_R,
-                         canvas.color565(0, 180, 220));
+    canvas.fillRoundRect(BAR_X, BAR_Y, fillW, BAR_H, BAR_R, barFillColor);
   } else if (fillW > 0) {
-    canvas.fillRect(BAR_X, BAR_Y, fillW, BAR_H, canvas.color565(0, 180, 220));
+    canvas.fillRect(BAR_X, BAR_Y, fillW, BAR_H, barFillColor);
   }
 
   // Draw rounded border
-  canvas.drawRoundRect(BAR_X, BAR_Y, BAR_W, BAR_H, BAR_R,
-                       canvas.color565(70, 90, 120));
+  canvas.drawRoundRect(BAR_X, BAR_Y, BAR_W, BAR_H, BAR_R, barBorderColor);
 
   // White slider knob (circle) at progress position - clipped to bar bounds
   int knobRadius = BAR_H / 2 - 2;  // Smaller radius to prevent overflow
   int knobX = BAR_X + fillW;
   knobX = constrain(knobX, BAR_X + knobRadius + 2, BAR_X + BAR_W - knobRadius - 2);
   int knobY = BAR_Y + BAR_H / 2;
-  canvas.fillCircle(knobX, knobY, knobRadius,
-                    canvas.color565(255, 255, 255));
-  canvas.fillCircle(knobX, knobY, knobRadius - 3,
-                    canvas.color565(0, 180, 220));
+  canvas.fillCircle(knobX, knobY, knobRadius, barKnobWhite);
+  canvas.fillCircle(knobX, knobY, knobRadius - 3, barKnobCyan);
 
   // Thin horizontal divider between progress zone and list
-  canvas.drawFastHLine(CARD_X + 10, 368, CARD_W - 20, canvas.color565(35, 50, 75));
+  canvas.drawFastHLine(CARD_X + 10, 368, CARD_W - 20, dividerColor);
 
   // ===================== ZONE E — SECTION TITLE ====================
   // "Aujourd'hui" label, Y=375..420
@@ -625,6 +640,19 @@ void drawUI()
   const int TIME_COL_X    = INNER_X + 50;    // time text (properly spaced from arrow)
   const int BADGE_COL_X   = INNER_R - 180;
 
+  // Pre-calculate list row colors
+  uint16_t listArrowPassed = canvas.color565(60, 75, 95);
+  uint16_t listArrowHigh = canvas.color565(0, 180, 220);
+  uint16_t listArrowLow = canvas.color565(120, 140, 165);
+  uint16_t listTimePassed = canvas.color565(65, 80, 100);
+  uint16_t listTimeNext = canvas.color565(0, 220, 255);
+  uint16_t listTimeNormal = canvas.color565(200, 220, 240);
+  uint16_t listLabelNext = canvas.color565(0, 220, 255);
+  uint16_t listLabelHigh = canvas.color565(0, 180, 220);
+  uint16_t listLabelLow = canvas.color565(130, 150, 175);
+  uint16_t listCoeffNext = canvas.color565(255, 200, 0);
+  uint16_t listCoeffHigh = canvas.color565(255, 175, 50);
+
   for (int i = 0; i < 4; i++) {
     int rowTopY  = LIST_TOP + i * ROW_HEIGHT;
     int baselineY = rowTopY + 40;   // text baseline within the row (centered)
@@ -638,26 +666,14 @@ void drawUI()
                                   : (displayTides[i].hour == next.hour && displayTides[i].minute == next.minute);
 
     // Arrow color: muted gray for passed tides, colored for upcoming
-    uint16_t arrowClr;
-    if (isPassed) {
-      arrowClr = canvas.color565(60, 75, 95);
-    } else if (displayTides[i].isHigh) {
-      arrowClr = canvas.color565(0, 180, 220);    // cyan for high tide
-    } else {
-      arrowClr = canvas.color565(120, 140, 165);  // muted blue-gray for low tide
-    }
+    uint16_t arrowClr = isPassed ? listArrowPassed
+                                 : (displayTides[i].isHigh ? listArrowHigh : listArrowLow);
     drawSmallArrow(ARROW_COL_X, arrowCY, displayTides[i].isHigh, arrowClr);
 
     // Time text
     canvas.setFont(&fonts::FreeSansBold18pt7b);
-    uint16_t timeClr;
-    if (isPassed) {
-      timeClr = canvas.color565(65, 80, 100);
-    } else if (isNextRow) {
-      timeClr = canvas.color565(0, 220, 255);
-    } else {
-      timeClr = canvas.color565(200, 220, 240);
-    }
+    uint16_t timeClr = isPassed ? listTimePassed
+                                : (isNextRow ? listTimeNext : listTimeNormal);
     canvas.setTextColor(timeClr);
     canvas.setCursor(TIME_COL_X, baselineY);
     canvas.printf("%02d:%02d", displayTides[i].hour, displayTides[i].minute);
@@ -667,14 +683,14 @@ void drawUI()
     if (displayTides[i].isHigh) {
       uint16_t labelClr, coeffClr;
       if (isPassed) {
-        labelClr = canvas.color565(65, 80, 100);
-        coeffClr = canvas.color565(65, 80, 100);
+        labelClr = listTimePassed;
+        coeffClr = listTimePassed;
       } else if (isNextRow) {
-        labelClr = canvas.color565(0, 220, 255);
-        coeffClr = canvas.color565(255, 200, 0);
+        labelClr = listLabelNext;
+        coeffClr = listCoeffNext;
       } else {
-        labelClr = canvas.color565(0, 180, 220);
-        coeffClr = canvas.color565(255, 175, 50);
+        labelClr = listLabelHigh;
+        coeffClr = listCoeffHigh;
       }
       canvas.setTextColor(labelClr);
       canvas.setCursor(TIME_COL_X + 140, baselineY);
@@ -683,10 +699,8 @@ void drawUI()
       canvas.setCursor(TIME_COL_X + 200, baselineY);
       canvas.printf("%d", displayTides[i].coefficient);
     } else {
-      uint16_t labelClr;
-      if (isPassed)       labelClr = canvas.color565(65, 80, 100);
-      else if (isNextRow) labelClr = canvas.color565(0, 220, 255);
-      else                labelClr = canvas.color565(130, 150, 175);
+      uint16_t labelClr = isPassed ? listTimePassed
+                                   : (isNextRow ? listLabelNext : listLabelLow);
       canvas.setTextColor(labelClr);
       canvas.setCursor(TIME_COL_X + 140, baselineY);
       canvas.print("BM");
@@ -697,12 +711,22 @@ void drawUI()
   // Y values are pre-computed in chartYToday — no float math per frame.
   unsigned long chartStart = millis();
 
+  // Pre-calculate chart colors to avoid repeated color565() calls in loops
+  uint16_t chartGridColor = canvas.color565(40, 60, 90);
+  uint16_t chartLabelColor = canvas.color565(100, 120, 150);
+  uint16_t chartFillColor = canvas.color565(0, 120, 180);
+  uint16_t chartCurveColor = canvas.color565(0, 200, 255);
+  uint16_t chartTimeLineColor = canvas.color565(255, 200, 0);
+  uint16_t chartKnobFill = canvas.color565(255, 200, 0);
+  uint16_t chartKnobBorder = canvas.color565(255, 255, 255);
+  uint16_t chartBorderColor = canvas.color565(50, 80, 120);
+
   // Draw grid lines and height labels — equally distributed from bottom (0) to top (6)
   canvas.setFont(&fonts::FreeSansBold9pt7b);
-  canvas.setTextColor(canvas.color565(100, 120, 150));
+  canvas.setTextColor(chartLabelColor);
   for (int h = 0; h <= 6; h++) {
     int labelY = CHART_B - (h * CHART_CH / 6);
-    canvas.drawFastHLine(CHART_L, labelY, CHART_CW, canvas.color565(40, 60, 90));
+    canvas.drawFastHLine(CHART_L, labelY, CHART_CW, chartGridColor);
     canvas.setCursor(CHART_L - 35, labelY - 4);  // Moved up 4 pixels to align with grid line
     canvas.printf("%d", h);
   }
@@ -710,24 +734,7 @@ void drawUI()
   // Draw vertical grid lines for hours
   for (int hour = 0; hour <= 24; hour += 2) {
     int gridX = CHART_L + (int)(hour / 24.0f * CHART_CW);
-    canvas.drawFastVLine(gridX, CHART_T, CHART_CH, canvas.color565(40, 60, 90));
-  }
-
-  // ===================== TIDE CHART (Maree.info Style - 24 Hour) =======================
-  // Y values are pre-computed in chartYToday — no float math per frame.
-
-  // Draw grid lines and height labels — equally distributed from bottom (0) to top (6)
-  canvas.setFont(&fonts::FreeSansBold9pt7b);
-  canvas.setTextColor(canvas.color565(100, 120, 150));
-  for (int h = 0; h <= 6; h++) {
-    int labelY = CHART_B - (h * CHART_CH / 6);
-    canvas.drawFastHLine(CHART_L, labelY, CHART_CW, canvas.color565(40, 60, 90));
-  }
-
-  // Draw vertical grid lines for hours
-  for (int hour = 0; hour <= 24; hour += 2) {
-    int gridX = CHART_L + (int)(hour / 24.0f * CHART_CW);
-    canvas.drawFastVLine(gridX, CHART_T, CHART_CH, canvas.color565(40, 60, 90));
+    canvas.drawFastVLine(gridX, CHART_T, CHART_CH, chartGridColor);
   }
 
   // Draw tide curve using pre-computed Y cache (no float math per pixel)
@@ -744,28 +751,27 @@ void drawUI()
     int y = activeChartY[i];
 
     // Fill column from curve down to chart bottom (always the same color)
-    canvas.drawFastVLine(x, y, CHART_B - y, canvas.color565(0, 120, 180));
+    canvas.drawFastVLine(x, y, CHART_B - y, chartFillColor);
 
     // Curve line segment to previous pixel (always the same color)
     if (i > 0) {
-      canvas.drawLine(x - 1, activeChartY[i - 1], x, y, canvas.color565(0, 200, 255));
+      canvas.drawLine(x - 1, activeChartY[i - 1], x, y, chartCurveColor);
     }
   }
 
   // Current time indicator: yellow vertical line and knob showing where we are in the tide
   int current_x = splitX;
-  canvas.drawFastVLine(current_x, CHART_T, CHART_CH, canvas.color565(255, 200, 0));
+  canvas.drawFastVLine(current_x, CHART_T, CHART_CH, chartTimeLineColor);
   int nowCacheIdx = constrain((int)(dayProgress * CHART_CW), 0, CHART_CW - 1);
   int currentY = activeChartY[nowCacheIdx];
-  canvas.fillCircle(current_x, currentY, 6, canvas.color565(255, 200, 0));
-  canvas.drawCircle(current_x, currentY, 6, canvas.color565(255, 255, 255));
+  canvas.fillCircle(current_x, currentY, 6, chartKnobFill);
+  canvas.drawCircle(current_x, currentY, 6, chartKnobBorder);
 
   // Draw chart border
-  canvas.drawRect(CHART_L, CHART_T, CHART_CW, CHART_CH, canvas.color565(50, 80, 120));
+  canvas.drawRect(CHART_L, CHART_T, CHART_CW, CHART_CH, chartBorderColor);
 
   // Add hour labels on horizontal axis (0 to 24 hours) — below the chart
-  canvas.setFont(&fonts::FreeSansBold9pt7b);
-  canvas.setTextColor(canvas.color565(100, 120, 150));
+  canvas.setTextColor(chartLabelColor);
   for (int hour = 0; hour <= 24; hour += 2) {
     int labelX = CHART_L + (int)(hour / 24.0f * CHART_CW);
     canvas.setCursor(labelX - 8, CHART_B + 18);
