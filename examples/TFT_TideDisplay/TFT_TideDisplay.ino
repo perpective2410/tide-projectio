@@ -752,6 +752,17 @@ void drawUI()
     }
   }
 
+  // Current time indicator: yellow vertical line and knob showing where we are in the tide
+  int current_x = splitX;
+  canvas.drawFastVLine(current_x, CHART_T, CHART_CH, canvas.color565(255, 200, 0));
+  int nowCacheIdx = constrain((int)(dayProgress * CHART_CW), 0, CHART_CW - 1);
+  int currentY = activeChartY[nowCacheIdx];
+  canvas.fillCircle(current_x, currentY, 6, canvas.color565(255, 200, 0));
+  canvas.drawCircle(current_x, currentY, 6, canvas.color565(255, 255, 255));
+
+  // Draw chart border
+  canvas.drawRect(CHART_L, CHART_T, CHART_CW, CHART_CH, canvas.color565(50, 80, 120));
+
   // Add hour labels on horizontal axis (0 to 24 hours) — below the chart
   canvas.setFont(&fonts::FreeSansBold9pt7b);
   canvas.setTextColor(canvas.color565(100, 120, 150));
