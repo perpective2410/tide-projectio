@@ -12,8 +12,8 @@
 // WiFi & NTP Configuration — add all known networks here
 struct WiFiCredential { const char* ssid; const char* pass; };
 const WiFiCredential WIFI_NETWORKS[] = {
-  { "Chez-nous",   "Magenta2110" },
-  // { "OtherSSID",   "password2"   },
+  { "Chez-nous",   "xxx" },
+   { "SFR_5360",   "yyy"   },
   // { "Hotspot",     "password3"   },
 };
 const int WIFI_NETWORK_COUNT = sizeof(WIFI_NETWORKS) / sizeof(WIFI_NETWORKS[0]);
