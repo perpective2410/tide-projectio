@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// Station Configuration for BelleIle_minimal Example
+// Station Configuration for TFT_TideDisplay Example
 // ─────────────────────────────────────────────────────────────────────────────
 // Edit this file to select which stations are compiled into your firmware.
 

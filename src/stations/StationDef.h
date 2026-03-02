@@ -18,6 +18,5 @@ struct StationDef {
     int                  harmonicCount;
 };
 
-// Station lookup is provided by StationRegistry.cpp.
+// Station lookup is provided by StationRegistry.h (header-only).
 // Use setStation(id) from Tides.h API instead of calling findStation directly.
-extern const StationDef* findStation(const char* id);
