@@ -562,27 +562,35 @@ void drawUI()
   // Show "No WiFi" only when: not connected AND scan done AND no configured network found
   bool noWiFiAvailable = (wifiStatus != WL_CONNECTED && !wifiScanInProgress && wifiScanTargetIndex == -1 && WiFi.scanComplete() >= 0);
 
-  uint16_t wifiColor;
+  // Signal strength: 1/2/3 bars based on RSSI, colored green/yellow/orange
+  int signalBars = 0;
+  uint16_t wifiColor = canvas.color565(80, 90, 110);  // Grey when not connected
   if (wifiOk) {
-    wifiColor = canvas.color565(80, 220, 100);  // Green when connected
-  } else {
-    wifiColor = canvas.color565(80, 90, 110);   // Grey when searching or unavailable
+    int rssi = WiFi.RSSI();
+    if (rssi >= -55) {
+      signalBars = 3;
+      wifiColor = canvas.color565(80, 220, 100);   // Strong: green
+    } else if (rssi >= -70) {
+      signalBars = 2;
+      wifiColor = canvas.color565(255, 200, 50);   // Medium: yellow
+    } else {
+      signalBars = 1;
+      wifiColor = canvas.color565(255, 120, 50);   // Weak: orange
+    }
   }
+  uint16_t arcDimColor = canvas.color565(40, 50, 65);  // Inactive arc slots
 
   int wifiIconX = W / 2 - 60;
   int wifiIconY = 26;
 
-  // Draw WiFi signal arcs (3 arcs = full signal when connected)
-  // Dot at bottom
+  // Draw WiFi icon: dot + 3 arcs, lit arcs reflect signal strength
   canvas.fillCircle(wifiIconX, wifiIconY + 2, 3, wifiColor);
-  // Inner arc
-  canvas.drawArc(wifiIconX, wifiIconY + 2, 7, 5, 225, 315, wifiColor);
-  // Middle arc
-  canvas.drawArc(wifiIconX, wifiIconY + 2, 13, 11, 225, 315, wifiColor);
-  // Outer arc (only when connected)
-  if (wifiOk) {
-    canvas.drawArc(wifiIconX, wifiIconY + 2, 19, 17, 225, 315, wifiColor);
-  }
+  canvas.drawArc(wifiIconX, wifiIconY + 2,  7,  5, 225, 315,
+                 (wifiOk && signalBars >= 1) ? wifiColor : (wifiOk ? arcDimColor : wifiColor));
+  canvas.drawArc(wifiIconX, wifiIconY + 2, 13, 11, 225, 315,
+                 (wifiOk && signalBars >= 2) ? wifiColor : (wifiOk ? arcDimColor : wifiColor));
+  canvas.drawArc(wifiIconX, wifiIconY + 2, 19, 17, 225, 315,
+                 (wifiOk && signalBars >= 3) ? wifiColor : (wifiOk ? arcDimColor : wifiColor));
 
   // SSID or status label
   canvas.setTextColor(wifiColor);
