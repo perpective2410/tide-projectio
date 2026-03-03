@@ -13,7 +13,7 @@
 struct WiFiCredential { const char* ssid; const char* pass; };
 const WiFiCredential WIFI_NETWORKS[] = {
  
-  { "SFR_5360",   "xxx"   },
+  { "SFR_5360",   "0123456789"   },
    { "Chez-nous",   "yyy" }
   // { "Hotspot",     "password3"   },
 };
@@ -30,7 +30,6 @@ unsigned long lastWiFiCheckTime = 0;
 unsigned long lastNTPSyncTime = 0;
 unsigned long lastWiFiReconnectTime = 0;
 const unsigned long WIFI_CHECK_INTERVAL = 5000;      // Check WiFi status every 5 seconds
-const unsigned long WIFI_RECONNECT_INTERVAL = 10000; // Wait 10 seconds before reconnecting
 const unsigned long NTP_SYNC_INTERVAL = 24 * 3600000; // Sync NTP every 24 hours
 
 // WiFi scan state (scan-before-connect)
@@ -45,8 +44,6 @@ M5Canvas canvas(&M5.Display);
 static const int W = 1280;
 static const int H = 720;
 
-const int FRAME_TIME = 33;
-unsigned long lastFrame = 0;
 
 // -------- Display Tide Data --------
 struct DisplayTideEvent {
@@ -54,7 +51,6 @@ struct DisplayTideEvent {
   int minute;
   bool isHigh;
   int coefficient;
-  double amplitude;  // Store actual amplitude from library
 };
 
 DisplayTideEvent today[4]    = {};
@@ -111,7 +107,7 @@ void computeChartYCache(TideInfo& info, int* cache)
 // -------- Populate a DisplayTideEvent array from a TideInfo --------
 void populateTideEvents(TideInfo& info, DisplayTideEvent* events)
 {
-  for (int i = 0; i < 4; i++) events[i] = {0, 0, false, 0, 0.0};
+  for (int i = 0; i < 4; i++) events[i] = {0, 0, false, 0};
   for (int i = 0; i < info.numEvents && i < 4; i++) {
     float h = info.events[i].time;
     int hh = (int)h;
@@ -120,7 +116,6 @@ void populateTideEvents(TideInfo& info, DisplayTideEvent* events)
     events[i].hour      = hh;
     events[i].minute    = mm;
     events[i].isHigh    = info.events[i].isPeak;
-    events[i].amplitude = info.events[i].amplitude;
     events[i].coefficient = (hh >= 12) ? info.afternoonCoefficient : info.morningCoefficient;
   }
 }
