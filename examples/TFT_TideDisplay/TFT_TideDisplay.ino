@@ -791,7 +791,11 @@ void drawUI()
   uint16_t listCoeffNext = canvas.color565(255, 200, 0);
   uint16_t listCoeffHigh = canvas.color565(255, 175, 50);
 
-  for (int i = 0; i < 4; i++) {
+  // Determine how many tides to display
+  int maxTidesToShow = showTomorrow ? tideInfoTomorrow.numEvents : tideInfoToday.numEvents;
+  maxTidesToShow = constrain(maxTidesToShow, 0, 4);  // Cap at 4 (array size)
+
+  for (int i = 0; i < maxTidesToShow; i++) {
     int rowTopY  = LIST_TOP + i * ROW_HEIGHT;
     int baselineY = rowTopY + 40;   // text baseline within the row (centered)
     int arrowCY   = baselineY + 10; // arrow vertically centered with text baseline, moved down 10px
