@@ -368,11 +368,22 @@ library.properties                 — Arduino Library Manager metadata
 
 ## Dependencies
 
+### Core Tides Library
+
 | Library | Version | Purpose |
 |---------|---------|---------|
-| [paulstoffregen/Time](https://github.com/PaulStoffregen/Time) | ≥ 1.6.1 | `time_t`, `breakTime()`, `makeTime()` |
+| [paulstoffregen/Time](https://github.com/PaulStoffregen/Time) | ≥ 1.6.1 | Date/time utilities: `time_t`, `breakTime()`, `makeTime()` |
 
-The NTPClient library is used in the example sketch only; it is not a library dependency.
+### M5Stack Tab5 TFT Display Example
+
+| Library | Version | Purpose |
+|---------|---------|---------|
+| [paulstoffregen/Time](https://github.com/PaulStoffregen/Time) | ≥ 1.6.1 | Date/time utilities |
+| [m5stack/M5Unified](https://github.com/m5stack/M5Unified) | ≥ 0.2.13 | M5Stack device abstraction (display, RTC, touch) |
+| [m5stack/M5GFX](https://github.com/m5stack/M5GFX) | ≥ 0.2.19 | Graphics and rendering for M5Stack displays |
+| [tzapu/WiFiManager](https://github.com/tzapu/WiFiManager) | ≥ 2.0.17 | Optional: Captive portal for WiFi configuration (can be disabled with `#define USE_WIFI_MANAGER` flag) |
+
+**Note:** The M5Stack example uses ESP32's built-in NTP via `configTzTime()` for time synchronization; NTPClient library is not required.
 
 ---
 
