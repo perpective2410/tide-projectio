@@ -105,6 +105,88 @@ Complete examples are in [`examples/BelleIle_minimal/`](examples/BelleIle_minima
 
 ---
 
+## M5Stack Tab5 TFT Display
+
+The `examples/TFT_TideDisplay/` folder contains a full-featured tide display for the **M5Stack Tab5** with WiFi configuration, NTP sync, and real-time tide visualization.
+
+### WiFi Configuration
+
+Two WiFi modes are available, switchable via a compilation flag:
+
+#### Mode 1: WiFiManager (Default - `#define USE_WIFI_MANAGER`)
+
+Uses the WiFiManager library for interactive WiFi configuration:
+
+- **Captive portal** at `192.168.4.1` accessible by tapping the WiFi status in the header
+- **Network scanning** — automatically shows available networks
+- **Credentials saved** to NVS, auto-reconnect on boot
+- **Always-on AP** — "TideDisplay" AP is always active alongside STA connection
+
+**To use WiFiManager:**
+```cpp
+// Line 2 of TFT_TideDisplay.ino
+#define USE_WIFI_MANAGER  // Uncommented = WiFiManager enabled
+```
+
+**Setup:**
+1. Power on the device
+2. Connect your phone to the "TideDisplay" WiFi AP
+3. Browser auto-redirects to captive portal at `192.168.4.1`
+4. Select network and enter password
+5. Device saves credentials and reconnects automatically on next boot
+
+#### Mode 2: Hardcoded Networks (Simpler - comment out `#define USE_WIFI_MANAGER`)
+
+Uses a simple `WIFI_NETWORKS` array with predefined SSIDs and passwords:
+
+- **No portal needed** — just configure the array in code
+- **Tries networks in order** — falls back if preferred network unavailable
+- **More stable** on M5Stack Tab5 (avoids WiFiManager complexity)
+- **Still has AP fallback** — "TideDisplay" AP available if all networks fail
+
+**To use hardcoded networks:**
+```cpp
+// Line 2 of TFT_TideDisplay.ino
+// #define USE_WIFI_MANAGER  // Commented out = hardcoded networks
+```
+
+**Setup:**
+1. Edit the `WIFI_NETWORKS` array (lines 30–34):
+```cpp
+const WiFiNetwork WIFI_NETWORKS[] = {
+  {"AndroidAP1b53", "12345678"},  // Tried first
+  {"Chez-nous", "your-password"},  // Tried second
+  // Add more networks as needed
+};
+```
+
+2. Recompile and upload
+3. Device tries networks in order, connects to the first available one
+
+**Advantages:**
+- ✅ Simpler code path
+- ✅ No WiFiManager dependency
+- ✅ More stable on ESP-Hosted WiFi (M5Stack Tab5)
+- ✅ Predictable connection order
+
+**Disadvantages:**
+- ❌ Must edit code to add/change networks
+- ❌ No interactive portal configuration
+
+---
+
+## Display Features
+
+- **Real-time tide display** with current and next tidal events
+- **Sinusoidal tide chart** showing 24-hour water level pattern
+- **French tide coefficients** (PM/BM coefficients for each tide)
+- **WiFi status** with signal strength indicator (1/2/3 bars)
+- **NTP time sync** — automatically syncs time over WiFi
+- **Today/Tomorrow toggle** — tap the display body to switch days
+- **Touch WiFi configuration** — tap the header WiFi area to access settings (WiFiManager mode only)
+
+---
+
 ## Available Stations
 
 The library includes **170+ French Atlantic tidal stations** with harmonic data sourced from the SHOM. Station names use underscores to replace spaces and hyphens.

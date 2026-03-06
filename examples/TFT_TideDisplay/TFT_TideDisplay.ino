@@ -1,43 +1,52 @@
+// ======== COMPILATION FLAGS ========
+#define USE_WIFI_MANAGER  // Comment out to use simple WIFI_NETWORKS array instead
+
 #include <M5Unified.h>
 #include <M5GFX.h>
 #include <WiFi.h>
 #include <time.h>
 #include <esp_sntp.h>
+#ifdef USE_WIFI_MANAGER
+  #include <WiFiManager.h>
+#endif
+#include <Preferences.h>
 
 // Station configuration is in StationConfig.h — edit that file to select stations.
 #include "StationConfig.h"
 #include <Tides.h>
 #include "FreeSansBold48pt7b.h"
 
-// WiFi & NTP Configuration — add all known networks here
-struct WiFiCredential { const char* ssid; const char* pass; };
-const WiFiCredential WIFI_NETWORKS[] = {
- 
-  { "SFR_5360",   "0123456789"   },
-   { "Chez-nous",   "yyy" }
-  // { "Hotspot",     "password3"   },
-};
-const int WIFI_NETWORK_COUNT = sizeof(WIFI_NETWORKS) / sizeof(WIFI_NETWORKS[0]);
-
 const char* NTP_TIMEZONE = "CET-1CEST,M3.5.0,M10.5.0/3";  // France timezone
 const char* NTP_SERVER1 = "pool.ntp.org";
 const char* NTP_SERVER2 = "time.nist.gov";
 
-// WiFi state
-int currentNetworkIndex = 0;
-int lastSuccessfulNetworkIndex = -1;  // Remember which network last worked (-1 = none yet)
-unsigned long lastWiFiCheckTime = 0;
+// ======== WIFI NETWORKS (used when USE_WIFI_MANAGER is disabled) ========
+#ifndef USE_WIFI_MANAGER
+  struct WiFiNetwork {
+    const char* ssid;
+    const char* password;
+  };
+
+  const WiFiNetwork WIFI_NETWORKS[] = {
+    {"AndroidAP1b53", "12345678"},  // Add your networks here in order of preference
+    {"Chez-nous", "xxx"},
+    // Add more networks as needed
+  };
+  const int NUM_WIFI_NETWORKS = sizeof(WIFI_NETWORKS) / sizeof(WIFI_NETWORKS[0]);
+#endif
+
+// WiFi & NTP state
 unsigned long lastNTPSyncTime = 0;
-unsigned long lastWiFiReconnectTime = 0;
-const unsigned long WIFI_CHECK_INTERVAL = 5000;      // Check WiFi status every 5 seconds
 const unsigned long NTP_SYNC_INTERVAL = 24 * 3600000; // Sync NTP every 24 hours
 
-// WiFi scan state (scan-before-connect)
-bool wifiAvailable[WIFI_NETWORK_COUNT] = {};  // which configured networks were found in scan
-bool wifiScanInProgress = false;
-int  wifiScanTargetIndex = -1;                // index to connect to after scan completes
-unsigned long lastScanTime = 0;
-const unsigned long SCAN_INTERVAL = 30000;    // rescan every 30s when not connected
+// WiFiManager instance (must be global for non-blocking mode)
+#ifdef USE_WIFI_MANAGER
+  WiFiManager wifiManager;
+#endif
+Preferences preferences;
+bool wifiPortalActive = false;
+bool portalConfigured = false;  // Track if user actually configured via portal
+String connectingSSID = "";  // Track which network we're connecting to
 
 M5Canvas canvas(&M5.Display);
 
@@ -188,155 +197,7 @@ void getCurrentDate(int& year, int& month, int& day)
   getLocalDateTime(year, month, day, hour, minute, second);
 }
 
-// -------- Non-blocking WiFi & NTP Functions --------
-
-// Start an asynchronous WiFi network scan
-void startWiFiScan()
-{
-  Serial.println("[WiFi] Starting scan...");
-  WiFi.scanNetworks(/*async=*/true);
-  wifiScanInProgress = true;
-}
-
-// Process WiFi scan results; returns 1 if at least one match found, 0 if no match, -1 if still scanning
-// Populates wifiAvailable[] — does NOT set currentNetworkIndex
-int processScanResults()
-{
-  int scanStatus = WiFi.scanComplete();
-  if (scanStatus < 0) {
-    // Still scanning (scanStatus returns -1 while in progress, -2 if not initiated)
-    return -1;
-  }
-
-  // Scan completed — process results
-  int numNetworks = scanStatus;
-  Serial.printf("[WiFi] Scan found %d networks\n", numNetworks);
-
-  // Reset availability array
-  for (int i = 0; i < WIFI_NETWORK_COUNT; i++) {
-    wifiAvailable[i] = false;
-  }
-
-  // Check each scanned network against configured networks
-  int matchCount = 0;
-  for (int i = 0; i < numNetworks; i++) {
-    String scannedSSID = WiFi.SSID(i);
-    Serial.printf("  [%d] %s\n", i, scannedSSID.c_str());
-
-    for (int j = 0; j < WIFI_NETWORK_COUNT; j++) {
-      if (scannedSSID == WIFI_NETWORKS[j].ssid) {
-        wifiAvailable[j] = true;
-        matchCount++;
-        Serial.printf("    → Matches WIFI_NETWORKS[%d]\n", j);
-      }
-    }
-  }
-
-  WiFi.scanDelete();
-
-  if (matchCount > 0) {
-    Serial.printf("[WiFi] Scan result: %d configured network(s) available\n", matchCount);
-    return 1;
-  }
-
-  Serial.println("[WiFi] Scan result: no matching configured networks");
-  return 0;  // No match found
-}
-
-// Returns the next available network index after afterIndex, or -1 if none left
-int findNextAvailableNetwork(int afterIndex)
-{
-  for (int i = afterIndex + 1; i < WIFI_NETWORK_COUNT; i++) {
-    if (wifiAvailable[i]) return i;
-  }
-  return -1;
-}
-
-void updateWiFiStatus()
-{
-  unsigned long now = millis();
-  if (now - lastWiFiCheckTime < WIFI_CHECK_INTERVAL) return;
-  lastWiFiCheckTime = now;
-
-  wl_status_t status = WiFi.status();
-
-  if (status == WL_CONNECTED) {
-    if (wifiScanInProgress) {
-      // Device auto-connected (ESP-Hosted saved credentials) before our scan completed
-      WiFi.scanDelete();
-      wifiScanInProgress = false;
-      Serial.printf("[WiFi] Auto-connected to: %s (scan superseded)\n", WiFi.SSID().c_str());
-    } else if (lastSuccessfulNetworkIndex < 0) {
-      // First time we observe a connection — log it
-      Serial.printf("[WiFi] Connected to: %s\n", WiFi.SSID().c_str());
-    }
-    // Find the matching index in WIFI_NETWORKS for the connected SSID
-    String connectedSSID = WiFi.SSID();
-    for (int i = 0; i < WIFI_NETWORK_COUNT; i++) {
-      if (connectedSSID == WIFI_NETWORKS[i].ssid) {
-        currentNetworkIndex = i;
-        lastSuccessfulNetworkIndex = i;
-        break;
-      }
-    }
-    lastWiFiReconnectTime = 0;
-    wifiScanTargetIndex = -1;
-    return;
-  }
-
-  // Not connected: handle scan-driven reconnection logic
-
-  if (wifiScanInProgress) {
-    // Scan is in progress — check if it completed
-    int result = processScanResults();
-    if (result == 1) {
-      // At least one matching network found — try the first one
-      int idx = findNextAvailableNetwork(-1);
-      currentNetworkIndex = idx;
-      wifiScanTargetIndex = idx;
-      Serial.printf("[WiFi] Trying WIFI_NETWORKS[%d]: %s\n", idx, WIFI_NETWORKS[idx].ssid);
-      WiFi.begin(WIFI_NETWORKS[idx].ssid, WIFI_NETWORKS[idx].pass);
-      lastWiFiReconnectTime = now;
-      wifiScanInProgress = false;
-    } else if (result == 0) {
-      // Scan completed but no match found — show "No WiFi" in display
-      wifiScanInProgress = false;
-      wifiScanTargetIndex = -1;
-      lastScanTime = now;
-    }
-    // If result == -1, scan still in progress, wait for next check
-
-  } else if (wifiScanTargetIndex >= 0) {
-    // Scan done, currently attempting to connect to a network from scan results
-    wl_status_t s = status;
-    if (s == WL_CONNECT_FAILED || s == WL_NO_SSID_AVAIL) {
-      // This network failed — try the next one from scan results
-      int next = findNextAvailableNetwork(currentNetworkIndex);
-      if (next >= 0) {
-        currentNetworkIndex = next;
-        wifiScanTargetIndex = next;
-        Serial.printf("[WiFi] Failed, trying next: WIFI_NETWORKS[%d]: %s\n",
-                      next, WIFI_NETWORKS[next].ssid);
-        WiFi.begin(WIFI_NETWORKS[next].ssid, WIFI_NETWORKS[next].pass);
-        lastWiFiReconnectTime = now;
-      } else {
-        // All scan matches exhausted — give up and rescan after interval
-        Serial.println("[WiFi] All scan candidates failed, will rescan");
-        wifiScanTargetIndex = -1;
-        lastScanTime = now;
-      }
-    }
-    // Otherwise still connecting — wait
-
-  } else {
-    // No scan in progress and no pending connection — check if time to rescan
-    if ((now - lastScanTime > SCAN_INTERVAL) || (lastScanTime == 0)) {
-      for (int i = 0; i < WIFI_NETWORK_COUNT; i++) wifiAvailable[i] = false;
-      startWiFiScan();
-      lastScanTime = now;
-    }
-  }
-}
+// -------- NTP Functions --------
 
 void syncNTPTime()
 {
@@ -559,8 +420,6 @@ void drawUI()
   // WiFi icon + SSID — center of header
   wl_status_t wifiStatus = WiFi.status();
   bool wifiOk = (wifiStatus == WL_CONNECTED);
-  // Show "No WiFi" only when: not connected AND scan done AND no configured network found
-  bool noWiFiAvailable = (wifiStatus != WL_CONNECTED && !wifiScanInProgress && wifiScanTargetIndex == -1 && WiFi.scanComplete() >= 0);
 
   // Signal strength: 1/2/3 bars based on RSSI, colored green/yellow/orange
   int signalBars = 0;
@@ -580,7 +439,7 @@ void drawUI()
   }
   uint16_t arcDimColor = canvas.color565(40, 50, 65);  // Inactive arc slots
 
-  int wifiIconX = W / 2 - 60;
+  int wifiIconX = W / 2 - 60 - 100;  // Moved 100px left
   int wifiIconY = 26;
 
   // Draw WiFi icon: dot + 3 arcs, lit arcs reflect signal strength
@@ -595,12 +454,24 @@ void drawUI()
   // SSID or status label
   canvas.setTextColor(wifiColor);
   canvas.setCursor(wifiIconX + 26, 12);
-  if (wifiOk) {
-    canvas.print(WiFi.SSID().c_str());
-  } else if (!noWiFiAvailable) {
-    canvas.print("Searching...");  // Blinks while scanning/connecting
+
+  // Check if WiFi has an SSID set but isn't connected yet (means it's connecting)
+  String currentSSID = WiFi.SSID();
+  bool isConnecting = !currentSSID.isEmpty() && !wifiOk;
+
+  if (isConnecting) {
+    // Blinking SSID while connecting - blink every 500ms
+    unsigned long now = millis();
+    bool showSSID = ((now / 500) % 2) == 0;
+    canvas.setTextColor(canvas.color565(255, 200, 100));  // Light orange for connecting
+    if (showSSID) {
+      canvas.print(currentSSID.c_str());
+    }
+    // When not showing, just leave blank space
+  } else if (wifiOk) {
+    canvas.print(currentSSID.c_str());
   } else {
-    canvas.print("No WiFi");
+    canvas.print("Waiting...");
   }
 
   // Clock icon (bigger) + time + date — right side (inline)
@@ -925,16 +796,32 @@ void drawUI()
 // -------- Touch Detection Task (runs independently of render loop) --------
 // Polls touch at 20 ms on a separate RTOS thread for responsive touch detection.
 volatile bool touchTogglePending = false;
+volatile bool touchPortalPending = false;
 
 void touchDetectionTask(void* params)
 {
   m5::touch_point_t pts[5];
   bool prevTouching = false;
+  unsigned long lastDebugTime = 0;
   for (;;) {
     int n = M5.Lcd.getTouchRaw(pts, 5);
     bool isTouching = (n > 0);
     if (isTouching && !prevTouching) {
-      touchTogglePending = true;
+      Serial.printf("[Touch] Detected at X=%d, Y=%d\n", pts[0].x, pts[0].y);
+      // Header bar (inverted: Y > 676 = top 44px)
+      if (pts[0].y > 676) {
+        // WiFi area: X in range (moved 100px left)
+        if (pts[0].x >= 450 && pts[0].x <= 800) {
+          Serial.println("[Touch] → WiFi Portal trigger");
+          touchPortalPending = true;
+        } else {
+          Serial.println("[Touch] → Day toggle");
+          touchTogglePending = true;
+        }
+      } else {
+        Serial.println("[Touch] → Day toggle");
+        touchTogglePending = true;
+      }
     }
     prevTouching = isTouching;
     vTaskDelay(pdMS_TO_TICKS(20));
@@ -962,6 +849,144 @@ void renderTask(void* params)
   }
 }
 
+// -------- WiFiManager Callbacks --------
+#ifdef USE_WIFI_MANAGER
+void saveConfigCallback() {
+  // Only save as preferred if this is from portal configuration, not from autoConnect fallback
+  if (!portalConfigured) {
+    return;  // autoConnect succeeded to a saved network - don't overwrite preference
+  }
+
+  String currentSSID = WiFi.SSID();
+  Serial.println("[WiFi] *** WiFi credentials SAVED via portal ***");
+  Serial.printf("[WiFi] Network: %s\n", currentSSID.c_str());
+
+  // Store the SSID as preferred in Preferences for reference
+  preferences.begin("wifi", false);
+  preferences.putString("preferred_ssid", currentSSID);
+  preferences.end();
+
+  Serial.printf("[WiFi] Saved as preferred network (for reference)\n");
+  Serial.println("[WiFi] Note: AutoConnect will try saved credentials in its own order");
+
+  portalConfigured = false;  // Reset flag
+}
+#else
+// Simple WiFi connection function for hardcoded networks
+bool tryWiFiNetworks() {
+  Serial.println("[WiFi] Trying WiFi networks from WIFI_NETWORKS array...");
+  for (int i = 0; i < NUM_WIFI_NETWORKS; i++) {
+    Serial.printf("[WiFi] Attempt %d: Connecting to %s...\n", i + 1, WIFI_NETWORKS[i].ssid);
+    WiFi.begin(WIFI_NETWORKS[i].ssid, WIFI_NETWORKS[i].password);
+
+    // Wait up to 10 seconds for connection
+    for (int timeout = 0; timeout < 20; timeout++) {
+      delay(500);
+      if (WiFi.isConnected()) {
+        Serial.printf("[WiFi] Connected to: %s\n", WiFi.SSID().c_str());
+        return true;
+      }
+    }
+    WiFi.disconnect();
+    delay(500);
+  }
+
+  Serial.println("[WiFi] Failed to connect to any network");
+  return false;
+}
+#endif
+
+// -------- WiFi Setup Task (runs after display is ready) --------
+void wifiSetupTask(void* params)
+{
+  delay(1000);  // Give display time to start rendering first
+
+  // Start in AP+STA mode
+  WiFi.mode(WIFI_AP_STA);
+  delay(500);
+
+#ifdef USE_WIFI_MANAGER
+  // ===== WiFiManager Approach =====
+  Serial.println("[WiFi] Initializing WiFiManager...");
+
+  wifiManager.setConfigPortalBlocking(false);
+  wifiManager.setConnectTimeout(10);   // 10 seconds - shorter timeout to avoid driver crashes
+  wifiManager.setConnectRetries(2);    // Only try 2 times per credential
+  wifiManager.setConfigPortalTimeout(0);  // 0 = no timeout, portal stays open
+
+  // Callback when credentials are saved via portal
+  wifiManager.setSaveConfigCallback(saveConfigCallback);
+
+  // Register WiFi event callbacks to track connection status
+  WiFi.onEvent([](WiFiEvent_t event) {
+    if (event == ARDUINO_EVENT_WIFI_STA_CONNECTED) {
+      String ssid = WiFi.SSID();
+      if (!ssid.isEmpty()) {
+        connectingSSID = "";
+        Serial.printf("[WiFi] Successfully connected to: %s\n", ssid.c_str());
+        redrawRequested = true;
+      }
+    } else if (event == ARDUINO_EVENT_WIFI_STA_DISCONNECTED) {
+      connectingSSID = "";
+      redrawRequested = true;
+    }
+  });
+
+  // Use WiFiManager's autoConnect which tries all saved credentials
+  Serial.println("[WiFi] Attempting autoConnect with saved credentials...");
+  delay(100);
+  wifiManager.autoConnect("TideDisplay");
+  delay(100);
+
+  if (WiFi.isConnected()) {
+    Serial.printf("[WiFi] Connected to: %s\n", WiFi.SSID().c_str());
+  } else {
+    Serial.println("[WiFi] Not connected - configure via portal at 192.168.4.1");
+  }
+
+  // Start web portal on AP interface
+  Serial.println("[WiFi] Starting AP 'TideDisplay' for configuration...");
+  WiFi.softAPConfig(IPAddress(192, 168, 4, 1), IPAddress(192, 168, 4, 1), IPAddress(255, 255, 255, 0));
+  WiFi.softAP("TideDisplay");
+  wifiManager.startWebPortal();
+
+#else
+  // ===== Simple Hardcoded Networks Approach =====
+  Serial.println("[WiFi] Using hardcoded WiFi networks (USE_WIFI_MANAGER disabled)");
+
+  // Register WiFi event callbacks
+  WiFi.onEvent([](WiFiEvent_t event) {
+    if (event == ARDUINO_EVENT_WIFI_STA_CONNECTED) {
+      connectingSSID = "";
+      redrawRequested = true;
+    } else if (event == ARDUINO_EVENT_WIFI_STA_DISCONNECTED) {
+      connectingSSID = "";
+      redrawRequested = true;
+    }
+  });
+
+  // Try to connect to networks from WIFI_NETWORKS array
+  bool connected = tryWiFiNetworks();
+
+  if (!connected) {
+    Serial.println("[WiFi] Starting AP 'TideDisplay' in fallback mode...");
+  }
+
+  // Always start AP as fallback
+  WiFi.softAPConfig(IPAddress(192, 168, 4, 1), IPAddress(192, 168, 4, 1), IPAddress(255, 255, 255, 0));
+  WiFi.softAP("TideDisplay");
+
+#endif
+
+  Serial.println("[WiFi] AP 'TideDisplay' active at 192.168.4.1");
+  Serial.printf("[WiFi] STA mode: %s\n", WiFi.isConnected() ? "Connected" : "Waiting for connection");
+  Serial.println("[WiFi] Setup complete");
+
+  lastNTPSyncTime = 0;  // Trigger first NTP sync when WiFi is ready
+
+  vTaskDelete(nullptr);  // Task completes and removes itself
+}
+
 void setup()
 {
   Serial.begin(115200);
@@ -974,6 +999,13 @@ void setup()
   M5.begin(cfg);
 
   Serial.println("M5Unified initialized");
+
+  // Configure Tab5 SDIO pins IMMEDIATELY after M5.begin() (before any WiFi code)
+  // This must happen before MycilaESPConnect touches WiFi
+  WiFi.setPins(/* CLK */ 12, /* CMD */ 13, /* D0 */ 11, /* D1 */ 10,
+               /* D2 */ 9, /* D3 */ 8, /* RST */ 15);
+  delay(100);
+  Serial.println("[WiFi] SDIO pins configured for Tab5");
 
   // Check RTC availability
   if (!M5.Rtc.isEnabled()) {
@@ -1013,33 +1045,50 @@ void setup()
   Serial.println("Loading tide data...");
   loadTideDataForToday(year, month, day);
 
-  // Start WiFi scan (don't blindly connect to first network)
-  // Tab5 uses ESP32-C6 WiFi coprocessor on SDIO2 with non-standard GPIO pins
-  Serial.println("Starting WiFi scan...");
-#if defined(CONFIG_IDF_TARGET_ESP32P4)
-  WiFi.setPins(GPIO_NUM_12, GPIO_NUM_13, GPIO_NUM_11,
-               GPIO_NUM_10, GPIO_NUM_9, GPIO_NUM_8, GPIO_NUM_15);
-#endif
-  WiFi.mode(WIFI_STA);
-  WiFi.setAutoReconnect(false);  // Prevent auto-reconnect until our scan completes
-  WiFi.disconnect(false);  // Disconnect from any current network (keep radio on)
-  // Scan-based connection logic will take control of connection
-  delay(500);  // Allow WiFi hardware time to initialize before first scan
-  lastScanTime = 0;  // Force immediate scan
-  startWiFiScan();
-
-  // Trigger first NTP sync immediately when WiFi connects
-  lastNTPSyncTime = 0;
+  // WiFiManager initialization deferred to background task (after display is ready)
+  Serial.println("WiFiManager will initialize in background after display setup...");
 
   xTaskCreate(touchDetectionTask, "touch", 2048, nullptr, 5, nullptr);
   xTaskCreate(renderTask, "render", 4096, nullptr, 4, nullptr);
+  xTaskCreate(wifiSetupTask, "wifi", 4096, nullptr, 2, nullptr);  // Lower priority, after render
 
   Serial.println("Setup complete!\n");
 }
 
 void loop()
 {
-  // Touch toggle — set by touchDetectionTask independently of render task
+  static unsigned long loopCount = 0;
+  static unsigned long lastDebugTime = 0;
+
+  loopCount++;
+
+  // Debug: Print WiFi state every 2 seconds
+  unsigned long now = millis();
+  if (now - lastDebugTime > 2000) {
+    lastDebugTime = now;
+    Serial.printf("[Loop] Running (count: %lu, time: %lu ms)\n", loopCount, now);
+    Serial.printf("[WiFi] Connected: %s, Mode: %d, SSID: %s, AP Active: %s\n",
+                  WiFi.isConnected() ? "yes" : "no",
+                  (int)WiFi.getMode(),
+                  WiFi.SSID().c_str(),
+                  WiFi.softAPgetStationNum() > 0 ? "yes" : "no");
+    Serial.flush();
+  }
+
+  // Header tap → toggle configuration UI state (WiFiManager only)
+  #ifdef USE_WIFI_MANAGER
+  if (touchPortalPending) {
+    touchPortalPending = false;
+    wifiPortalActive = !wifiPortalActive;
+    if (wifiPortalActive) {
+      portalConfigured = true;  // Mark that user is about to configure via portal
+    }
+    Serial.printf("[WiFi] Configuration mode toggled: %s\n", wifiPortalActive ? "ON" : "OFF");
+    redrawRequested = true;
+  }
+  #endif
+
+  // Body tap → toggle today/tomorrow
   static int touchCount = 0;
   if (touchTogglePending) {
     touchTogglePending = false;
@@ -1048,12 +1097,16 @@ void loop()
     unsigned long now = millis();
     Serial.printf("[Touch] Toggled to: %s (touch #%d at %lu ms)\n",
                   showTomorrow ? "Demain" : "Aujourd'hui", touchCount, now);
-    // Request immediate redraw on touch
     redrawRequested = true;
   }
 
-  // Non-blocking WiFi & NTP updates
-  updateWiFiStatus();
+
+  // Service WiFiManager portal in non-blocking mode (WiFiManager only)
+  #ifdef USE_WIFI_MANAGER
+  wifiManager.process();
+  #endif
+
+  // Non-blocking NTP update
   syncNTPTime();
 
   // Check if date has changed and reload tide data if needed
