@@ -394,6 +394,40 @@ The harmonic engine has no hardware-specific dependencies and should port to oth
 
 ---
 
+## Accuracy
+
+The Le Palais station has been validated against the full year 2026 from [maree.info/101](https://maree.info/101) (SHOM reference data), covering 365 days and ~1,400 tide events.
+
+### Time Accuracy (harmonic − reference, minutes)
+
+| Tide | Mean | Max error | Within ±5 min | Within ±10 min | Within ±15 min |
+|------|------|-----------|---------------|----------------|----------------|
+| High tides | +0.3 min | ±18 min | 62 % | 90 % | 97 % |
+| Low tides  | +0.8 min | ±17 min | 70 % | 93 % | 100 % |
+
+No systematic drift — mean errors are well below 1 minute across the full year.
+
+### Height Accuracy (harmonic − reference, metres)
+
+| Tide | Mean | Max error | Within ±0.15 m | Within ±0.20 m |
+|------|------|-----------|----------------|----------------|
+| High tides | −0.03 m | ±0.25 m | 74 % | 87 % |
+| Low tides  | −0.11 m | ±0.30 m | 54 % | 73 % |
+
+High tide heights are excellent. Low tides show a small persistent negative bias (~0.11 m), indicating the z0 datum offset can be reduced slightly (2.90 → 2.80 m) for improved low-tide accuracy.
+
+### Full-day pass rates
+
+| Tolerance | Days passing |
+|-----------|-------------|
+| All tides within ±2 min AND ±0.15 m | 8 % |
+| All tides within ±5 min AND ±0.20 m | 37 % |
+| All tides within ±10 min AND ±0.25 m | 68 % |
+
+These results are typical for harmonic prediction using a reduced constituent set; official SHOM tables use many more constituents and site-specific corrections.
+
+---
+
 ## Contributing
 
 Contributions are welcome, especially **new station data**.
