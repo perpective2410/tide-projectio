@@ -1,0 +1,25 @@
+#######################################
+# Syntax Coloring Map for Tides
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+TideEvent	KEYWORD1
+TideInfo	KEYWORD1
+TideStack	KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+setStation	KEYWORD2
+tides	KEYWORD2
+getFranceTimezoneOffset	KEYWORD2
+push	KEYWORD2
+peek	KEYWORD2
+getStack	KEYWORD2
+getCount	KEYWORD2
+getTop	KEYWORD2
+getEventTime	KEYWORD2

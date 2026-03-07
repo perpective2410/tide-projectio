@@ -1,0 +1,2136 @@
+2026-01-01
+  HT  maree.info: 02:31 4.65m   harmonic: 02:36 4.65m   diff: +5 min
+  LT  maree.info: 08:31 1.29m   harmonic: 08:38 1.13m   diff: +7 min
+  HT  maree.info: 15:02 4.74m   harmonic: 15:06 4.69m   diff: +4 min
+  LT  maree.info: 20:55 1.22m   harmonic: 21:04 1.08m   diff: +9 min
+
+2026-01-02
+  HT  maree.info: 03:25 4.90m   harmonic: 03:29 4.91m   diff: +4 min
+  LT  maree.info: 09:30 1.02m   harmonic: 09:35 0.84m   diff: +5 min
+  HT  maree.info: 15:57 4.92m   harmonic: 15:59 4.87m   diff: +2 min
+  LT  maree.info: 21:51 1.02m   harmonic: 21:57 0.87m   diff: +6 min
+
+2026-01-03
+  HT  maree.info: 04:17 5.11m   harmonic: 04:18 5.13m   diff: +1 min
+  LT  maree.info: 10:25 0.79m   harmonic: 10:27 0.60m   diff: +2 min
+  HT  maree.info: 16:47 5.04m   harmonic: 16:48 4.98m   diff: +1 min
+  LT  maree.info: 22:43 0.88m   harmonic: 22:47 0.70m   diff: +4 min
+
+2026-01-04
+  HT  maree.info: 05:05 5.26m   harmonic: 05:04 5.26m   diff: -1 min
+  LT  maree.info: 11:17 0.64m   harmonic: 11:17 0.44m   diff: +0 min
+  HT  maree.info: 17:34 5.07m   harmonic: 17:33 5.00m   diff: -1 min
+  LT  maree.info: 23:33 0.81m   harmonic: 23:35 0.63m   diff: +2 min
+
+2026-01-05
+  HT  maree.info: 05:50 5.30m   harmonic: 05:48 5.29m   diff: -2 min
+  LT  maree.info: 12:06 0.60m   harmonic: 12:04 0.41m   diff: -2 min
+  HT  maree.info: 18:17 5.00m   harmonic: 18:17 4.92m   diff: +0 min
+
+2026-01-06
+  LT  maree.info: 00:21 0.83m   harmonic: 00:21 0.65m   diff: +0 min
+  HT  maree.info: 06:33 5.24m   harmonic: 06:30 5.21m   diff: -3 min
+  LT  maree.info: 12:53 0.70m   harmonic: 12:50 0.51m   diff: -3 min
+  HT  maree.info: 18:56 4.86m   harmonic: 18:58 4.76m   diff: +2 min
+
+2026-01-07
+  LT  maree.info: 01:07 0.95m   harmonic: 01:06 0.79m   diff: -1 min
+  HT  maree.info: 07:11 5.08m   harmonic: 07:11 5.02m   diff: +0 min
+  LT  maree.info: 13:39 0.90m   harmonic: 13:36 0.73m   diff: -3 min
+  HT  maree.info: 19:32 4.67m   harmonic: 19:37 4.54m   diff: +5 min
+
+2026-01-08
+  LT  maree.info: 01:53 1.15m   harmonic: 01:50 1.01m   diff: -3 min
+  HT  maree.info: 07:47 4.85m   harmonic: 07:50 4.76m   diff: +3 min
+  LT  maree.info: 14:24 1.18m   harmonic: 14:21 1.03m   diff: -3 min
+  HT  maree.info: 20:06 4.45m   harmonic: 20:16 4.29m   diff: +10 min
+
+2026-01-09
+  LT  maree.info: 02:40 1.41m   harmonic: 02:36 1.30m   diff: -4 min
+  HT  maree.info: 08:23 4.58m   harmonic: 08:30 4.46m   diff: +7 min
+  LT  maree.info: 15:10 1.50m   harmonic: 15:07 1.37m   diff: -3 min
+  HT  maree.info: 20:45 4.23m   harmonic: 20:56 4.05m   diff: +11 min
+
+2026-01-10
+  LT  maree.info: 03:28 1.69m   harmonic: 03:23 1.62m   diff: -5 min
+  HT  maree.info: 09:06 4.30m   harmonic: 09:13 4.16m   diff: +7 min
+  LT  maree.info: 15:59 1.81m   harmonic: 15:55 1.71m   diff: -4 min
+  HT  maree.info: 21:36 4.02m   harmonic: 21:44 3.85m   diff: +8 min
+
+2026-01-11
+  LT  maree.info: 04:21 1.95m   harmonic: 04:16 1.91m   diff: -5 min
+  HT  maree.info: 09:58 4.03m   harmonic: 10:10 3.89m   diff: +12 min
+  LT  maree.info: 16:56 2.06m   harmonic: 16:50 1.98m   diff: -6 min
+  HT  maree.info: 22:49 3.86m   harmonic: 22:55 3.72m   diff: +6 min
+
+2026-01-12
+  LT  maree.info: 05:22 2.14m   harmonic: 05:17 2.12m   diff: -5 min
+  HT  maree.info: 11:20 3.83m   harmonic: 11:31 3.73m   diff: +11 min
+  LT  maree.info: 18:00 2.20m   harmonic: 17:52 2.14m   diff: -8 min
+
+2026-01-13
+  HT  maree.info: 00:24 3.84m   harmonic: 00:20 3.72m   diff: -4 min
+  LT  maree.info: 06:29 2.22m   harmonic: 06:26 2.20m   diff: -3 min
+  HT  maree.info: 13:00 3.80m   harmonic: 12:53 3.72m   diff: -7 min
+  LT  maree.info: 19:08 2.20m   harmonic: 18:58 2.15m   diff: -10 min
+
+2026-01-14
+  HT  maree.info: 01:36 3.96m   harmonic: 01:30 3.85m   diff: -6 min
+  LT  maree.info: 07:36 2.17m   harmonic: 07:35 2.13m   diff: -1 min
+  HT  maree.info: 14:08 3.91m   harmonic: 13:57 3.84m   diff: -11 min
+  LT  maree.info: 20:09 2.08m   harmonic: 20:00 2.04m   diff: -9 min
+
+2026-01-15
+  HT  maree.info: 02:29 4.14m   harmonic: 02:23 4.06m   diff: -6 min
+  LT  maree.info: 08:34 2.01m   harmonic: 08:33 1.94m   diff: -1 min
+  HT  maree.info: 14:57 4.08m   harmonic: 14:46 4.03m   diff: -11 min
+  LT  maree.info: 20:59 1.90m   harmonic: 20:52 1.84m   diff: -7 min
+
+2026-01-16
+  HT  maree.info: 03:11 4.34m   harmonic: 03:07 4.30m   diff: -4 min
+  LT  maree.info: 09:22 1.79m   harmonic: 09:22 1.70m   diff: +0 min
+  HT  maree.info: 15:36 4.26m   harmonic: 15:28 4.23m   diff: -8 min
+  LT  maree.info: 21:41 1.71m   harmonic: 21:36 1.61m   diff: -5 min
+
+2026-01-17
+  HT  maree.info: 03:49 4.54m   harmonic: 03:45 4.53m   diff: -4 min
+  LT  maree.info: 10:03 1.56m   harmonic: 10:03 1.44m   diff: +0 min
+  HT  maree.info: 16:10 4.44m   harmonic: 16:05 4.44m   diff: -5 min
+  LT  maree.info: 22:19 1.51m   harmonic: 22:16 1.38m   diff: -3 min
+
+2026-01-18
+  HT  maree.info: 04:23 4.73m   harmonic: 04:21 4.75m   diff: -2 min
+  LT  maree.info: 10:41 1.34m   harmonic: 10:41 1.20m   diff: +0 min
+  HT  maree.info: 16:42 4.59m   harmonic: 16:41 4.61m   diff: -1 min
+  LT  maree.info: 22:55 1.34m   harmonic: 22:52 1.18m   diff: -3 min
+
+2026-01-19
+  HT  maree.info: 04:57 4.89m   harmonic: 04:55 4.92m   diff: -2 min
+  LT  maree.info: 11:17 1.16m   harmonic: 11:16 0.99m   diff: -1 min
+  HT  maree.info: 17:14 4.71m   harmonic: 17:15 4.74m   diff: +1 min
+  LT  maree.info: 23:30 1.21m   harmonic: 23:27 1.01m   diff: -3 min
+
+2026-01-20
+  HT  maree.info: 05:31 5.00m   harmonic: 05:28 5.04m   diff: -3 min
+  LT  maree.info: 11:53 1.03m   harmonic: 11:51 0.84m   diff: -2 min
+  HT  maree.info: 17:45 4.79m   harmonic: 17:48 4.82m   diff: +3 min
+
+2026-01-21
+  LT  maree.info: 00:05 1.13m   harmonic: 00:02 0.90m   diff: -3 min
+  HT  maree.info: 06:05 5.07m   harmonic: 06:01 5.11m   diff: -4 min
+  LT  maree.info: 12:28 0.96m   harmonic: 12:27 0.76m   diff: -1 min
+  HT  maree.info: 18:18 4.82m   harmonic: 18:21 4.84m   diff: +3 min
+
+2026-01-22
+  LT  maree.info: 00:40 1.10m   harmonic: 00:39 0.85m   diff: -1 min
+  HT  maree.info: 06:40 5.07m   harmonic: 06:35 5.10m   diff: -5 min
+  LT  maree.info: 13:04 0.96m   harmonic: 13:04 0.76m   diff: +0 min
+  HT  maree.info: 18:52 4.79m   harmonic: 18:55 4.81m   diff: +3 min
+
+2026-01-23
+  LT  maree.info: 01:17 1.13m   harmonic: 01:17 0.88m   diff: +0 min
+  HT  maree.info: 07:16 5.00m   harmonic: 07:10 5.02m   diff: -6 min
+  LT  maree.info: 13:41 1.03m   harmonic: 13:43 0.85m   diff: +2 min
+  HT  maree.info: 19:28 4.70m   harmonic: 19:30 4.71m   diff: +2 min
+
+2026-01-24
+  LT  maree.info: 01:57 1.22m   harmonic: 01:58 1.00m   diff: +1 min
+  HT  maree.info: 07:55 4.85m   harmonic: 07:47 4.86m   diff: -8 min
+  LT  maree.info: 14:22 1.17m   harmonic: 14:26 1.03m   diff: +4 min
+  HT  maree.info: 20:07 4.54m   harmonic: 20:10 4.56m   diff: +3 min
+
+2026-01-25
+  LT  maree.info: 02:42 1.38m   harmonic: 02:45 1.19m   diff: +3 min
+  HT  maree.info: 08:39 4.64m   harmonic: 08:31 4.63m   diff: -8 min
+  LT  maree.info: 15:08 1.37m   harmonic: 15:15 1.27m   diff: +7 min
+  HT  maree.info: 20:55 4.34m   harmonic: 20:59 4.35m   diff: +4 min
+
+2026-01-26
+  LT  maree.info: 03:34 1.57m   harmonic: 03:39 1.42m   diff: +5 min
+  HT  maree.info: 09:35 4.38m   harmonic: 09:28 4.35m   diff: -7 min
+  LT  maree.info: 16:02 1.60m   harmonic: 16:12 1.52m   diff: +10 min
+  HT  maree.info: 22:02 4.14m   harmonic: 22:09 4.15m   diff: +7 min
+
+2026-01-27
+  LT  maree.info: 04:36 1.76m   harmonic: 04:43 1.64m   diff: +7 min
+  HT  maree.info: 10:56 4.16m   harmonic: 10:59 4.11m   diff: +3 min
+  LT  maree.info: 17:08 1.80m   harmonic: 17:20 1.71m   diff: +12 min
+  HT  maree.info: 23:45 4.05m   harmonic: 23:55 4.07m   diff: +10 min
+
+2026-01-28
+  LT  maree.info: 05:51 1.85m   harmonic: 06:00 1.72m   diff: +9 min
+  HT  maree.info: 12:35 4.11m   harmonic: 12:46 4.08m   diff: +11 min
+  LT  maree.info: 18:26 1.86m   harmonic: 18:38 1.74m   diff: +12 min
+
+2026-01-29
+  HT  maree.info: 01:19 4.19m   harmonic: 01:25 4.23m   diff: +6 min
+  LT  maree.info: 07:12 1.76m   harmonic: 07:20 1.60m   diff: +8 min
+  HT  maree.info: 14:00 4.26m   harmonic: 14:05 4.26m   diff: +5 min
+  LT  maree.info: 19:43 1.73m   harmonic: 19:52 1.56m   diff: +9 min
+
+2026-01-30
+  HT  maree.info: 02:31 4.47m   harmonic: 02:32 4.52m   diff: +1 min
+  LT  maree.info: 08:26 1.48m   harmonic: 08:31 1.30m   diff: +5 min
+  HT  maree.info: 15:05 4.51m   harmonic: 15:06 4.52m   diff: +1 min
+  LT  maree.info: 20:50 1.45m   harmonic: 20:56 1.26m   diff: +6 min
+
+2026-01-31
+  HT  maree.info: 03:27 4.79m   harmonic: 03:27 4.84m   diff: +0 min
+  LT  maree.info: 09:28 1.13m   harmonic: 09:30 0.93m   diff: +2 min
+  HT  maree.info: 15:58 4.77m   harmonic: 15:57 4.77m   diff: -1 min
+  LT  maree.info: 21:47 1.14m   harmonic: 21:50 0.93m   diff: +3 min
+
+2026-02-01
+  HT  maree.info: 04:15 5.07m   harmonic: 04:14 5.12m   diff: -1 min
+  LT  maree.info: 10:21 0.82m   harmonic: 10:20 0.60m   diff: -1 min
+  HT  maree.info: 16:42 4.97m   harmonic: 16:42 4.96m   diff: +0 min
+  LT  maree.info: 22:36 0.88m   harmonic: 22:38 0.66m   diff: +2 min
+
+2026-02-02
+  HT  maree.info: 04:57 5.28m   harmonic: 04:56 5.31m   diff: -1 min
+  LT  maree.info: 11:08 0.60m   harmonic: 11:06 0.38m   diff: -2 min
+  HT  maree.info: 17:21 5.09m   harmonic: 17:21 5.05m   diff: +0 min
+  LT  maree.info: 23:21 0.71m   harmonic: 23:21 0.50m   diff: +0 min
+
+2026-02-03
+  HT  maree.info: 05:35 5.37m   harmonic: 05:35 5.38m   diff: +0 min
+  LT  maree.info: 11:51 0.52m   harmonic: 11:48 0.30m   diff: -3 min
+  HT  maree.info: 17:55 5.10m   harmonic: 17:58 5.03m   diff: +3 min
+
+2026-02-04
+  LT  maree.info: 00:03 0.67m   harmonic: 00:03 0.47m   diff: +0 min
+  HT  maree.info: 06:08 5.34m   harmonic: 06:10 5.32m   diff: +2 min
+  LT  maree.info: 12:32 0.58m   harmonic: 12:29 0.39m   diff: -3 min
+  HT  maree.info: 18:25 5.03m   harmonic: 18:31 4.92m   diff: +6 min
+
+2026-02-05
+  LT  maree.info: 00:44 0.74m   harmonic: 00:43 0.59m   diff: -1 min
+  HT  maree.info: 06:39 5.21m   harmonic: 06:43 5.15m   diff: +4 min
+  LT  maree.info: 13:11 0.76m   harmonic: 13:08 0.61m   diff: -3 min
+  HT  maree.info: 18:53 4.89m   harmonic: 19:01 4.74m   diff: +8 min
+
+2026-02-06
+  LT  maree.info: 01:23 0.93m   harmonic: 01:22 0.82m   diff: -1 min
+  HT  maree.info: 07:07 5.00m   harmonic: 07:13 4.90m   diff: +6 min
+  LT  maree.info: 13:48 1.04m   harmonic: 13:47 0.94m   diff: -1 min
+  HT  maree.info: 19:22 4.70m   harmonic: 19:28 4.52m   diff: +6 min
+
+2026-02-07
+  LT  maree.info: 02:02 1.21m   harmonic: 02:00 1.15m   diff: -2 min
+  HT  maree.info: 07:39 4.72m   harmonic: 07:42 4.59m   diff: +3 min
+  LT  maree.info: 14:26 1.38m   harmonic: 14:25 1.32m   diff: -1 min
+  HT  maree.info: 19:54 4.46m   harmonic: 19:56 4.28m   diff: +2 min
+
+2026-02-08
+  LT  maree.info: 02:42 1.54m   harmonic: 02:40 1.52m   diff: -2 min
+  HT  maree.info: 08:12 4.40m   harmonic: 08:11 4.27m   diff: -1 min
+  LT  maree.info: 15:06 1.74m   harmonic: 15:04 1.71m   diff: -2 min
+  HT  maree.info: 20:31 4.18m   harmonic: 20:27 4.04m   diff: -4 min
+
+2026-02-09
+  LT  maree.info: 03:25 1.88m   harmonic: 03:23 1.90m   diff: -2 min
+  HT  maree.info: 08:51 4.06m   harmonic: 08:45 3.95m   diff: -6 min
+  LT  maree.info: 15:52 2.07m   harmonic: 15:48 2.06m   diff: -4 min
+  HT  maree.info: 21:21 3.90m   harmonic: 21:11 3.79m   diff: -10 min
+
+2026-02-10
+  LT  maree.info: 04:18 2.18m   harmonic: 04:16 2.23m   diff: -2 min
+  HT  maree.info: 09:46 3.74m   harmonic: 09:40 3.65m   diff: -6 min
+  LT  maree.info: 16:51 2.34m   harmonic: 16:46 2.33m   diff: -5 min
+  HT  maree.info: 22:55 3.68m   harmonic: 22:50 3.60m   diff: -5 min
+
+2026-02-11
+  LT  maree.info: 05:28 2.38m   harmonic: 05:31 2.44m   diff: +3 min
+  HT  maree.info: 12:00 3.55m   harmonic: 11:57 3.49m   diff: -3 min
+  LT  maree.info: 18:12 2.44m   harmonic: 18:08 2.44m   diff: -4 min
+
+2026-02-12
+  HT  maree.info: 01:01 3.72m   harmonic: 00:51 3.64m   diff: -10 min
+  LT  maree.info: 06:55 2.38m   harmonic: 07:02 2.41m   diff: +7 min
+  HT  maree.info: 13:48 3.67m   harmonic: 13:31 3.60m   diff: -17 min
+  LT  maree.info: 19:36 2.32m   harmonic: 19:32 2.32m   diff: -4 min
+
+2026-02-13
+  HT  maree.info: 02:09 3.94m   harmonic: 02:00 3.86m   diff: -9 min
+  LT  maree.info: 08:10 2.17m   harmonic: 08:15 2.16m   diff: +5 min
+  HT  maree.info: 14:43 3.91m   harmonic: 14:29 3.84m   diff: -14 min
+  LT  maree.info: 20:37 2.06m   harmonic: 20:35 2.05m   diff: -2 min
+
+2026-02-14
+  HT  maree.info: 02:56 4.21m   harmonic: 02:49 4.14m   diff: -7 min
+  LT  maree.info: 09:02 1.86m   harmonic: 09:06 1.82m   diff: +4 min
+  HT  maree.info: 15:21 4.17m   harmonic: 15:12 4.12m   diff: -9 min
+  LT  maree.info: 21:21 1.75m   harmonic: 21:20 1.72m   diff: -1 min
+
+2026-02-15
+  HT  maree.info: 03:33 4.50m   harmonic: 03:27 4.45m   diff: -6 min
+  LT  maree.info: 09:43 1.52m   harmonic: 09:46 1.46m   diff: +3 min
+  HT  maree.info: 15:53 4.44m   harmonic: 15:49 4.40m   diff: -4 min
+  LT  maree.info: 21:59 1.45m   harmonic: 21:57 1.39m   diff: -2 min
+
+2026-02-16
+  HT  maree.info: 04:06 4.77m   harmonic: 04:02 4.74m   diff: -4 min
+  LT  maree.info: 10:20 1.20m   harmonic: 10:20 1.12m   diff: +0 min
+  HT  maree.info: 16:24 4.69m   harmonic: 16:22 4.66m   diff: -2 min
+  LT  maree.info: 22:34 1.17m   harmonic: 22:32 1.08m   diff: -2 min
+
+2026-02-17
+  HT  maree.info: 04:38 5.02m   harmonic: 04:35 5.00m   diff: -3 min
+  LT  maree.info: 10:54 0.93m   harmonic: 10:54 0.83m   diff: +0 min
+  HT  maree.info: 16:54 4.90m   harmonic: 16:54 4.88m   diff: +0 min
+  LT  maree.info: 23:08 0.94m   harmonic: 23:05 0.81m   diff: -3 min
+
+2026-02-18
+  HT  maree.info: 05:11 5.22m   harmonic: 05:07 5.21m   diff: -4 min
+  LT  maree.info: 11:29 0.73m   harmonic: 11:27 0.60m   diff: -2 min
+  HT  maree.info: 17:25 5.05m   harmonic: 17:25 5.03m   diff: +0 min
+  LT  maree.info: 23:42 0.79m   harmonic: 23:39 0.62m   diff: -3 min
+
+2026-02-19
+  HT  maree.info: 05:44 5.33m   harmonic: 05:38 5.34m   diff: -6 min
+  LT  maree.info: 12:03 0.62m   harmonic: 12:02 0.48m   diff: -1 min
+  HT  maree.info: 17:56 5.12m   harmonic: 17:56 5.12m   diff: +0 min
+
+2026-02-20
+  LT  maree.info: 00:17 0.72m   harmonic: 00:15 0.52m   diff: -2 min
+  HT  maree.info: 06:17 5.35m   harmonic: 06:10 5.36m   diff: -7 min
+  LT  maree.info: 12:38 0.61m   harmonic: 12:38 0.49m   diff: +0 min
+  HT  maree.info: 18:29 5.10m   harmonic: 18:27 5.11m   diff: -2 min
+
+2026-02-21
+  LT  maree.info: 00:54 0.75m   harmonic: 00:52 0.55m   diff: -2 min
+  HT  maree.info: 06:52 5.25m   harmonic: 06:44 5.27m   diff: -8 min
+  LT  maree.info: 13:15 0.72m   harmonic: 13:16 0.62m   diff: +1 min
+  HT  maree.info: 19:02 4.98m   harmonic: 19:01 5.00m   diff: -1 min
+
+2026-02-22
+  LT  maree.info: 01:33 0.88m   harmonic: 01:33 0.71m   diff: +0 min
+  HT  maree.info: 07:29 5.04m   harmonic: 07:20 5.05m   diff: -9 min
+  LT  maree.info: 13:56 0.94m   harmonic: 13:58 0.87m   diff: +2 min
+  HT  maree.info: 19:39 4.76m   harmonic: 19:38 4.79m   diff: -1 min
+
+2026-02-23
+  LT  maree.info: 02:18 1.13m   harmonic: 02:19 0.98m   diff: +1 min
+  HT  maree.info: 08:10 4.72m   harmonic: 08:01 4.72m   diff: -9 min
+  LT  maree.info: 14:41 1.27m   harmonic: 14:45 1.20m   diff: +4 min
+  HT  maree.info: 20:21 4.47m   harmonic: 20:23 4.50m   diff: +2 min
+
+2026-02-24
+  LT  maree.info: 03:09 1.45m   harmonic: 03:12 1.32m   diff: +3 min
+  HT  maree.info: 09:02 4.33m   harmonic: 08:55 4.31m   diff: -7 min
+  LT  maree.info: 15:36 1.64m   harmonic: 15:42 1.57m   diff: +6 min
+  HT  maree.info: 21:22 4.15m   harmonic: 21:30 4.16m   diff: +8 min
+
+2026-02-25
+  LT  maree.info: 04:14 1.78m   harmonic: 04:18 1.65m   diff: +4 min
+  HT  maree.info: 10:35 3.99m   harmonic: 10:41 3.95m   diff: +6 min
+  LT  maree.info: 16:45 1.96m   harmonic: 16:54 1.86m   diff: +9 min
+  HT  maree.info: 23:30 3.95m   harmonic: 23:41 3.99m   diff: +11 min
+
+2026-02-26
+  LT  maree.info: 05:37 1.96m   harmonic: 05:42 1.82m   diff: +5 min
+  HT  maree.info: 12:38 3.92m   harmonic: 12:43 3.93m   diff: +5 min
+  LT  maree.info: 18:13 2.06m   harmonic: 18:22 1.91m   diff: +9 min
+
+2026-02-27
+  HT  maree.info: 01:21 4.11m   harmonic: 01:18 4.16m   diff: -3 min
+  LT  maree.info: 07:11 1.85m   harmonic: 07:12 1.68m   diff: +1 min
+  HT  maree.info: 14:05 4.14m   harmonic: 14:02 4.16m   diff: -3 min
+  LT  maree.info: 19:41 1.86m   harmonic: 19:44 1.67m   diff: +3 min
+
+2026-02-28
+  HT  maree.info: 02:32 4.44m   harmonic: 02:26 4.49m   diff: -6 min
+  LT  maree.info: 08:26 1.51m   harmonic: 08:24 1.32m   diff: -2 min
+  HT  maree.info: 15:04 4.45m   harmonic: 15:00 4.46m   diff: -4 min
+  LT  maree.info: 20:47 1.50m   harmonic: 20:47 1.29m   diff: +0 min
+
+2026-03-01
+  HT  maree.info: 03:23 4.78m   harmonic: 03:18 4.83m   diff: -5 min
+  LT  maree.info: 09:23 1.13m   harmonic: 09:19 0.92m   diff: -4 min
+  HT  maree.info: 15:48 4.74m   harmonic: 15:46 4.75m   diff: -2 min
+  LT  maree.info: 21:38 1.14m   harmonic: 21:37 0.91m   diff: -1 min
+
+2026-03-02
+  HT  maree.info: 04:04 5.06m   harmonic: 04:01 5.11m   diff: -3 min
+  LT  maree.info: 10:09 0.82m   harmonic: 10:05 0.58m   diff: -4 min
+  HT  maree.info: 16:24 4.96m   harmonic: 16:25 4.96m   diff: +1 min
+  LT  maree.info: 22:22 0.85m   harmonic: 22:21 0.61m   diff: -1 min
+
+2026-03-03
+  HT  maree.info: 04:38 5.25m   harmonic: 04:39 5.29m   diff: +1 min
+  LT  maree.info: 10:50 0.62m   harmonic: 10:47 0.38m   diff: -3 min
+  HT  maree.info: 16:56 5.10m   harmonic: 17:00 5.07m   diff: +4 min
+  LT  maree.info: 23:02 0.67m   harmonic: 23:01 0.43m   diff: -1 min
+
+2026-03-04
+  HT  maree.info: 05:09 5.34m   harmonic: 05:12 5.36m   diff: +3 min
+  LT  maree.info: 11:28 0.55m   harmonic: 11:25 0.32m   diff: -3 min
+  HT  maree.info: 17:24 5.15m   harmonic: 17:31 5.09m   diff: +7 min
+  LT  maree.info: 23:40 0.62m   harmonic: 23:40 0.41m   diff: +0 min
+
+2026-03-05
+  HT  maree.info: 05:37 5.32m   harmonic: 05:43 5.30m   diff: +6 min
+  LT  maree.info: 12:04 0.61m   harmonic: 12:02 0.41m   diff: -2 min
+  HT  maree.info: 17:50 5.13m   harmonic: 17:59 5.02m   diff: +9 min
+
+2026-03-06
+  LT  maree.info: 00:16 0.70m   harmonic: 00:16 0.53m   diff: +0 min
+  HT  maree.info: 06:04 5.21m   harmonic: 06:12 5.15m   diff: +8 min
+  LT  maree.info: 12:38 0.79m   harmonic: 12:38 0.64m   diff: +0 min
+  HT  maree.info: 18:17 5.02m   harmonic: 18:25 4.89m   diff: +8 min
+
+2026-03-07
+  LT  maree.info: 00:50 0.88m   harmonic: 00:52 0.78m   diff: +2 min
+  HT  maree.info: 06:33 5.02m   harmonic: 06:38 4.92m   diff: +5 min
+  LT  maree.info: 13:11 1.04m   harmonic: 13:12 0.95m   diff: +1 min
+  HT  maree.info: 18:45 4.84m   harmonic: 18:49 4.70m   diff: +4 min
+
+2026-03-08
+  LT  maree.info: 01:25 1.14m   harmonic: 01:27 1.11m   diff: +2 min
+  HT  maree.info: 07:01 4.75m   harmonic: 07:03 4.65m   diff: +2 min
+  LT  maree.info: 13:44 1.36m   harmonic: 13:45 1.32m   diff: +1 min
+  HT  maree.info: 19:15 4.60m   harmonic: 19:15 4.47m   diff: +0 min
+
+2026-03-09
+  LT  maree.info: 02:00 1.46m   harmonic: 02:02 1.48m   diff: +2 min
+  HT  maree.info: 07:31 4.43m   harmonic: 07:29 4.34m   diff: -2 min
+  LT  maree.info: 14:19 1.70m   harmonic: 14:19 1.70m   diff: +0 min
+  HT  maree.info: 19:48 4.31m   harmonic: 19:43 4.21m   diff: -5 min
+
+2026-03-10
+  LT  maree.info: 02:39 1.80m   harmonic: 02:39 1.87m   diff: +0 min
+  HT  maree.info: 08:04 4.09m   harmonic: 08:00 4.01m   diff: -4 min
+  LT  maree.info: 14:59 2.04m   harmonic: 14:56 2.05m   diff: -3 min
+  HT  maree.info: 20:28 3.99m   harmonic: 20:20 3.92m   diff: -8 min
+
+2026-03-11
+  LT  maree.info: 03:26 2.13m   harmonic: 03:24 2.22m   diff: -2 min
+  HT  maree.info: 08:48 3.74m   harmonic: 08:42 3.67m   diff: -6 min
+  LT  maree.info: 15:52 2.35m   harmonic: 15:46 2.36m   diff: -6 min
+  HT  maree.info: 21:36 3.70m   harmonic: 21:25 3.63m   diff: -11 min
+
+2026-03-12
+  LT  maree.info: 04:32 2.39m   harmonic: 04:35 2.47m   diff: +3 min
+  HT  maree.info: 10:31 3.47m   harmonic: 10:57 3.41m   diff: +26 min
+  LT  maree.info: 17:13 2.52m   harmonic: 17:13 2.54m   diff: +0 min
+
+2026-03-13
+  HT  maree.info: 00:10 3.63m   harmonic: 00:06 3.55m   diff: -4 min
+  LT  maree.info: 06:06 2.44m   harmonic: 06:22 2.49m   diff: +16 min
+  HT  maree.info: 13:13 3.57m   harmonic: 12:58 3.50m   diff: -15 min
+  LT  maree.info: 18:54 2.43m   harmonic: 18:59 2.44m   diff: +5 min
+
+2026-03-14
+  HT  maree.info: 01:35 3.85m   harmonic: 01:28 3.75m   diff: -7 min
+  LT  maree.info: 07:35 2.21m   harmonic: 07:47 2.22m   diff: +12 min
+  HT  maree.info: 14:13 3.85m   harmonic: 14:01 3.76m   diff: -12 min
+  LT  maree.info: 20:04 2.13m   harmonic: 20:08 2.13m   diff: +4 min
+
+2026-03-15
+  HT  maree.info: 02:26 4.16m   harmonic: 02:19 4.06m   diff: -7 min
+  LT  maree.info: 08:30 1.85m   harmonic: 08:38 1.84m   diff: +8 min
+  HT  maree.info: 14:52 4.16m   harmonic: 14:46 4.08m   diff: -6 min
+  LT  maree.info: 20:50 1.76m   harmonic: 20:53 1.75m   diff: +3 min
+
+2026-03-16
+  HT  maree.info: 03:04 4.49m   harmonic: 02:59 4.40m   diff: -5 min
+  LT  maree.info: 09:11 1.46m   harmonic: 09:17 1.43m   diff: +6 min
+  HT  maree.info: 15:24 4.48m   harmonic: 15:22 4.41m   diff: -2 min
+  LT  maree.info: 21:28 1.39m   harmonic: 21:29 1.36m   diff: +1 min
+
+2026-03-17
+  HT  maree.info: 03:38 4.82m   harmonic: 03:34 4.74m   diff: -4 min
+  LT  maree.info: 09:48 1.09m   harmonic: 09:51 1.05m   diff: +3 min
+  HT  maree.info: 15:55 4.79m   harmonic: 15:55 4.72m   diff: +0 min
+  LT  maree.info: 22:04 1.05m   harmonic: 22:03 0.99m   diff: -1 min
+
+2026-03-18
+  HT  maree.info: 04:11 5.11m   harmonic: 04:07 5.05m   diff: -4 min
+  LT  maree.info: 10:23 0.77m   harmonic: 10:25 0.72m   diff: +2 min
+  HT  maree.info: 16:26 5.04m   harmonic: 16:26 4.98m   diff: +0 min
+  LT  maree.info: 22:39 0.76m   harmonic: 22:37 0.68m   diff: -2 min
+
+2026-03-19
+  HT  maree.info: 04:44 5.35m   harmonic: 04:40 5.30m   diff: -4 min
+  LT  maree.info: 10:58 0.54m   harmonic: 10:59 0.49m   diff: +1 min
+  HT  maree.info: 16:58 5.23m   harmonic: 16:57 5.18m   diff: -1 min
+  LT  maree.info: 23:14 0.57m   harmonic: 23:13 0.45m   diff: -1 min
+
+2026-03-20
+  HT  maree.info: 05:18 5.48m   harmonic: 05:12 5.44m   diff: -6 min
+  LT  maree.info: 11:34 0.42m   harmonic: 11:34 0.37m   diff: +0 min
+  HT  maree.info: 17:31 5.31m   harmonic: 17:29 5.29m   diff: -2 min
+  LT  maree.info: 23:51 0.48m   harmonic: 23:50 0.35m   diff: -1 min
+
+2026-03-21
+  HT  maree.info: 05:53 5.48m   harmonic: 05:46 5.45m   diff: -7 min
+  LT  maree.info: 12:11 0.44m   harmonic: 12:12 0.39m   diff: +1 min
+  HT  maree.info: 18:05 5.28m   harmonic: 18:02 5.27m   diff: -3 min
+
+2026-03-22
+  LT  maree.info: 00:31 0.53m   harmonic: 00:29 0.39m   diff: -2 min
+  HT  maree.info: 06:30 5.33m   harmonic: 06:22 5.32m   diff: -8 min
+  LT  maree.info: 12:51 0.61m   harmonic: 12:52 0.57m   diff: +1 min
+  HT  maree.info: 18:40 5.12m   harmonic: 18:37 5.14m   diff: -3 min
+
+2026-03-23
+  LT  maree.info: 01:13 0.72m   harmonic: 01:12 0.59m   diff: -1 min
+  HT  maree.info: 07:08 5.04m   harmonic: 07:00 5.03m   diff: -8 min
+  LT  maree.info: 13:34 0.91m   harmonic: 13:35 0.87m   diff: +1 min
+  HT  maree.info: 19:18 4.85m   harmonic: 19:17 4.87m   diff: -1 min
+
+2026-03-24
+  LT  maree.info: 02:01 1.04m   harmonic: 02:00 0.91m   diff: -1 min
+  HT  maree.info: 07:52 4.64m   harmonic: 07:45 4.63m   diff: -7 min
+  LT  maree.info: 14:23 1.31m   harmonic: 14:24 1.25m   diff: +1 min
+  HT  maree.info: 20:04 4.50m   harmonic: 20:06 4.52m   diff: +2 min
+
+2026-03-25
+  LT  maree.info: 02:56 1.43m   harmonic: 02:56 1.30m   diff: +0 min
+  HT  maree.info: 08:53 4.20m   harmonic: 08:50 4.18m   diff: -3 min
+  LT  maree.info: 15:21 1.73m   harmonic: 15:24 1.64m   diff: +3 min
+  HT  maree.info: 21:17 4.14m   harmonic: 21:28 4.15m   diff: +11 min
+
+2026-03-26
+  LT  maree.info: 04:05 1.79m   harmonic: 04:06 1.65m   diff: +1 min
+  HT  maree.info: 10:47 3.88m   harmonic: 10:52 3.87m   diff: +5 min
+  LT  maree.info: 16:36 2.04m   harmonic: 16:40 1.91m   diff: +4 min
+  HT  maree.info: 23:36 3.99m   harmonic: 23:36 4.02m   diff: +0 min
+
+2026-03-27
+  LT  maree.info: 05:35 1.95m   harmonic: 05:33 1.79m   diff: -2 min
+  HT  maree.info: 12:43 3.91m   harmonic: 12:36 3.91m   diff: -7 min
+  LT  maree.info: 18:09 2.09m   harmonic: 18:10 1.92m   diff: +1 min
+
+2026-03-28
+  HT  maree.info: 01:16 4.18m   harmonic: 01:04 4.20m   diff: -12 min
+  LT  maree.info: 07:07 1.79m   harmonic: 07:00 1.62m   diff: -7 min
+  HT  maree.info: 13:57 4.16m   harmonic: 13:48 4.14m   diff: -9 min
+  LT  maree.info: 19:31 1.84m   harmonic: 19:29 1.65m   diff: -2 min
+
+2026-03-29
+  HT  maree.info: 03:19 4.47m   harmonic: 03:08 4.49m   diff: -11 min
+  LT  maree.info: 09:14 1.47m   harmonic: 09:07 1.29m   diff: -7 min
+  HT  maree.info: 15:48 4.45m   harmonic: 15:42 4.43m   diff: -6 min
+  LT  maree.info: 21:31 1.48m   harmonic: 21:28 1.28m   diff: -3 min
+
+2026-03-30
+  HT  maree.info: 04:05 4.75m   harmonic: 03:58 4.77m   diff: -7 min
+  LT  maree.info: 10:05 1.15m   harmonic: 09:58 0.95m   diff: -7 min
+  HT  maree.info: 16:26 4.69m   harmonic: 16:24 4.69m   diff: -2 min
+  LT  maree.info: 22:19 1.16m   harmonic: 22:16 0.93m   diff: -3 min
+
+2026-03-31
+  HT  maree.info: 04:41 4.96m   harmonic: 04:38 5.00m   diff: -3 min
+  LT  maree.info: 10:48 0.90m   harmonic: 10:41 0.69m   diff: -7 min
+  HT  maree.info: 16:57 4.89m   harmonic: 17:00 4.88m   diff: +3 min
+  LT  maree.info: 23:01 0.92m   harmonic: 22:57 0.68m   diff: -4 min
+
+2026-04-01
+  HT  maree.info: 05:11 5.10m   harmonic: 05:13 5.14m   diff: +2 min
+  LT  maree.info: 11:26 0.77m   harmonic: 11:20 0.53m   diff: -6 min
+  HT  maree.info: 17:24 5.02m   harmonic: 17:31 5.00m   diff: +7 min
+  LT  maree.info: 23:38 0.79m   harmonic: 23:36 0.54m   diff: -2 min
+
+2026-04-02
+  HT  maree.info: 05:39 5.16m   harmonic: 05:45 5.19m   diff: +6 min
+  LT  maree.info: 12:01 0.74m   harmonic: 11:57 0.51m   diff: -4 min
+  HT  maree.info: 17:51 5.09m   harmonic: 18:00 5.05m   diff: +9 min
+
+2026-04-03
+  LT  maree.info: 00:13 0.77m   harmonic: 00:13 0.53m   diff: +0 min
+  HT  maree.info: 06:06 5.15m   harmonic: 06:14 5.15m   diff: +8 min
+  LT  maree.info: 12:33 0.80m   harmonic: 12:33 0.60m   diff: +0 min
+  HT  maree.info: 18:18 5.09m   harmonic: 18:27 5.03m   diff: +9 min
+
+2026-04-04
+  LT  maree.info: 00:47 0.84m   harmonic: 00:49 0.65m   diff: +2 min
+  HT  maree.info: 06:34 5.06m   harmonic: 06:41 5.03m   diff: +7 min
+  LT  maree.info: 13:05 0.95m   harmonic: 13:07 0.79m   diff: +2 min
+  HT  maree.info: 18:46 5.00m   harmonic: 18:53 4.93m   diff: +7 min
+
+2026-04-05
+  LT  maree.info: 01:19 0.98m   harmonic: 01:24 0.87m   diff: +5 min
+  HT  maree.info: 07:03 4.89m   harmonic: 07:08 4.84m   diff: +5 min
+  LT  maree.info: 13:36 1.16m   harmonic: 13:40 1.05m   diff: +4 min
+  HT  maree.info: 19:16 4.84m   harmonic: 19:20 4.78m   diff: +4 min
+
+2026-04-06
+  LT  maree.info: 01:52 1.20m   harmonic: 01:58 1.15m   diff: +6 min
+  HT  maree.info: 07:31 4.66m   harmonic: 07:35 4.60m   diff: +4 min
+  LT  maree.info: 14:08 1.43m   harmonic: 14:12 1.36m   diff: +4 min
+  HT  maree.info: 19:46 4.62m   harmonic: 19:48 4.57m   diff: +2 min
+
+2026-04-07
+  LT  maree.info: 02:27 1.46m   harmonic: 02:32 1.48m   diff: +5 min
+  HT  maree.info: 08:01 4.38m   harmonic: 08:04 4.33m   diff: +3 min
+  LT  maree.info: 14:42 1.71m   harmonic: 14:45 1.68m   diff: +3 min
+  HT  maree.info: 20:19 4.36m   harmonic: 20:19 4.31m   diff: +0 min
+
+2026-04-08
+  LT  maree.info: 03:06 1.75m   harmonic: 03:09 1.80m   diff: +3 min
+  HT  maree.info: 08:34 4.08m   harmonic: 08:38 4.02m   diff: +4 min
+  LT  maree.info: 15:22 2.01m   harmonic: 15:22 1.99m   diff: +0 min
+  HT  maree.info: 20:59 4.08m   harmonic: 20:58 4.02m   diff: -1 min
+
+2026-04-09
+  LT  maree.info: 03:52 2.03m   harmonic: 03:53 2.10m   diff: +1 min
+  HT  maree.info: 09:18 3.78m   harmonic: 09:25 3.71m   diff: +7 min
+  LT  maree.info: 16:13 2.27m   harmonic: 16:10 2.26m   diff: -3 min
+  HT  maree.info: 22:02 3.81m   harmonic: 22:03 3.73m   diff: +1 min
+
+2026-04-10
+  LT  maree.info: 04:52 2.26m   harmonic: 04:58 2.33m   diff: +6 min
+  HT  maree.info: 10:46 3.54m   harmonic: 11:18 3.48m   diff: +32 min
+  LT  maree.info: 17:26 2.44m   harmonic: 17:28 2.44m   diff: +2 min
+
+2026-04-11
+  HT  maree.info: 00:04 3.70m   harmonic: 00:13 3.61m   diff: +9 min
+  LT  maree.info: 06:16 2.33m   harmonic: 06:33 2.36m   diff: +17 min
+  HT  maree.info: 13:14 3.58m   harmonic: 13:12 3.53m   diff: -2 min
+  LT  maree.info: 19:00 2.40m   harmonic: 19:09 2.39m   diff: +9 min
+
+2026-04-12
+  HT  maree.info: 01:40 3.85m   harmonic: 01:40 3.76m   diff: +0 min
+  LT  maree.info: 07:43 2.16m   harmonic: 07:57 2.15m   diff: +14 min
+  HT  maree.info: 14:24 3.84m   harmonic: 14:19 3.77m   diff: -5 min
+  LT  maree.info: 20:15 2.13m   harmonic: 20:22 2.12m   diff: +7 min
+
+2026-04-13
+  HT  maree.info: 02:39 4.14m   harmonic: 02:37 4.04m   diff: -2 min
+  LT  maree.info: 08:44 1.82m   harmonic: 08:54 1.80m   diff: +10 min
+  HT  maree.info: 15:08 4.16m   harmonic: 15:07 4.08m   diff: -1 min
+  LT  maree.info: 21:06 1.76m   harmonic: 21:11 1.76m   diff: +5 min
+
+2026-04-14
+  HT  maree.info: 03:23 4.47m   harmonic: 03:21 4.37m   diff: -2 min
+  LT  maree.info: 09:29 1.44m   harmonic: 09:36 1.42m   diff: +7 min
+  HT  maree.info: 15:45 4.50m   harmonic: 15:46 4.41m   diff: +1 min
+  LT  maree.info: 21:48 1.38m   harmonic: 21:52 1.36m   diff: +4 min
+
+2026-04-15
+  HT  maree.info: 04:02 4.80m   harmonic: 04:00 4.71m   diff: -2 min
+  LT  maree.info: 10:09 1.07m   harmonic: 10:14 1.05m   diff: +5 min
+  HT  maree.info: 16:20 4.82m   harmonic: 16:22 4.73m   diff: +2 min
+  LT  maree.info: 22:27 1.03m   harmonic: 22:29 0.99m   diff: +2 min
+
+2026-04-16
+  HT  maree.info: 04:39 5.10m   harmonic: 04:36 5.02m   diff: -3 min
+  LT  maree.info: 10:47 0.75m   harmonic: 10:51 0.74m   diff: +4 min
+  HT  maree.info: 16:55 5.09m   harmonic: 16:56 5.01m   diff: +1 min
+  LT  maree.info: 23:05 0.73m   harmonic: 23:07 0.66m   diff: +2 min
+
+2026-04-17
+  HT  maree.info: 05:16 5.33m   harmonic: 05:12 5.26m   diff: -4 min
+  LT  maree.info: 11:25 0.52m   harmonic: 11:29 0.52m   diff: +4 min
+  HT  maree.info: 17:30 5.27m   harmonic: 17:30 5.21m   diff: +0 min
+  LT  maree.info: 23:45 0.52m   harmonic: 23:46 0.44m   diff: +1 min
+
+2026-04-18
+  HT  maree.info: 05:54 5.44m   harmonic: 05:49 5.38m   diff: -5 min
+  LT  maree.info: 12:05 0.43m   harmonic: 12:08 0.43m   diff: +3 min
+  HT  maree.info: 18:06 5.35m   harmonic: 18:05 5.32m   diff: -1 min
+
+2026-04-19
+  LT  maree.info: 00:27 0.43m   harmonic: 00:27 0.34m   diff: +0 min
+  HT  maree.info: 06:33 5.41m   harmonic: 06:27 5.36m   diff: -6 min
+  LT  maree.info: 12:47 0.48m   harmonic: 12:49 0.47m   diff: +2 min
+  HT  maree.info: 18:45 5.30m   harmonic: 18:43 5.29m   diff: -2 min
+
+2026-04-20
+  LT  maree.info: 01:12 0.50m   harmonic: 01:11 0.40m   diff: -1 min
+  HT  maree.info: 07:14 5.22m   harmonic: 07:08 5.18m   diff: -6 min
+  LT  maree.info: 13:31 0.68m   harmonic: 13:32 0.65m   diff: +1 min
+  HT  maree.info: 19:25 5.13m   harmonic: 19:24 5.13m   diff: -1 min
+
+2026-04-21
+  LT  maree.info: 02:00 0.71m   harmonic: 01:58 0.60m   diff: -2 min
+  HT  maree.info: 07:59 4.90m   harmonic: 07:54 4.88m   diff: -5 min
+  LT  maree.info: 14:19 1.00m   harmonic: 14:19 0.94m   diff: +0 min
+  HT  maree.info: 20:11 4.85m   harmonic: 20:11 4.86m   diff: +0 min
+
+2026-04-22
+  LT  maree.info: 02:52 1.03m   harmonic: 02:49 0.90m   diff: -3 min
+  HT  maree.info: 08:52 4.51m   harmonic: 08:49 4.49m   diff: -3 min
+  LT  maree.info: 15:12 1.37m   harmonic: 15:12 1.28m   diff: +0 min
+  HT  maree.info: 21:09 4.53m   harmonic: 21:11 4.53m   diff: +2 min
+
+2026-04-23
+  LT  maree.info: 03:52 1.39m   harmonic: 03:48 1.25m   diff: -4 min
+  HT  maree.info: 10:07 4.14m   harmonic: 10:07 4.12m   diff: +0 min
+  LT  maree.info: 16:14 1.73m   harmonic: 16:14 1.61m   diff: +0 min
+  HT  maree.info: 22:36 4.24m   harmonic: 22:39 4.24m   diff: +3 min
+
+2026-04-24
+  LT  maree.info: 05:02 1.69m   harmonic: 04:59 1.53m   diff: -3 min
+  HT  maree.info: 11:52 3.94m   harmonic: 11:47 3.92m   diff: -5 min
+  LT  maree.info: 17:30 1.96m   harmonic: 17:29 1.81m   diff: -1 min
+
+2026-04-25
+  HT  maree.info: 00:25 4.15m   harmonic: 00:18 4.14m   diff: -7 min
+  LT  maree.info: 06:25 1.80m   harmonic: 06:18 1.64m   diff: -7 min
+  HT  maree.info: 13:25 3.99m   harmonic: 13:13 3.95m   diff: -12 min
+  LT  maree.info: 18:53 1.96m   harmonic: 18:49 1.81m   diff: -4 min
+
+2026-04-26
+  HT  maree.info: 01:49 4.25m   harmonic: 01:37 4.24m   diff: -12 min
+  LT  maree.info: 07:44 1.70m   harmonic: 07:35 1.54m   diff: -9 min
+  HT  maree.info: 14:30 4.17m   harmonic: 14:20 4.12m   diff: -10 min
+  LT  maree.info: 20:06 1.77m   harmonic: 20:01 1.62m   diff: -5 min
+
+2026-04-27
+  HT  maree.info: 02:50 4.43m   harmonic: 02:39 4.42m   diff: -11 min
+  LT  maree.info: 08:47 1.49m   harmonic: 08:37 1.34m   diff: -10 min
+  HT  maree.info: 15:17 4.38m   harmonic: 15:12 4.33m   diff: -5 min
+  LT  maree.info: 21:04 1.52m   harmonic: 20:58 1.35m   diff: -6 min
+
+2026-04-28
+  HT  maree.info: 03:35 4.59m   harmonic: 03:29 4.60m   diff: -6 min
+  LT  maree.info: 09:37 1.28m   harmonic: 09:27 1.12m   diff: -10 min
+  HT  maree.info: 15:54 4.57m   harmonic: 15:54 4.54m   diff: +0 min
+  LT  maree.info: 21:52 1.30m   harmonic: 21:46 1.11m   diff: -6 min
+
+2026-04-29
+  HT  maree.info: 04:11 4.72m   harmonic: 04:09 4.75m   diff: -2 min
+  LT  maree.info: 10:20 1.13m   harmonic: 10:11 0.95m   diff: -9 min
+  HT  maree.info: 16:24 4.73m   harmonic: 16:29 4.71m   diff: +5 min
+  LT  maree.info: 22:34 1.14m   harmonic: 22:29 0.92m   diff: -5 min
+
+2026-04-30
+  HT  maree.info: 04:42 4.81m   harmonic: 04:44 4.85m   diff: +2 min
+  LT  maree.info: 10:57 1.04m   harmonic: 10:50 0.85m   diff: -7 min
+  HT  maree.info: 16:52 4.85m   harmonic: 17:01 4.84m   diff: +9 min
+  LT  maree.info: 23:12 1.06m   harmonic: 23:09 0.82m   diff: -3 min
+
+2026-05-01
+  HT  maree.info: 05:11 4.86m   harmonic: 05:16 4.90m   diff: +5 min
+  LT  maree.info: 11:32 1.03m   harmonic: 11:28 0.83m   diff: -4 min
+  HT  maree.info: 17:21 4.92m   harmonic: 17:30 4.92m   diff: +9 min
+  LT  maree.info: 23:47 1.05m   harmonic: 23:47 0.81m   diff: +0 min
+
+2026-05-02
+  HT  maree.info: 05:40 4.86m   harmonic: 05:46 4.89m   diff: +6 min
+  LT  maree.info: 12:05 1.08m   harmonic: 12:04 0.88m   diff: -1 min
+  HT  maree.info: 17:51 4.93m   harmonic: 17:59 4.94m   diff: +8 min
+
+2026-05-03
+  LT  maree.info: 00:21 1.09m   harmonic: 00:23 0.88m   diff: +2 min
+  HT  maree.info: 06:10 4.80m   harmonic: 06:16 4.82m   diff: +6 min
+  LT  maree.info: 12:36 1.19m   harmonic: 12:39 1.00m   diff: +3 min
+  HT  maree.info: 18:22 4.87m   harmonic: 18:29 4.89m   diff: +7 min
+
+2026-05-04
+  LT  maree.info: 00:54 1.18m   harmonic: 00:59 1.02m   diff: +5 min
+  HT  maree.info: 06:41 4.68m   harmonic: 06:46 4.70m   diff: +5 min
+  LT  maree.info: 13:08 1.33m   harmonic: 13:13 1.18m   diff: +5 min
+  HT  maree.info: 18:54 4.75m   harmonic: 19:00 4.78m   diff: +6 min
+
+2026-05-05
+  LT  maree.info: 01:28 1.31m   harmonic: 01:35 1.22m   diff: +7 min
+  HT  maree.info: 07:12 4.51m   harmonic: 07:18 4.52m   diff: +6 min
+  LT  maree.info: 13:41 1.51m   harmonic: 13:48 1.39m   diff: +7 min
+  HT  maree.info: 19:27 4.59m   harmonic: 19:33 4.61m   diff: +6 min
+
+2026-05-06
+  LT  maree.info: 02:05 1.48m   harmonic: 02:12 1.44m   diff: +7 min
+  HT  maree.info: 07:44 4.31m   harmonic: 07:52 4.30m   diff: +8 min
+  LT  maree.info: 14:17 1.72m   harmonic: 14:23 1.62m   diff: +6 min
+  HT  maree.info: 20:03 4.40m   harmonic: 20:09 4.39m   diff: +6 min
+
+2026-05-07
+  LT  maree.info: 02:45 1.68m   harmonic: 02:51 1.67m   diff: +6 min
+  HT  maree.info: 08:21 4.09m   harmonic: 08:32 4.07m   diff: +11 min
+  LT  maree.info: 14:59 1.92m   harmonic: 15:03 1.85m   diff: +4 min
+  HT  maree.info: 20:48 4.19m   harmonic: 20:53 4.16m   diff: +5 min
+
+2026-05-08
+  LT  maree.info: 03:30 1.87m   harmonic: 03:36 1.88m   diff: +6 min
+  HT  maree.info: 09:08 3.89m   harmonic: 09:25 3.84m   diff: +17 min
+  LT  maree.info: 15:49 2.11m   harmonic: 15:51 2.05m   diff: +2 min
+  HT  maree.info: 21:48 4.01m   harmonic: 21:53 3.94m   diff: +5 min
+
+2026-05-09
+  LT  maree.info: 04:24 2.03m   harmonic: 04:33 2.04m   diff: +9 min
+  HT  maree.info: 10:19 3.73m   harmonic: 10:45 3.68m   diff: +26 min
+  LT  maree.info: 16:51 2.23m   harmonic: 16:55 2.19m   diff: +4 min
+  HT  maree.info: 23:10 3.91m   harmonic: 23:18 3.83m   diff: +8 min
+
+2026-05-10
+  LT  maree.info: 05:31 2.09m   harmonic: 05:44 2.08m   diff: +13 min
+  HT  maree.info: 12:00 3.72m   harmonic: 12:15 3.68m   diff: +15 min
+  LT  maree.info: 18:05 2.21m   harmonic: 18:12 2.19m   diff: +7 min
+
+2026-05-11
+  HT  maree.info: 00:34 3.97m   harmonic: 00:40 3.88m   diff: +6 min
+  LT  maree.info: 06:43 2.00m   harmonic: 06:57 1.97m   diff: +14 min
+  HT  maree.info: 13:20 3.89m   harmonic: 13:25 3.84m   diff: +5 min
+  LT  maree.info: 19:16 2.04m   harmonic: 19:23 2.02m   diff: +7 min
+
+2026-05-12
+  HT  maree.info: 01:41 4.16m   harmonic: 01:44 4.07m   diff: +3 min
+  LT  maree.info: 07:47 1.77m   harmonic: 07:58 1.73m   diff: +11 min
+  HT  maree.info: 14:16 4.16m   harmonic: 14:20 4.09m   diff: +4 min
+  LT  maree.info: 20:14 1.75m   harmonic: 20:20 1.74m   diff: +6 min
+
+2026-05-13
+  HT  maree.info: 02:35 4.42m   harmonic: 02:37 4.34m   diff: +2 min
+  LT  maree.info: 08:40 1.46m   harmonic: 08:49 1.44m   diff: +9 min
+  HT  maree.info: 15:02 4.46m   harmonic: 15:06 4.39m   diff: +4 min
+  LT  maree.info: 21:03 1.43m   harmonic: 21:09 1.41m   diff: +6 min
+
+2026-05-14
+  HT  maree.info: 03:22 4.70m   harmonic: 03:23 4.63m   diff: +1 min
+  LT  maree.info: 09:27 1.14m   harmonic: 09:35 1.14m   diff: +8 min
+  HT  maree.info: 15:44 4.75m   harmonic: 15:48 4.68m   diff: +4 min
+  LT  maree.info: 21:49 1.10m   harmonic: 21:55 1.07m   diff: +6 min
+
+2026-05-15
+  HT  maree.info: 04:07 4.96m   harmonic: 04:06 4.90m   diff: -1 min
+  LT  maree.info: 10:12 0.86m   harmonic: 10:19 0.88m   diff: +7 min
+  HT  maree.info: 16:25 5.00m   harmonic: 16:28 4.94m   diff: +3 min
+  LT  maree.info: 22:34 0.81m   harmonic: 22:39 0.77m   diff: +5 min
+
+2026-05-16
+  HT  maree.info: 04:51 5.16m   harmonic: 04:49 5.09m   diff: -2 min
+  LT  maree.info: 10:56 0.67m   harmonic: 11:02 0.69m   diff: +6 min
+  HT  maree.info: 17:06 5.18m   harmonic: 17:08 5.14m   diff: +2 min
+  LT  maree.info: 23:21 0.61m   harmonic: 23:24 0.55m   diff: +3 min
+
+2026-05-17
+  HT  maree.info: 05:35 5.25m   harmonic: 05:32 5.19m   diff: -3 min
+  LT  maree.info: 11:42 0.59m   harmonic: 11:46 0.60m   diff: +4 min
+  HT  maree.info: 17:49 5.26m   harmonic: 17:50 5.24m   diff: +1 min
+
+2026-05-18
+  LT  maree.info: 00:10 0.52m   harmonic: 00:11 0.44m   diff: +1 min
+  HT  maree.info: 06:22 5.21m   harmonic: 06:17 5.16m   diff: -5 min
+  LT  maree.info: 12:29 0.63m   harmonic: 12:32 0.62m   diff: +3 min
+  HT  maree.info: 18:34 5.23m   harmonic: 18:35 5.23m   diff: +1 min
+
+2026-05-19
+  LT  maree.info: 01:00 0.55m   harmonic: 00:59 0.46m   diff: -1 min
+  HT  maree.info: 07:10 5.05m   harmonic: 07:05 5.01m   diff: -5 min
+  LT  maree.info: 13:18 0.78m   harmonic: 13:20 0.74m   diff: +2 min
+  HT  maree.info: 19:23 5.10m   harmonic: 19:22 5.11m   diff: -1 min
+
+2026-05-20
+  LT  maree.info: 01:52 0.70m   harmonic: 01:49 0.60m   diff: -3 min
+  HT  maree.info: 08:02 4.80m   harmonic: 07:58 4.77m   diff: -4 min
+  LT  maree.info: 14:10 1.02m   harmonic: 14:10 0.94m   diff: +0 min
+  HT  maree.info: 20:16 4.89m   harmonic: 20:15 4.90m   diff: -1 min
+
+2026-05-21
+  LT  maree.info: 02:47 0.94m   harmonic: 02:43 0.83m   diff: -4 min
+  HT  maree.info: 09:00 4.51m   harmonic: 08:56 4.48m   diff: -4 min
+  LT  maree.info: 15:05 1.30m   harmonic: 15:04 1.19m   diff: -1 min
+  HT  maree.info: 21:19 4.65m   harmonic: 21:16 4.65m   diff: -3 min
+
+2026-05-22
+  LT  maree.info: 03:46 1.22m   harmonic: 03:41 1.09m   diff: -5 min
+  HT  maree.info: 10:07 4.24m   harmonic: 10:05 4.21m   diff: -2 min
+  LT  maree.info: 16:06 1.56m   harmonic: 16:03 1.43m   diff: -3 min
+  HT  maree.info: 22:30 4.43m   harmonic: 22:27 4.42m   diff: -3 min
+
+2026-05-23
+  LT  maree.info: 04:49 1.47m   harmonic: 04:44 1.33m   diff: -5 min
+  HT  maree.info: 11:25 4.07m   harmonic: 11:20 4.04m   diff: -5 min
+  LT  maree.info: 17:12 1.74m   harmonic: 17:08 1.62m   diff: -4 min
+  HT  maree.info: 23:48 4.29m   harmonic: 23:44 4.26m   diff: -4 min
+
+2026-05-24
+  LT  maree.info: 05:58 1.63m   harmonic: 05:51 1.49m   diff: -7 min
+  HT  maree.info: 12:41 4.03m   harmonic: 12:33 3.98m   diff: -8 min
+  LT  maree.info: 18:22 1.80m   harmonic: 18:16 1.69m   diff: -6 min
+
+2026-05-25
+  HT  maree.info: 01:02 4.24m   harmonic: 00:57 4.22m   diff: -5 min
+  LT  maree.info: 07:07 1.67m   harmonic: 06:57 1.55m   diff: -10 min
+  HT  maree.info: 13:46 4.10m   harmonic: 13:39 4.04m   diff: -7 min
+  LT  maree.info: 19:29 1.76m   harmonic: 19:22 1.66m   diff: -7 min
+
+2026-05-26
+  HT  maree.info: 02:05 4.26m   harmonic: 02:00 4.25m   diff: -5 min
+  LT  maree.info: 08:09 1.62m   harmonic: 07:57 1.51m   diff: -12 min
+  HT  maree.info: 14:36 4.22m   harmonic: 14:33 4.16m   diff: -3 min
+  LT  maree.info: 20:28 1.65m   harmonic: 20:21 1.56m   diff: -7 min
+
+2026-05-27
+  HT  maree.info: 02:56 4.32m   harmonic: 02:52 4.33m   diff: -4 min
+  LT  maree.info: 09:02 1.53m   harmonic: 08:50 1.43m   diff: -12 min
+  HT  maree.info: 15:17 4.36m   harmonic: 15:18 4.32m   diff: +1 min
+  LT  maree.info: 21:20 1.54m   harmonic: 21:14 1.42m   diff: -6 min
+
+2026-05-28
+  HT  maree.info: 03:38 4.39m   harmonic: 03:36 4.42m   diff: -2 min
+  LT  maree.info: 09:49 1.44m   harmonic: 09:37 1.34m   diff: -12 min
+  HT  maree.info: 15:52 4.49m   harmonic: 15:57 4.48m   diff: +5 min
+  LT  maree.info: 22:05 1.45m   harmonic: 22:00 1.29m   diff: -5 min
+
+2026-05-29
+  HT  maree.info: 04:15 4.46m   harmonic: 04:15 4.50m   diff: +0 min
+  LT  maree.info: 10:30 1.38m   harmonic: 10:20 1.25m   diff: -10 min
+  HT  maree.info: 16:26 4.61m   harmonic: 16:32 4.62m   diff: +6 min
+  LT  maree.info: 22:47 1.38m   harmonic: 22:43 1.19m   diff: -4 min
+
+2026-05-30
+  HT  maree.info: 04:49 4.52m   harmonic: 04:50 4.58m   diff: +1 min
+  LT  maree.info: 11:07 1.35m   harmonic: 11:00 1.19m   diff: -7 min
+  HT  maree.info: 16:59 4.69m   harmonic: 17:06 4.74m   diff: +7 min
+  LT  maree.info: 23:24 1.34m   harmonic: 23:24 1.13m   diff: +0 min
+
+2026-05-31
+  HT  maree.info: 05:23 4.55m   harmonic: 05:24 4.62m   diff: +1 min
+  LT  maree.info: 11:41 1.35m   harmonic: 11:39 1.16m   diff: -2 min
+  HT  maree.info: 17:33 4.72m   harmonic: 17:39 4.81m   diff: +6 min
+
+2026-06-01
+  LT  maree.info: 00:01 1.32m   harmonic: 00:02 1.11m   diff: +1 min
+  HT  maree.info: 05:56 4.55m   harmonic: 05:58 4.63m   diff: +2 min
+  LT  maree.info: 12:15 1.38m   harmonic: 12:16 1.18m   diff: +1 min
+  HT  maree.info: 18:07 4.72m   harmonic: 18:13 4.83m   diff: +6 min
+
+2026-06-02
+  LT  maree.info: 00:36 1.32m   harmonic: 00:40 1.15m   diff: +4 min
+  HT  maree.info: 06:29 4.50m   harmonic: 06:32 4.58m   diff: +3 min
+  LT  maree.info: 12:49 1.44m   harmonic: 12:53 1.25m   diff: +4 min
+  HT  maree.info: 18:42 4.67m   harmonic: 18:48 4.79m   diff: +6 min
+
+2026-06-03
+  LT  maree.info: 01:13 1.36m   harmonic: 01:18 1.22m   diff: +5 min
+  HT  maree.info: 07:02 4.42m   harmonic: 07:08 4.50m   diff: +6 min
+  LT  maree.info: 13:24 1.52m   harmonic: 13:29 1.34m   diff: +5 min
+  HT  maree.info: 19:17 4.60m   harmonic: 19:23 4.69m   diff: +6 min
+
+2026-06-04
+  LT  maree.info: 01:50 1.43m   harmonic: 01:56 1.32m   diff: +6 min
+  HT  maree.info: 07:36 4.32m   harmonic: 07:45 4.38m   diff: +9 min
+  LT  maree.info: 14:01 1.62m   harmonic: 14:07 1.46m   diff: +6 min
+  HT  maree.info: 19:56 4.49m   harmonic: 20:01 4.56m   diff: +5 min
+
+2026-06-05
+  LT  maree.info: 02:30 1.52m   harmonic: 02:35 1.43m   diff: +5 min
+  HT  maree.info: 08:13 4.21m   harmonic: 08:25 4.23m   diff: +12 min
+  LT  maree.info: 14:42 1.73m   harmonic: 14:47 1.60m   diff: +5 min
+  HT  maree.info: 20:38 4.38m   harmonic: 20:42 4.40m   diff: +4 min
+
+2026-06-06
+  LT  maree.info: 03:12 1.62m   harmonic: 03:18 1.56m   diff: +6 min
+  HT  maree.info: 08:56 4.09m   harmonic: 09:11 4.09m   diff: +15 min
+  LT  maree.info: 15:27 1.83m   harmonic: 15:31 1.73m   diff: +4 min
+  HT  maree.info: 21:28 4.27m   harmonic: 21:29 4.25m   diff: +1 min
+
+2026-06-07
+  LT  maree.info: 03:58 1.71m   harmonic: 04:06 1.66m   diff: +8 min
+  HT  maree.info: 09:49 3.99m   harmonic: 10:06 3.97m   diff: +17 min
+  LT  maree.info: 16:19 1.91m   harmonic: 16:23 1.84m   diff: +4 min
+  HT  maree.info: 22:27 4.18m   harmonic: 22:27 4.14m   diff: +0 min
+
+2026-06-08
+  LT  maree.info: 04:50 1.77m   harmonic: 05:01 1.73m   diff: +11 min
+  HT  maree.info: 10:56 3.94m   harmonic: 11:12 3.92m   diff: +16 min
+  LT  maree.info: 17:17 1.94m   harmonic: 17:22 1.89m   diff: +5 min
+  HT  maree.info: 23:33 4.15m   harmonic: 23:35 4.09m   diff: +2 min
+
+2026-06-09
+  LT  maree.info: 05:49 1.77m   harmonic: 06:01 1.74m   diff: +12 min
+  HT  maree.info: 12:12 3.98m   harmonic: 12:23 3.96m   diff: +11 min
+  LT  maree.info: 18:20 1.88m   harmonic: 18:26 1.86m   diff: +6 min
+
+2026-06-10
+  HT  maree.info: 00:42 4.20m   harmonic: 00:46 4.14m   diff: +4 min
+  LT  maree.info: 06:51 1.69m   harmonic: 07:03 1.66m   diff: +12 min
+  HT  maree.info: 13:22 4.13m   harmonic: 13:28 4.10m   diff: +6 min
+  LT  maree.info: 19:22 1.72m   harmonic: 19:30 1.72m   diff: +8 min
+
+2026-06-11
+  HT  maree.info: 01:46 4.33m   harmonic: 01:52 4.29m   diff: +6 min
+  LT  maree.info: 07:52 1.52m   harmonic: 08:03 1.51m   diff: +11 min
+  HT  maree.info: 14:21 4.35m   harmonic: 14:27 4.32m   diff: +6 min
+  LT  maree.info: 20:20 1.50m   harmonic: 20:29 1.49m   diff: +9 min
+
+2026-06-12
+  HT  maree.info: 02:46 4.52m   harmonic: 02:50 4.49m   diff: +4 min
+  LT  maree.info: 08:49 1.31m   harmonic: 08:59 1.31m   diff: +10 min
+  HT  maree.info: 15:13 4.59m   harmonic: 15:19 4.57m   diff: +6 min
+  LT  maree.info: 21:16 1.24m   harmonic: 21:25 1.22m   diff: +9 min
+
+2026-06-13
+  HT  maree.info: 03:42 4.72m   harmonic: 03:44 4.69m   diff: +2 min
+  LT  maree.info: 09:42 1.09m   harmonic: 09:51 1.10m   diff: +9 min
+  HT  maree.info: 16:03 4.83m   harmonic: 16:09 4.82m   diff: +6 min
+  LT  maree.info: 22:11 0.98m   harmonic: 22:18 0.94m   diff: +7 min
+
+2026-06-14
+  HT  maree.info: 04:35 4.89m   harmonic: 04:36 4.87m   diff: +1 min
+  LT  maree.info: 10:35 0.90m   harmonic: 10:42 0.91m   diff: +7 min
+  HT  maree.info: 16:53 5.02m   harmonic: 16:57 5.03m   diff: +4 min
+  LT  maree.info: 23:05 0.75m   harmonic: 23:10 0.69m   diff: +5 min
+
+2026-06-15
+  HT  maree.info: 05:28 5.01m   harmonic: 05:26 4.99m   diff: -2 min
+  LT  maree.info: 11:26 0.78m   harmonic: 11:32 0.76m   diff: +6 min
+  HT  maree.info: 17:43 5.15m   harmonic: 17:45 5.17m   diff: +2 min
+
+2026-06-16
+  LT  maree.info: 06:20 5.04m   harmonic: 00:01 0.52m   diff: -379 min
+  HT  maree.info: 12:18 0.74m   harmonic: 06:16 5.02m   diff: -362 min
+  LT  maree.info: 18:33 5.20m   harmonic: 12:21 0.69m   diff: -372 min
+
+2026-06-17
+  LT  maree.info: 00:52 0.55m   harmonic: 00:51 0.46m   diff: -1 min
+  HT  maree.info: 07:11 4.98m   harmonic: 07:05 4.95m   diff: -6 min
+  LT  maree.info: 13:09 0.78m   harmonic: 13:11 0.70m   diff: +2 min
+  HT  maree.info: 19:24 5.16m   harmonic: 19:22 5.19m   diff: -2 min
+
+2026-06-18
+  LT  maree.info: 01:45 0.60m   harmonic: 01:42 0.50m   diff: -3 min
+  HT  maree.info: 08:01 4.84m   harmonic: 07:55 4.81m   diff: -6 min
+  LT  maree.info: 14:01 0.90m   harmonic: 14:00 0.80m   diff: -1 min
+  HT  maree.info: 20:15 5.03m   harmonic: 20:11 5.05m   diff: -4 min
+
+2026-06-19
+  LT  maree.info: 02:37 0.76m   harmonic: 02:33 0.66m   diff: -4 min
+  HT  maree.info: 08:50 4.64m   harmonic: 08:46 4.60m   diff: -4 min
+  LT  maree.info: 14:53 1.08m   harmonic: 14:51 0.98m   diff: -2 min
+  HT  maree.info: 21:05 4.84m   harmonic: 21:02 4.84m   diff: -3 min
+
+2026-06-20
+  LT  maree.info: 03:30 1.00m   harmonic: 03:25 0.89m   diff: -5 min
+  HT  maree.info: 09:38 4.41m   harmonic: 09:39 4.37m   diff: +1 min
+  LT  maree.info: 15:46 1.30m   harmonic: 15:43 1.20m   diff: -3 min
+  HT  maree.info: 21:55 4.60m   harmonic: 21:57 4.58m   diff: +2 min
+
+2026-06-21
+  LT  maree.info: 04:23 1.27m   harmonic: 04:18 1.17m   diff: -5 min
+  HT  maree.info: 10:30 4.21m   harmonic: 10:35 4.15m   diff: +5 min
+  LT  maree.info: 16:42 1.52m   harmonic: 16:38 1.44m   diff: -4 min
+  HT  maree.info: 22:49 4.36m   harmonic: 22:56 4.33m   diff: +7 min
+
+2026-06-22
+  LT  maree.info: 05:20 1.53m   harmonic: 05:14 1.44m   diff: -6 min
+  HT  maree.info: 11:30 4.05m   harmonic: 11:38 3.99m   diff: +8 min
+  LT  maree.info: 17:42 1.70m   harmonic: 17:36 1.65m   diff: -6 min
+
+2026-06-23
+  HT  maree.info: 06:20 1.73m   harmonic: 00:02 4.13m   diff: -378 min
+  LT  maree.info: 12:38 3.98m   harmonic: 06:12 1.66m   diff: -386 min
+  HT  maree.info: 18:44 1.82m   harmonic: 12:43 3.92m   diff: -361 min
+
+2026-06-24
+  HT  maree.info: 01:02 4.03m   harmonic: 01:10 4.02m   diff: +8 min
+  LT  maree.info: 07:23 1.83m   harmonic: 07:11 1.78m   diff: -12 min
+  HT  maree.info: 13:45 4.01m   harmonic: 13:46 3.95m   diff: +1 min
+  LT  maree.info: 19:47 1.86m   harmonic: 19:40 1.85m   diff: -7 min
+
+2026-06-25
+  HT  maree.info: 02:11 4.00m   harmonic: 02:12 4.01m   diff: +1 min
+  LT  maree.info: 08:23 1.83m   harmonic: 08:10 1.81m   diff: -13 min
+  HT  maree.info: 14:41 4.11m   harmonic: 14:41 4.07m   diff: +0 min
+  LT  maree.info: 20:46 1.83m   harmonic: 20:40 1.80m   diff: -6 min
+
+2026-06-26
+  HT  maree.info: 03:09 4.05m   harmonic: 03:05 4.07m   diff: -4 min
+  LT  maree.info: 09:18 1.77m   harmonic: 09:04 1.75m   diff: -14 min
+  HT  maree.info: 15:28 4.24m   harmonic: 15:28 4.23m   diff: +0 min
+  LT  maree.info: 21:39 1.75m   harmonic: 21:34 1.68m   diff: -5 min
+
+2026-06-27
+  HT  maree.info: 03:57 4.14m   harmonic: 03:50 4.17m   diff: -7 min
+  LT  maree.info: 10:05 1.68m   harmonic: 09:54 1.63m   diff: -11 min
+  HT  maree.info: 16:09 4.37m   harmonic: 16:09 4.40m   diff: +0 min
+  LT  maree.info: 22:26 1.64m   harmonic: 22:22 1.54m   diff: -4 min
+
+2026-06-28
+  HT  maree.info: 04:37 4.25m   harmonic: 04:30 4.30m   diff: -7 min
+  LT  maree.info: 10:47 1.59m   harmonic: 10:38 1.49m   diff: -9 min
+  HT  maree.info: 16:47 4.49m   harmonic: 16:47 4.57m   diff: +0 min
+  LT  maree.info: 23:08 1.52m   harmonic: 23:06 1.38m   diff: -2 min
+
+2026-06-29
+  HT  maree.info: 05:14 4.34m   harmonic: 05:07 4.42m   diff: -7 min
+  LT  maree.info: 11:25 1.50m   harmonic: 11:19 1.37m   diff: -6 min
+  HT  maree.info: 17:22 4.60m   harmonic: 17:24 4.71m   diff: +2 min
+  LT  maree.info: 23:46 1.41m   harmonic: 23:46 1.25m   diff: +0 min
+
+2026-06-30
+  HT  maree.info: 05:48 4.42m   harmonic: 05:43 4.52m   diff: -5 min
+  LT  maree.info: 12:00 1.43m   harmonic: 11:58 1.27m   diff: -2 min
+  HT  maree.info: 17:57 4.67m   harmonic: 17:59 4.81m   diff: +2 min
+
+2026-07-01
+  LT  maree.info: 00:23 1.31m   harmonic: 00:24 1.15m   diff: +1 min
+  HT  maree.info: 06:20 4.47m   harmonic: 06:19 4.58m   diff: -1 min
+  LT  maree.info: 12:35 1.39m   harmonic: 12:35 1.20m   diff: +0 min
+  HT  maree.info: 18:32 4.72m   harmonic: 18:34 4.86m   diff: +2 min
+
+2026-07-02
+  LT  maree.info: 00:59 1.25m   harmonic: 01:01 1.10m   diff: +2 min
+  HT  maree.info: 06:52 4.48m   harmonic: 06:54 4.59m   diff: +2 min
+  LT  maree.info: 13:10 1.37m   harmonic: 13:11 1.18m   diff: +1 min
+  HT  maree.info: 19:06 4.73m   harmonic: 19:09 4.86m   diff: +3 min
+
+2026-07-03
+  LT  maree.info: 01:35 1.23m   harmonic: 01:37 1.09m   diff: +2 min
+  HT  maree.info: 07:24 4.48m   harmonic: 07:29 4.56m   diff: +5 min
+  LT  maree.info: 13:46 1.38m   harmonic: 13:48 1.20m   diff: +2 min
+  HT  maree.info: 19:42 4.70m   harmonic: 19:43 4.81m   diff: +1 min
+
+2026-07-04
+  LT  maree.info: 02:11 1.24m   harmonic: 02:14 1.12m   diff: +3 min
+  HT  maree.info: 07:58 4.44m   harmonic: 08:05 4.50m   diff: +7 min
+  LT  maree.info: 14:22 1.42m   harmonic: 14:25 1.26m   diff: +3 min
+  HT  maree.info: 20:20 4.64m   harmonic: 20:19 4.72m   diff: -1 min
+
+2026-07-05
+  LT  maree.info: 02:48 1.29m   harmonic: 02:53 1.20m   diff: +5 min
+  HT  maree.info: 08:35 4.38m   harmonic: 08:42 4.41m   diff: +7 min
+  LT  maree.info: 15:02 1.49m   harmonic: 15:05 1.35m   diff: +3 min
+  HT  maree.info: 21:01 4.55m   harmonic: 20:58 4.60m   diff: -3 min
+
+2026-07-06
+  LT  maree.info: 03:28 1.37m   harmonic: 03:35 1.31m   diff: +7 min
+  HT  maree.info: 09:16 4.28m   harmonic: 09:24 4.30m   diff: +8 min
+  LT  maree.info: 15:46 1.57m   harmonic: 15:50 1.48m   diff: +4 min
+  HT  maree.info: 21:47 4.43m   harmonic: 21:42 4.45m   diff: -5 min
+
+2026-07-07
+  LT  maree.info: 04:13 1.47m   harmonic: 04:21 1.44m   diff: +8 min
+  HT  maree.info: 10:06 4.18m   harmonic: 10:13 4.19m   diff: +7 min
+  LT  maree.info: 16:36 1.66m   harmonic: 16:41 1.60m   diff: +5 min
+  HT  maree.info: 22:42 4.30m   harmonic: 22:36 4.30m   diff: -6 min
+
+2026-07-08
+  LT  maree.info: 05:04 1.57m   harmonic: 05:15 1.57m   diff: +11 min
+  HT  maree.info: 11:09 4.09m   harmonic: 11:17 4.10m   diff: +8 min
+  LT  maree.info: 17:33 1.73m   harmonic: 17:41 1.70m   diff: +8 min
+  HT  maree.info: 23:49 4.21m   harmonic: 23:49 4.18m   diff: +0 min
+
+2026-07-09
+  LT  maree.info: 06:04 1.65m   harmonic: 06:17 1.65m   diff: +13 min
+  HT  maree.info: 12:29 4.08m   harmonic: 12:38 4.09m   diff: +9 min
+  LT  maree.info: 18:39 1.73m   harmonic: 18:48 1.72m   diff: +9 min
+
+2026-07-10
+  HT  maree.info: 01:06 4.19m   harmonic: 01:15 4.18m   diff: +9 min
+  LT  maree.info: 07:10 1.65m   harmonic: 07:24 1.65m   diff: +14 min
+  HT  maree.info: 13:48 4.19m   harmonic: 13:57 4.21m   diff: +9 min
+  LT  maree.info: 19:48 1.62m   harmonic: 19:58 1.61m   diff: +10 min
+
+2026-07-11
+  HT  maree.info: 02:22 4.29m   harmonic: 02:31 4.30m   diff: +9 min
+  LT  maree.info: 08:19 1.55m   harmonic: 08:31 1.52m   diff: +12 min
+  HT  maree.info: 14:55 4.41m   harmonic: 15:04 4.44m   diff: +9 min
+  LT  maree.info: 20:55 1.41m   harmonic: 21:06 1.37m   diff: +11 min
+
+2026-07-12
+  HT  maree.info: 03:31 4.47m   harmonic: 03:36 4.50m   diff: +5 min
+  LT  maree.info: 09:24 1.35m   harmonic: 09:34 1.30m   diff: +10 min
+  HT  maree.info: 15:55 4.67m   harmonic: 16:01 4.72m   diff: +6 min
+  LT  maree.info: 21:59 1.13m   harmonic: 22:07 1.06m   diff: +8 min
+
+2026-07-13
+  HT  maree.info: 04:32 4.69m   harmonic: 04:32 4.72m   diff: +0 min
+  LT  maree.info: 10:23 1.10m   harmonic: 10:31 1.04m   diff: +8 min
+  HT  maree.info: 16:50 4.94m   harmonic: 16:53 4.99m   diff: +3 min
+  LT  maree.info: 22:57 0.83m   harmonic: 23:02 0.74m   diff: +5 min
+
+2026-07-14
+  HT  maree.info: 05:26 4.88m   harmonic: 05:23 4.90m   diff: -3 min
+  LT  maree.info: 11:17 0.88m   harmonic: 11:23 0.79m   diff: +6 min
+  HT  maree.info: 17:40 5.15m   harmonic: 17:41 5.20m   diff: +1 min
+  LT  maree.info: 23:52 0.59m   harmonic: 23:53 0.49m   diff: +1 min
+
+2026-07-15
+  HT  maree.info: 06:15 5.01m   harmonic: 06:11 5.01m   diff: -4 min
+  LT  maree.info: 12:09 0.71m   harmonic: 12:12 0.61m   diff: +3 min
+  HT  maree.info: 18:28 5.28m   harmonic: 18:27 5.32m   diff: -1 min
+
+2026-07-16
+  LT  maree.info: 00:43 0.46m   harmonic: 00:41 0.35m   diff: -2 min
+  HT  maree.info: 07:01 5.04m   harmonic: 06:55 5.02m   diff: -6 min
+  LT  maree.info: 12:57 0.65m   harmonic: 12:59 0.54m   diff: +2 min
+  HT  maree.info: 19:13 5.29m   harmonic: 19:10 5.33m   diff: -3 min
+
+2026-07-17
+  LT  maree.info: 01:31 0.46m   harmonic: 01:28 0.35m   diff: -3 min
+  HT  maree.info: 07:42 4.97m   harmonic: 07:38 4.93m   diff: -4 min
+  LT  maree.info: 13:45 0.69m   harmonic: 13:44 0.59m   diff: -1 min
+  HT  maree.info: 19:54 5.19m   harmonic: 19:53 5.21m   diff: -1 min
+
+2026-07-18
+  LT  maree.info: 02:18 0.59m   harmonic: 02:14 0.50m   diff: -4 min
+  HT  maree.info: 08:19 4.81m   harmonic: 08:19 4.76m   diff: +0 min
+  LT  maree.info: 14:31 0.84m   harmonic: 14:29 0.76m   diff: -2 min
+  HT  maree.info: 20:31 4.98m   harmonic: 20:34 4.98m   diff: +3 min
+
+2026-07-19
+  LT  maree.info: 03:03 0.84m   harmonic: 02:59 0.77m   diff: -4 min
+  HT  maree.info: 08:54 4.60m   harmonic: 08:59 4.52m   diff: +5 min
+  LT  maree.info: 15:17 1.09m   harmonic: 15:15 1.03m   diff: -2 min
+  HT  maree.info: 21:06 4.71m   harmonic: 21:15 4.68m   diff: +9 min
+
+2026-07-20
+  LT  maree.info: 03:49 1.17m   harmonic: 03:44 1.12m   diff: -5 min
+  HT  maree.info: 09:29 4.37m   harmonic: 09:39 4.27m   diff: +10 min
+  LT  maree.info: 16:05 1.38m   harmonic: 16:01 1.35m   diff: -4 min
+  HT  maree.info: 21:46 4.41m   harmonic: 21:58 4.34m   diff: +12 min
+
+2026-07-21
+  LT  maree.info: 04:36 1.51m   harmonic: 04:31 1.49m   diff: -5 min
+  HT  maree.info: 10:12 4.13m   harmonic: 10:25 4.02m   diff: +13 min
+  LT  maree.info: 16:56 1.69m   harmonic: 16:52 1.69m   diff: -4 min
+  HT  maree.info: 22:33 4.10m   harmonic: 22:49 4.03m   diff: +16 min
+
+2026-07-22
+  LT  maree.info: 05:29 1.83m   harmonic: 05:23 1.82m   diff: -6 min
+  HT  maree.info: 11:11 3.92m   harmonic: 11:27 3.84m   diff: +16 min
+  LT  maree.info: 17:55 1.95m   harmonic: 17:50 1.97m   diff: -5 min
+
+2026-07-23
+  HT  maree.info: 06:31 2.05m   harmonic: 00:03 3.79m   diff: -388 min
+  LT  maree.info: 12:42 3.81m   harmonic: 06:22 2.06m   diff: -380 min
+  HT  maree.info: 19:02 2.10m   harmonic: 12:50 3.76m   diff: -372 min
+
+2026-07-24
+  HT  maree.info: 01:25 3.71m   harmonic: 01:29 3.71m   diff: +4 min
+  LT  maree.info: 07:41 2.14m   harmonic: 07:28 2.16m   diff: -13 min
+  HT  maree.info: 14:09 3.87m   harmonic: 14:06 3.83m   diff: -3 min
+  LT  maree.info: 20:13 2.10m   harmonic: 20:09 2.14m   diff: -4 min
+
+2026-07-25
+  HT  maree.info: 02:50 3.78m   harmonic: 02:38 3.77m   diff: -12 min
+  LT  maree.info: 08:49 2.07m   harmonic: 08:35 2.09m   diff: -14 min
+  HT  maree.info: 15:11 4.03m   harmonic: 15:05 4.01m   diff: -6 min
+  LT  maree.info: 21:17 1.98m   harmonic: 21:14 1.99m   diff: -3 min
+
+2026-07-26
+  HT  maree.info: 03:46 3.93m   harmonic: 03:31 3.93m   diff: -15 min
+  LT  maree.info: 09:45 1.91m   harmonic: 09:33 1.91m   diff: -12 min
+  HT  maree.info: 15:57 4.23m   harmonic: 15:51 4.23m   diff: -6 min
+  LT  maree.info: 22:09 1.78m   harmonic: 22:06 1.76m   diff: -3 min
+
+2026-07-27
+  HT  maree.info: 04:28 4.12m   harmonic: 04:14 4.13m   diff: -14 min
+  LT  maree.info: 10:30 1.71m   harmonic: 10:21 1.68m   diff: -9 min
+  HT  maree.info: 16:36 4.42m   harmonic: 16:31 4.46m   diff: -5 min
+  LT  maree.info: 22:52 1.56m   harmonic: 22:50 1.50m   diff: -2 min
+
+2026-07-28
+  HT  maree.info: 05:03 4.29m   harmonic: 04:52 4.34m   diff: -11 min
+  LT  maree.info: 11:08 1.52m   harmonic: 11:02 1.44m   diff: -6 min
+  HT  maree.info: 17:10 4.61m   harmonic: 17:07 4.68m   diff: -3 min
+  LT  maree.info: 23:29 1.35m   harmonic: 23:29 1.26m   diff: +0 min
+
+2026-07-29
+  HT  maree.info: 05:34 4.45m   harmonic: 05:27 4.52m   diff: -7 min
+  LT  maree.info: 11:44 1.34m   harmonic: 11:40 1.23m   diff: -4 min
+  HT  maree.info: 17:42 4.76m   harmonic: 17:41 4.85m   diff: -1 min
+
+2026-07-30
+  LT  maree.info: 00:05 1.16m   harmonic: 00:04 1.05m   diff: -1 min
+  HT  maree.info: 06:04 4.58m   harmonic: 06:00 4.67m   diff: -4 min
+  LT  maree.info: 12:18 1.20m   harmonic: 12:14 1.06m   diff: -4 min
+  HT  maree.info: 18:14 4.88m   harmonic: 18:14 4.99m   diff: +0 min
+
+2026-07-31
+  LT  maree.info: 00:39 1.03m   harmonic: 00:38 0.91m   diff: -1 min
+  HT  maree.info: 06:33 4.68m   harmonic: 06:32 4.77m   diff: -1 min
+  LT  maree.info: 12:51 1.11m   harmonic: 12:48 0.95m   diff: -3 min
+  HT  maree.info: 18:46 4.96m   harmonic: 18:46 5.06m   diff: +0 min
+
+2026-08-01
+  LT  maree.info: 01:12 0.95m   harmonic: 01:12 0.83m   diff: +0 min
+  HT  maree.info: 07:03 4.73m   harmonic: 07:04 4.81m   diff: +1 min
+  LT  maree.info: 13:24 1.07m   harmonic: 13:23 0.90m   diff: -1 min
+  HT  maree.info: 19:19 4.97m   harmonic: 19:18 5.07m   diff: -1 min
+
+2026-08-02
+  LT  maree.info: 01:46 0.94m   harmonic: 01:46 0.82m   diff: +0 min
+  HT  maree.info: 07:34 4.73m   harmonic: 07:36 4.80m   diff: +2 min
+  LT  maree.info: 13:57 1.09m   harmonic: 13:58 0.92m   diff: +1 min
+  HT  maree.info: 19:53 4.92m   harmonic: 19:50 5.01m   diff: -3 min
+
+2026-08-03
+  LT  maree.info: 02:20 0.98m   harmonic: 02:23 0.89m   diff: +3 min
+  HT  maree.info: 08:07 4.67m   harmonic: 08:09 4.73m   diff: +2 min
+  LT  maree.info: 14:34 1.16m   harmonic: 14:36 1.01m   diff: +2 min
+  HT  maree.info: 20:29 4.80m   harmonic: 20:24 4.88m   diff: -5 min
+
+2026-08-04
+  LT  maree.info: 02:58 1.09m   harmonic: 03:02 1.04m   diff: +4 min
+  HT  maree.info: 08:43 4.55m   harmonic: 08:44 4.60m   diff: +1 min
+  LT  maree.info: 15:14 1.29m   harmonic: 15:19 1.18m   diff: +5 min
+  HT  maree.info: 21:09 4.61m   harmonic: 21:03 4.68m   diff: -6 min
+
+2026-08-05
+  LT  maree.info: 03:40 1.27m   harmonic: 03:46 1.26m   diff: +6 min
+  HT  maree.info: 09:24 4.38m   harmonic: 09:26 4.42m   diff: +2 min
+  LT  maree.info: 16:02 1.48m   harmonic: 16:07 1.40m   diff: +5 min
+  HT  maree.info: 21:58 4.37m   harmonic: 21:51 4.41m   diff: -7 min
+
+2026-08-06
+  LT  maree.info: 04:28 1.49m   harmonic: 04:38 1.50m   diff: +10 min
+  HT  maree.info: 10:19 4.17m   harmonic: 10:23 4.20m   diff: +4 min
+  LT  maree.info: 16:58 1.67m   harmonic: 17:06 1.62m   diff: +8 min
+  HT  maree.info: 23:08 4.13m   harmonic: 23:04 4.14m   diff: -4 min
+
+2026-08-07
+  LT  maree.info: 05:28 1.72m   harmonic: 05:41 1.72m   diff: +13 min
+  HT  maree.info: 11:48 4.01m   harmonic: 12:00 4.04m   diff: +12 min
+  LT  maree.info: 18:09 1.81m   harmonic: 18:18 1.76m   diff: +9 min
+
+2026-08-08
+  HT  maree.info: 00:46 4.00m   harmonic: 00:59 4.02m   diff: +13 min
+  LT  maree.info: 06:42 1.85m   harmonic: 06:57 1.81m   diff: +15 min
+  HT  maree.info: 13:33 4.06m   harmonic: 13:44 4.12m   diff: +11 min
+  LT  maree.info: 19:30 1.78m   harmonic: 19:40 1.71m   diff: +10 min
+
+2026-08-09
+  HT  maree.info: 02:19 4.09m   harmonic: 02:28 4.15m   diff: +9 min
+  LT  maree.info: 08:04 1.78m   harmonic: 08:16 1.69m   diff: +12 min
+  HT  maree.info: 14:53 4.32m   harmonic: 14:58 4.38m   diff: +5 min
+  LT  maree.info: 20:49 1.54m   harmonic: 20:57 1.44m   diff: +8 min
+
+2026-08-10
+  HT  maree.info: 03:32 4.34m   harmonic: 03:34 4.41m   diff: +2 min
+  LT  maree.info: 09:17 1.52m   harmonic: 09:25 1.39m   diff: +8 min
+  HT  maree.info: 15:55 4.65m   harmonic: 15:57 4.72m   diff: +2 min
+  LT  maree.info: 21:55 1.17m   harmonic: 22:00 1.05m   diff: +5 min
+
+2026-08-11
+  HT  maree.info: 04:30 4.64m   harmonic: 04:28 4.70m   diff: -2 min
+  LT  maree.info: 10:17 1.17m   harmonic: 10:22 1.02m   diff: +5 min
+  HT  maree.info: 16:46 4.98m   harmonic: 16:46 5.04m   diff: +0 min
+  LT  maree.info: 22:51 0.81m   harmonic: 22:53 0.67m   diff: +2 min
+
+2026-08-12
+  HT  maree.info: 05:18 4.90m   harmonic: 05:14 4.94m   diff: -4 min
+  LT  maree.info: 11:09 0.85m   harmonic: 11:12 0.69m   diff: +3 min
+  HT  maree.info: 17:31 5.24m   harmonic: 17:30 5.29m   diff: -1 min
+  LT  maree.info: 23:41 0.53m   harmonic: 23:40 0.38m   diff: -1 min
+
+2026-08-13
+  HT  maree.info: 06:00 5.07m   harmonic: 05:56 5.09m   diff: -4 min
+  LT  maree.info: 11:56 0.62m   harmonic: 11:57 0.46m   diff: +1 min
+  HT  maree.info: 18:11 5.38m   harmonic: 18:11 5.42m   diff: +0 min
+
+2026-08-14
+  LT  maree.info: 00:26 0.39m   harmonic: 00:24 0.24m   diff: -2 min
+  HT  maree.info: 06:37 5.14m   harmonic: 06:35 5.13m   diff: -2 min
+  LT  maree.info: 12:39 0.52m   harmonic: 12:40 0.37m   diff: +1 min
+  HT  maree.info: 18:47 5.39m   harmonic: 18:49 5.41m   diff: +2 min
+
+2026-08-15
+  LT  maree.info: 01:09 0.40m   harmonic: 01:06 0.26m   diff: -3 min
+  HT  maree.info: 07:10 5.10m   harmonic: 07:11 5.05m   diff: +1 min
+  LT  maree.info: 13:22 0.56m   harmonic: 13:21 0.43m   diff: -1 min
+  HT  maree.info: 19:20 5.27m   harmonic: 19:25 5.27m   diff: +5 min
+
+2026-08-16
+  LT  maree.info: 01:50 0.56m   harmonic: 01:47 0.45m   diff: -3 min
+  HT  maree.info: 07:40 4.96m   harmonic: 07:44 4.89m   diff: +4 min
+  LT  maree.info: 14:02 0.73m   harmonic: 14:02 0.64m   diff: +0 min
+  HT  maree.info: 19:49 5.05m   harmonic: 19:58 5.02m   diff: +9 min
+
+2026-08-17
+  LT  maree.info: 02:30 0.83m   harmonic: 02:27 0.77m   diff: -3 min
+  HT  maree.info: 08:09 4.77m   harmonic: 08:14 4.66m   diff: +5 min
+  LT  maree.info: 14:43 1.01m   harmonic: 14:42 0.96m   diff: -1 min
+  HT  maree.info: 20:21 4.76m   harmonic: 20:30 4.70m   diff: +9 min
+
+2026-08-18
+  LT  maree.info: 03:09 1.19m   harmonic: 03:06 1.16m   diff: -3 min
+  HT  maree.info: 08:40 4.52m   harmonic: 08:44 4.39m   diff: +4 min
+  LT  maree.info: 15:24 1.36m   harmonic: 15:24 1.35m   diff: +0 min
+  HT  maree.info: 20:54 4.42m   harmonic: 21:00 4.34m   diff: +6 min
+
+2026-08-19
+  LT  maree.info: 03:50 1.57m   harmonic: 03:47 1.58m   diff: -3 min
+  HT  maree.info: 09:16 4.24m   harmonic: 09:16 4.12m   diff: +0 min
+  LT  maree.info: 16:09 1.73m   harmonic: 16:08 1.76m   diff: -1 min
+  HT  maree.info: 21:33 4.07m   harmonic: 21:36 3.98m   diff: +3 min
+
+2026-08-20
+  LT  maree.info: 04:37 1.94m   harmonic: 04:33 1.97m   diff: -4 min
+  HT  maree.info: 10:04 3.94m   harmonic: 09:59 3.85m   diff: -5 min
+  LT  maree.info: 17:03 2.07m   harmonic: 17:02 2.12m   diff: -1 min
+  HT  maree.info: 22:28 3.73m   harmonic: 22:33 3.66m   diff: +5 min
+
+2026-08-21
+  LT  maree.info: 05:35 2.23m   harmonic: 05:30 2.27m   diff: -5 min
+  HT  maree.info: 11:32 3.71m   harmonic: 11:37 3.64m   diff: +5 min
+  LT  maree.info: 18:13 2.30m   harmonic: 18:13 2.35m   diff: +0 min
+
+2026-08-22
+  HT  maree.info: 00:42 3.52m   harmonic: 00:46 3.49m   diff: +4 min
+  LT  maree.info: 06:54 2.38m   harmonic: 06:47 2.41m   diff: -7 min
+  HT  maree.info: 13:41 3.72m   harmonic: 13:33 3.66m   diff: -8 min
+  LT  maree.info: 19:39 2.31m   harmonic: 19:41 2.36m   diff: +2 min
+
+2026-08-23
+  HT  maree.info: 02:33 3.63m   harmonic: 02:15 3.58m   diff: -18 min
+  LT  maree.info: 08:20 2.29m   harmonic: 08:11 2.32m   diff: -9 min
+  HT  maree.info: 14:52 3.92m   harmonic: 14:42 3.86m   diff: -10 min
+  LT  maree.info: 20:55 2.12m   harmonic: 20:57 2.15m   diff: +2 min
+
+2026-08-24
+  HT  maree.info: 03:30 3.85m   harmonic: 03:12 3.80m   diff: -18 min
+  LT  maree.info: 09:23 2.04m   harmonic: 09:16 2.06m   diff: -7 min
+  HT  maree.info: 15:39 4.18m   harmonic: 15:31 4.12m   diff: -8 min
+  LT  maree.info: 21:48 1.83m   harmonic: 21:49 1.83m   diff: +1 min
+
+2026-08-25
+  HT  maree.info: 04:09 4.11m   harmonic: 03:55 4.07m   diff: -14 min
+  LT  maree.info: 10:08 1.75m   harmonic: 10:03 1.74m   diff: -5 min
+  HT  maree.info: 16:16 4.45m   harmonic: 16:09 4.40m   diff: -7 min
+  LT  maree.info: 22:28 1.52m   harmonic: 22:30 1.50m   diff: +2 min
+
+2026-08-26
+  HT  maree.info: 04:41 4.35m   harmonic: 04:30 4.34m   diff: -11 min
+  LT  maree.info: 10:45 1.47m   harmonic: 10:41 1.43m   diff: -4 min
+  HT  maree.info: 16:48 4.70m   harmonic: 16:44 4.68m   diff: -4 min
+  LT  maree.info: 23:04 1.23m   harmonic: 23:05 1.19m   diff: +1 min
+
+2026-08-27
+  HT  maree.info: 05:09 4.58m   harmonic: 05:03 4.59m   diff: -6 min
+  LT  maree.info: 11:19 1.21m   harmonic: 11:15 1.15m   diff: -4 min
+  HT  maree.info: 17:19 4.92m   harmonic: 17:16 4.92m   diff: -3 min
+  LT  maree.info: 23:37 0.99m   harmonic: 23:37 0.93m   diff: +0 min
+
+2026-08-28
+  HT  maree.info: 05:38 4.77m   harmonic: 05:34 4.80m   diff: -4 min
+  LT  maree.info: 11:52 1.01m   harmonic: 11:48 0.91m   diff: -4 min
+  HT  maree.info: 17:49 5.09m   harmonic: 17:47 5.11m   diff: -2 min
+
+2026-08-29
+  LT  maree.info: 00:10 0.81m   harmonic: 00:09 0.73m   diff: -1 min
+  HT  maree.info: 06:06 4.92m   harmonic: 06:04 4.96m   diff: -2 min
+  LT  maree.info: 12:24 0.87m   harmonic: 12:20 0.74m   diff: -4 min
+  HT  maree.info: 18:20 5.20m   harmonic: 18:17 5.24m   diff: -3 min
+
+2026-08-30
+  LT  maree.info: 00:43 0.71m   harmonic: 00:42 0.62m   diff: -1 min
+  HT  maree.info: 06:36 5.00m   harmonic: 06:34 5.05m   diff: -2 min
+  LT  maree.info: 12:56 0.80m   harmonic: 12:54 0.64m   diff: -2 min
+  HT  maree.info: 18:52 5.22m   harmonic: 18:48 5.28m   diff: -4 min
+
+2026-08-31
+  LT  maree.info: 01:16 0.70m   harmonic: 01:16 0.61m   diff: +0 min
+  HT  maree.info: 07:07 5.00m   harmonic: 07:04 5.06m   diff: -3 min
+  LT  maree.info: 13:30 0.82m   harmonic: 13:30 0.65m   diff: +0 min
+  HT  maree.info: 19:24 5.14m   harmonic: 19:20 5.21m   diff: -4 min
+
+2026-09-01
+  LT  maree.info: 01:51 0.78m   harmonic: 01:52 0.71m   diff: +1 min
+  HT  maree.info: 07:38 4.92m   harmonic: 07:36 4.98m   diff: -2 min
+  LT  maree.info: 14:07 0.93m   harmonic: 14:08 0.77m   diff: +1 min
+  HT  maree.info: 19:59 4.96m   harmonic: 19:54 5.03m   diff: -5 min
+
+2026-09-02
+  LT  maree.info: 02:29 0.96m   harmonic: 02:32 0.91m   diff: +3 min
+  HT  maree.info: 08:13 4.75m   harmonic: 08:11 4.81m   diff: -2 min
+  LT  maree.info: 14:48 1.14m   harmonic: 14:51 1.00m   diff: +3 min
+  HT  maree.info: 20:38 4.68m   harmonic: 20:33 4.74m   diff: -5 min
+
+2026-09-03
+  LT  maree.info: 03:12 1.23m   harmonic: 03:17 1.20m   diff: +5 min
+  HT  maree.info: 08:53 4.50m   harmonic: 08:53 4.54m   diff: +0 min
+  LT  maree.info: 15:37 1.42m   harmonic: 15:42 1.30m   diff: +5 min
+  HT  maree.info: 21:27 4.34m   harmonic: 21:22 4.37m   diff: -5 min
+
+2026-09-04
+  LT  maree.info: 04:02 1.56m   harmonic: 04:10 1.54m   diff: +8 min
+  HT  maree.info: 09:47 4.20m   harmonic: 09:51 4.22m   diff: +4 min
+  LT  maree.info: 16:37 1.72m   harmonic: 16:44 1.61m   diff: +7 min
+  HT  maree.info: 22:48 3.99m   harmonic: 22:49 4.00m   diff: +1 min
+
+2026-09-05
+  LT  maree.info: 05:06 1.87m   harmonic: 05:18 1.82m   diff: +12 min
+  HT  maree.info: 11:36 3.97m   harmonic: 11:52 4.00m   diff: +16 min
+  LT  maree.info: 17:55 1.93m   harmonic: 18:03 1.79m   diff: +8 min
+
+2026-09-06
+  HT  maree.info: 00:52 3.87m   harmonic: 01:02 3.91m   diff: +10 min
+  LT  maree.info: 06:29 2.03m   harmonic: 06:43 1.91m   diff: +14 min
+  HT  maree.info: 13:36 4.06m   harmonic: 13:40 4.11m   diff: +4 min
+  LT  maree.info: 19:28 1.87m   harmonic: 19:33 1.71m   diff: +5 min
+
+2026-09-07
+  HT  maree.info: 02:25 4.06m   harmonic: 02:26 4.12m   diff: +1 min
+  LT  maree.info: 08:00 1.90m   harmonic: 08:08 1.71m   diff: +8 min
+  HT  maree.info: 14:53 4.38m   harmonic: 14:51 4.42m   diff: -2 min
+  LT  maree.info: 20:49 1.54m   harmonic: 20:50 1.37m   diff: +1 min
+
+2026-09-08
+  HT  maree.info: 03:30 4.38m   harmonic: 03:27 4.43m   diff: -3 min
+  LT  maree.info: 09:12 1.55m   harmonic: 09:15 1.33m   diff: +3 min
+  HT  maree.info: 15:49 4.74m   harmonic: 15:46 4.78m   diff: -3 min
+  LT  maree.info: 21:49 1.14m   harmonic: 21:48 0.96m   diff: -1 min
+
+2026-09-09
+  HT  maree.info: 04:19 4.70m   harmonic: 04:15 4.74m   diff: -4 min
+  LT  maree.info: 10:07 1.15m   harmonic: 10:08 0.93m   diff: +1 min
+  HT  maree.info: 16:33 5.06m   harmonic: 16:32 5.09m   diff: -1 min
+  LT  maree.info: 22:38 0.78m   harmonic: 22:37 0.59m   diff: -1 min
+
+2026-09-10
+  HT  maree.info: 05:00 4.96m   harmonic: 04:57 4.98m   diff: -3 min
+  LT  maree.info: 10:54 0.82m   harmonic: 10:54 0.59m   diff: +0 min
+  HT  maree.info: 17:11 5.28m   harmonic: 17:12 5.31m   diff: +1 min
+  LT  maree.info: 23:22 0.54m   harmonic: 23:20 0.35m   diff: -2 min
+
+2026-09-11
+  HT  maree.info: 05:35 5.12m   harmonic: 05:34 5.13m   diff: -1 min
+  LT  maree.info: 11:36 0.61m   harmonic: 11:36 0.38m   diff: +0 min
+  HT  maree.info: 17:45 5.39m   harmonic: 17:48 5.40m   diff: +3 min
+
+2026-09-12
+  LT  maree.info: 00:03 0.45m   harmonic: 00:00 0.26m   diff: -3 min
+  HT  maree.info: 06:06 5.19m   harmonic: 06:08 5.18m   diff: +2 min
+  LT  maree.info: 12:16 0.53m   harmonic: 12:16 0.32m   diff: +0 min
+  HT  maree.info: 18:16 5.37m   harmonic: 18:22 5.37m   diff: +6 min
+
+2026-09-13
+  LT  maree.info: 00:41 0.50m   harmonic: 00:39 0.33m   diff: -2 min
+  HT  maree.info: 06:34 5.17m   harmonic: 06:39 5.11m   diff: +5 min
+  LT  maree.info: 12:54 0.60m   harmonic: 12:55 0.42m   diff: +1 min
+  HT  maree.info: 18:44 5.24m   harmonic: 18:53 5.21m   diff: +9 min
+
+2026-09-14
+  LT  maree.info: 01:18 0.68m   harmonic: 01:16 0.55m   diff: -2 min
+  HT  maree.info: 07:02 5.05m   harmonic: 07:07 4.97m   diff: +5 min
+  LT  maree.info: 13:31 0.79m   harmonic: 13:33 0.66m   diff: +2 min
+  HT  maree.info: 19:12 5.03m   harmonic: 19:22 4.96m   diff: +10 min
+
+2026-09-15
+  LT  maree.info: 01:54 0.96m   harmonic: 01:53 0.87m   diff: -1 min
+  HT  maree.info: 07:31 4.87m   harmonic: 07:34 4.76m   diff: +3 min
+  LT  maree.info: 14:08 1.08m   harmonic: 14:10 1.00m   diff: +2 min
+  HT  maree.info: 19:42 4.74m   harmonic: 19:50 4.65m   diff: +8 min
+
+2026-09-16
+  LT  maree.info: 02:30 1.30m   harmonic: 02:29 1.26m   diff: -1 min
+  HT  maree.info: 08:01 4.62m   harmonic: 08:01 4.51m   diff: +0 min
+  LT  maree.info: 14:46 1.43m   harmonic: 14:49 1.40m   diff: +3 min
+  HT  maree.info: 20:12 4.41m   harmonic: 20:17 4.31m   diff: +5 min
+
+2026-09-17
+  LT  maree.info: 03:07 1.67m   harmonic: 03:06 1.66m   diff: -1 min
+  HT  maree.info: 08:35 4.32m   harmonic: 08:30 4.22m   diff: -5 min
+  LT  maree.info: 15:27 1.79m   harmonic: 15:30 1.80m   diff: +3 min
+  HT  maree.info: 20:47 4.05m   harmonic: 20:49 3.96m   diff: +2 min
+
+2026-09-18
+  LT  maree.info: 03:49 2.03m   harmonic: 03:47 2.03m   diff: -2 min
+  HT  maree.info: 09:18 4.00m   harmonic: 09:09 3.92m   diff: -9 min
+  LT  maree.info: 16:16 2.14m   harmonic: 16:19 2.17m   diff: +3 min
+  HT  maree.info: 21:34 3.70m   harmonic: 21:36 3.63m   diff: +2 min
+
+2026-09-19
+  LT  maree.info: 04:44 2.33m   harmonic: 04:41 2.34m   diff: -3 min
+  HT  maree.info: 10:33 3.71m   harmonic: 10:25 3.64m   diff: -8 min
+  LT  maree.info: 17:24 2.39m   harmonic: 17:31 2.41m   diff: +7 min
+
+2026-09-20
+  HT  maree.info: 06:04 2.50m   harmonic: 00:01 3.40m   diff: -363 min
+  LT  maree.info: 13:01 3.67m   harmonic: 06:05 2.51m   diff: -416 min
+  HT  maree.info: 18:57 2.42m   harmonic: 12:53 3.59m   diff: -364 min
+
+2026-09-21
+  HT  maree.info: 02:04 3.58m   harmonic: 01:44 3.50m   diff: -20 min
+  LT  maree.info: 07:41 2.42m   harmonic: 07:42 2.41m   diff: +1 min
+  HT  maree.info: 14:21 3.89m   harmonic: 14:10 3.78m   diff: -11 min
+  LT  maree.info: 20:21 2.19m   harmonic: 20:30 2.18m   diff: +9 min
+
+2026-09-22
+  HT  maree.info: 02:59 3.84m   harmonic: 02:44 3.75m   diff: -15 min
+  LT  maree.info: 08:49 2.13m   harmonic: 08:49 2.12m   diff: +0 min
+  HT  maree.info: 15:09 4.18m   harmonic: 15:00 4.05m   diff: -9 min
+  LT  maree.info: 21:14 1.86m   harmonic: 21:20 1.83m   diff: +6 min
+
+2026-09-23
+  HT  maree.info: 03:37 4.13m   harmonic: 03:26 4.05m   diff: -11 min
+  LT  maree.info: 09:35 1.79m   harmonic: 09:34 1.77m   diff: -1 min
+  HT  maree.info: 15:45 4.48m   harmonic: 15:39 4.36m   diff: -6 min
+  LT  maree.info: 21:54 1.50m   harmonic: 21:59 1.48m   diff: +5 min
+
+2026-09-24
+  HT  maree.info: 04:08 4.42m   harmonic: 04:02 4.36m   diff: -6 min
+  LT  maree.info: 10:12 1.46m   harmonic: 10:11 1.42m   diff: -1 min
+  HT  maree.info: 16:18 4.77m   harmonic: 16:14 4.67m   diff: -4 min
+  LT  maree.info: 22:29 1.17m   harmonic: 22:32 1.15m   diff: +3 min
+
+2026-09-25
+  HT  maree.info: 04:37 4.70m   harmonic: 04:34 4.65m   diff: -3 min
+  LT  maree.info: 10:46 1.15m   harmonic: 10:44 1.10m   diff: -2 min
+  HT  maree.info: 16:48 5.03m   harmonic: 16:46 4.95m   diff: -2 min
+  LT  maree.info: 23:03 0.90m   harmonic: 23:05 0.86m   diff: +2 min
+
+2026-09-26
+  HT  maree.info: 05:06 4.93m   harmonic: 05:04 4.89m   diff: -2 min
+  LT  maree.info: 11:19 0.91m   harmonic: 11:17 0.82m   diff: -2 min
+  HT  maree.info: 17:20 5.24m   harmonic: 17:17 5.17m   diff: -3 min
+  LT  maree.info: 23:36 0.69m   harmonic: 23:37 0.65m   diff: +1 min
+
+2026-09-27
+  HT  maree.info: 05:36 5.11m   harmonic: 05:34 5.09m   diff: -2 min
+  LT  maree.info: 11:53 0.74m   harmonic: 11:51 0.61m   diff: -2 min
+  HT  maree.info: 17:52 5.35m   harmonic: 17:49 5.32m   diff: -3 min
+
+2026-09-28
+  LT  maree.info: 00:10 0.59m   harmonic: 00:11 0.53m   diff: +1 min
+  HT  maree.info: 06:08 5.20m   harmonic: 06:04 5.20m   diff: -4 min
+  LT  maree.info: 12:28 0.66m   harmonic: 12:26 0.50m   diff: -2 min
+  HT  maree.info: 18:25 5.36m   harmonic: 18:21 5.35m   diff: -4 min
+
+2026-09-29
+  LT  maree.info: 00:46 0.60m   harmonic: 00:47 0.53m   diff: +1 min
+  HT  maree.info: 06:40 5.19m   harmonic: 06:36 5.21m   diff: -4 min
+  LT  maree.info: 13:05 0.69m   harmonic: 13:04 0.51m   diff: -1 min
+  HT  maree.info: 19:00 5.24m   harmonic: 18:55 5.25m   diff: -5 min
+
+2026-09-30
+  LT  maree.info: 01:24 0.72m   harmonic: 01:25 0.66m   diff: +1 min
+  HT  maree.info: 07:14 5.08m   harmonic: 07:10 5.11m   diff: -4 min
+  LT  maree.info: 13:46 0.84m   harmonic: 13:45 0.65m   diff: -1 min
+  HT  maree.info: 19:37 5.00m   harmonic: 19:33 5.02m   diff: -4 min
+
+2026-10-01
+  LT  maree.info: 02:06 0.97m   harmonic: 02:08 0.90m   diff: +2 min
+  HT  maree.info: 07:52 4.86m   harmonic: 07:49 4.90m   diff: -3 min
+  LT  maree.info: 14:31 1.10m   harmonic: 14:32 0.92m   diff: +1 min
+  HT  maree.info: 20:19 4.65m   harmonic: 20:16 4.67m   diff: -3 min
+
+2026-10-02
+  LT  maree.info: 02:53 1.31m   harmonic: 02:56 1.22m   diff: +3 min
+  HT  maree.info: 08:36 4.56m   harmonic: 08:36 4.58m   diff: +0 min
+  LT  maree.info: 15:24 1.44m   harmonic: 15:26 1.25m   diff: +2 min
+  HT  maree.info: 21:16 4.24m   harmonic: 21:15 4.26m   diff: -1 min
+
+2026-10-03
+  LT  maree.info: 03:48 1.68m   harmonic: 03:53 1.57m   diff: +5 min
+  HT  maree.info: 09:43 4.23m   harmonic: 09:47 4.23m   diff: +4 min
+  LT  maree.info: 16:29 1.77m   harmonic: 16:33 1.56m   diff: +4 min
+  HT  maree.info: 23:03 3.92m   harmonic: 23:07 3.93m   diff: +4 min
+
+2026-10-04
+  LT  maree.info: 04:58 1.99m   harmonic: 05:06 1.83m   diff: +8 min
+  HT  maree.info: 11:49 4.05m   harmonic: 11:53 4.06m   diff: +4 min
+  LT  maree.info: 17:53 1.94m   harmonic: 17:56 1.71m   diff: +3 min
+
+2026-10-05
+  HT  maree.info: 01:01 3.91m   harmonic: 00:57 3.93m   diff: -4 min
+  LT  maree.info: 06:26 2.08m   harmonic: 06:32 1.86m   diff: +6 min
+  HT  maree.info: 13:34 4.20m   harmonic: 13:27 4.20m   diff: -7 min
+  LT  maree.info: 19:26 1.82m   harmonic: 19:22 1.59m   diff: -4 min
+
+2026-10-06
+  HT  maree.info: 02:20 4.15m   harmonic: 02:12 4.16m   diff: -8 min
+  LT  maree.info: 07:53 1.87m   harmonic: 07:53 1.63m   diff: +0 min
+  HT  maree.info: 14:42 4.49m   harmonic: 14:34 4.48m   diff: -8 min
+  LT  maree.info: 20:39 1.50m   harmonic: 20:33 1.28m   diff: -6 min
+
+2026-10-07
+  HT  maree.info: 03:16 4.45m   harmonic: 03:09 4.45m   diff: -7 min
+  LT  maree.info: 08:58 1.52m   harmonic: 08:56 1.27m   diff: -2 min
+  HT  maree.info: 15:32 4.79m   harmonic: 15:27 4.78m   diff: -5 min
+  LT  maree.info: 21:33 1.16m   harmonic: 21:27 0.94m   diff: -6 min
+
+2026-10-08
+  HT  maree.info: 03:58 4.72m   harmonic: 03:54 4.72m   diff: -4 min
+  LT  maree.info: 09:49 1.18m   harmonic: 09:46 0.91m   diff: -3 min
+  HT  maree.info: 16:12 5.02m   harmonic: 16:10 5.02m   diff: -2 min
+  LT  maree.info: 22:18 0.89m   harmonic: 22:13 0.66m   diff: -5 min
+
+2026-10-09
+  HT  maree.info: 04:33 4.94m   harmonic: 04:33 4.94m   diff: +0 min
+  LT  maree.info: 10:33 0.91m   harmonic: 10:31 0.64m   diff: -2 min
+  HT  maree.info: 16:46 5.17m   harmonic: 16:48 5.17m   diff: +2 min
+  LT  maree.info: 22:59 0.73m   harmonic: 22:54 0.49m   diff: -5 min
+
+2026-10-10
+  HT  maree.info: 05:04 5.08m   harmonic: 05:08 5.07m   diff: +4 min
+  LT  maree.info: 11:14 0.76m   harmonic: 11:11 0.48m   diff: -3 min
+  HT  maree.info: 17:17 5.24m   harmonic: 17:23 5.23m   diff: +6 min
+  LT  maree.info: 23:37 0.69m   harmonic: 23:33 0.45m   diff: -4 min
+
+2026-10-11
+  HT  maree.info: 05:33 5.15m   harmonic: 05:39 5.12m   diff: +6 min
+  LT  maree.info: 11:51 0.73m   harmonic: 11:50 0.46m   diff: -1 min
+  HT  maree.info: 17:45 5.21m   harmonic: 17:55 5.18m   diff: +10 min
+
+2026-10-12
+  LT  maree.info: 00:13 0.76m   harmonic: 00:10 0.54m   diff: -3 min
+  HT  maree.info: 06:02 5.13m   harmonic: 06:08 5.09m   diff: +6 min
+  LT  maree.info: 12:28 0.81m   harmonic: 12:28 0.57m   diff: +0 min
+  HT  maree.info: 18:13 5.10m   harmonic: 18:24 5.05m   diff: +11 min
+
+2026-10-13
+  LT  maree.info: 00:47 0.93m   harmonic: 00:47 0.74m   diff: +0 min
+  HT  maree.info: 06:31 5.04m   harmonic: 06:36 4.98m   diff: +5 min
+  LT  maree.info: 13:03 0.99m   harmonic: 13:06 0.79m   diff: +3 min
+  HT  maree.info: 18:43 4.91m   harmonic: 18:53 4.84m   diff: +10 min
+
+2026-10-14
+  LT  maree.info: 01:21 1.17m   harmonic: 01:23 1.01m   diff: +2 min
+  HT  maree.info: 07:01 4.87m   harmonic: 07:04 4.81m   diff: +3 min
+  LT  maree.info: 13:38 1.23m   harmonic: 13:43 1.09m   diff: +5 min
+  HT  maree.info: 19:13 4.66m   harmonic: 19:21 4.58m   diff: +8 min
+
+2026-10-15
+  LT  maree.info: 01:55 1.45m   harmonic: 01:58 1.34m   diff: +3 min
+  HT  maree.info: 07:33 4.64m   harmonic: 07:33 4.58m   diff: +0 min
+  LT  maree.info: 14:15 1.51m   harmonic: 14:20 1.43m   diff: +5 min
+  HT  maree.info: 19:43 4.37m   harmonic: 19:51 4.28m   diff: +8 min
+
+2026-10-16
+  LT  maree.info: 02:32 1.76m   harmonic: 02:34 1.67m   diff: +2 min
+  HT  maree.info: 08:08 4.37m   harmonic: 08:06 4.31m   diff: -2 min
+  LT  maree.info: 14:55 1.81m   harmonic: 15:00 1.77m   diff: +5 min
+  HT  maree.info: 20:18 4.06m   harmonic: 20:26 3.97m   diff: +8 min
+
+2026-10-17
+  LT  maree.info: 03:13 2.06m   harmonic: 03:13 1.99m   diff: +0 min
+  HT  maree.info: 08:50 4.09m   harmonic: 08:47 4.02m   diff: -3 min
+  LT  maree.info: 15:42 2.10m   harmonic: 15:48 2.08m   diff: +6 min
+  HT  maree.info: 21:03 3.76m   harmonic: 21:17 3.67m   diff: +14 min
+
+2026-10-18
+  LT  maree.info: 04:05 2.32m   harmonic: 04:04 2.26m   diff: -1 min
+  HT  maree.info: 09:56 3.84m   harmonic: 09:55 3.75m   diff: -1 min
+  LT  maree.info: 16:42 2.32m   harmonic: 16:54 2.29m   diff: +12 min
+  HT  maree.info: 22:38 3.53m   harmonic: 23:09 3.46m   diff: +31 min
+
+2026-10-19
+  LT  maree.info: 05:17 2.48m   harmonic: 05:21 2.43m   diff: +4 min
+  HT  maree.info: 11:57 3.74m   harmonic: 11:56 3.64m   diff: -1 min
+  LT  maree.info: 18:04 2.39m   harmonic: 18:22 2.33m   diff: +18 min
+
+2026-10-20
+  HT  maree.info: 01:07 3.59m   harmonic: 00:55 3.52m   diff: -12 min
+  LT  maree.info: 06:46 2.44m   harmonic: 06:53 2.38m   diff: +7 min
+  HT  maree.info: 13:27 3.89m   harmonic: 13:20 3.76m   diff: -7 min
+  LT  maree.info: 19:27 2.22m   harmonic: 19:40 2.14m   diff: +13 min
+
+2026-10-21
+  HT  maree.info: 02:11 3.84m   harmonic: 02:00 3.74m   diff: -11 min
+  LT  maree.info: 07:59 2.20m   harmonic: 08:03 2.15m   diff: +4 min
+  HT  maree.info: 14:23 4.15m   harmonic: 14:17 4.00m   diff: -6 min
+  LT  maree.info: 20:27 1.92m   harmonic: 20:35 1.84m   diff: +8 min
+
+2026-10-22
+  HT  maree.info: 02:53 4.13m   harmonic: 02:48 4.03m   diff: -5 min
+  LT  maree.info: 08:49 1.87m   harmonic: 08:52 1.83m   diff: +3 min
+  HT  maree.info: 15:05 4.44m   harmonic: 15:01 4.30m   diff: -4 min
+  LT  maree.info: 21:10 1.57m   harmonic: 21:17 1.52m   diff: +7 min
+
+2026-10-23
+  HT  maree.info: 03:27 4.44m   harmonic: 03:26 4.33m   diff: -1 min
+  LT  maree.info: 09:30 1.53m   harmonic: 09:32 1.49m   diff: +2 min
+  HT  maree.info: 15:41 4.74m   harmonic: 15:39 4.60m   diff: -2 min
+  LT  maree.info: 21:49 1.23m   harmonic: 21:54 1.20m   diff: +5 min
+
+2026-10-24
+  HT  maree.info: 04:00 4.73m   harmonic: 04:01 4.63m   diff: +1 min
+  LT  maree.info: 10:08 1.21m   harmonic: 10:09 1.15m   diff: +1 min
+  HT  maree.info: 16:16 5.02m   harmonic: 16:14 4.89m   diff: -2 min
+  LT  maree.info: 22:25 0.94m   harmonic: 22:30 0.92m   diff: +5 min
+
+2026-10-25
+  HT  maree.info: 03:34 4.99m   harmonic: 03:34 4.90m   diff: +0 min
+  LT  maree.info: 09:45 0.94m   harmonic: 09:45 0.85m   diff: +0 min
+  HT  maree.info: 15:51 5.23m   harmonic: 15:49 5.12m   diff: -2 min
+  LT  maree.info: 22:02 0.73m   harmonic: 22:06 0.70m   diff: +4 min
+
+2026-10-26
+  HT  maree.info: 04:08 5.18m   harmonic: 04:07 5.11m   diff: -1 min
+  LT  maree.info: 10:23 0.74m   harmonic: 10:23 0.62m   diff: +0 min
+  HT  maree.info: 16:27 5.35m   harmonic: 16:24 5.26m   diff: -3 min
+  LT  maree.info: 22:41 0.62m   harmonic: 22:43 0.58m   diff: +2 min
+
+2026-10-27
+  HT  maree.info: 04:43 5.28m   harmonic: 04:41 5.23m   diff: -2 min
+  LT  maree.info: 11:03 0.64m   harmonic: 11:02 0.49m   diff: -1 min
+  HT  maree.info: 17:05 5.35m   harmonic: 17:01 5.27m   diff: -4 min
+  LT  maree.info: 23:21 0.64m   harmonic: 23:23 0.58m   diff: +2 min
+
+2026-10-28
+  HT  maree.info: 05:20 5.27m   harmonic: 05:17 5.25m   diff: -3 min
+  LT  maree.info: 11:46 0.66m   harmonic: 11:45 0.48m   diff: -1 min
+  HT  maree.info: 17:44 5.21m   harmonic: 17:41 5.16m   diff: -3 min
+
+2026-10-29
+  LT  maree.info: 00:04 0.78m   harmonic: 00:05 0.69m   diff: +1 min
+  HT  maree.info: 06:00 5.14m   harmonic: 05:57 5.15m   diff: -3 min
+  LT  maree.info: 12:32 0.81m   harmonic: 12:30 0.61m   diff: -2 min
+  HT  maree.info: 18:28 4.95m   harmonic: 18:25 4.91m   diff: -3 min
+
+2026-10-30
+  LT  maree.info: 00:51 1.03m   harmonic: 00:52 0.91m   diff: +1 min
+  HT  maree.info: 06:45 4.92m   harmonic: 06:42 4.93m   diff: -3 min
+  LT  maree.info: 13:23 1.07m   harmonic: 13:21 0.85m   diff: -2 min
+  HT  maree.info: 19:19 4.60m   harmonic: 19:17 4.58m   diff: -2 min
+
+2026-10-31
+  LT  maree.info: 01:43 1.35m   harmonic: 01:43 1.19m   diff: +0 min
+  HT  maree.info: 07:41 4.64m   harmonic: 07:38 4.64m   diff: -3 min
+  LT  maree.info: 14:20 1.38m   harmonic: 14:19 1.14m   diff: -1 min
+  HT  maree.info: 20:29 4.24m   harmonic: 20:28 4.23m   diff: -1 min
+
+2026-11-01
+  LT  maree.info: 02:43 1.68m   harmonic: 02:43 1.48m   diff: +0 min
+  HT  maree.info: 08:59 4.37m   harmonic: 08:58 4.35m   diff: -1 min
+  LT  maree.info: 15:26 1.66m   harmonic: 15:26 1.40m   diff: +0 min
+  HT  maree.info: 22:11 4.02m   harmonic: 22:04 4.00m   diff: -7 min
+
+2026-11-02
+  LT  maree.info: 03:53 1.91m   harmonic: 03:54 1.69m   diff: +1 min
+  HT  maree.info: 10:43 4.25m   harmonic: 10:36 4.21m   diff: -7 min
+  LT  maree.info: 16:45 1.81m   harmonic: 16:42 1.53m   diff: -3 min
+  HT  maree.info: 23:46 4.04m   harmonic: 23:33 4.00m   diff: -13 min
+
+2026-11-03
+  LT  maree.info: 05:13 1.96m   harmonic: 05:12 1.72m   diff: -1 min
+  HT  maree.info: 12:11 4.32m   harmonic: 12:00 4.27m   diff: -11 min
+  LT  maree.info: 18:06 1.74m   harmonic: 17:58 1.48m   diff: -8 min
+
+2026-11-04
+  HT  maree.info: 00:57 4.21m   harmonic: 00:45 4.15m   diff: -12 min
+  LT  maree.info: 06:29 1.81m   harmonic: 06:25 1.57m   diff: -4 min
+  HT  maree.info: 13:17 4.49m   harmonic: 13:07 4.44m   diff: -10 min
+  LT  maree.info: 19:13 1.54m   harmonic: 19:03 1.31m   diff: -10 min
+
+2026-11-05
+  HT  maree.info: 01:49 4.42m   harmonic: 01:41 4.37m   diff: -8 min
+  LT  maree.info: 07:32 1.57m   harmonic: 07:27 1.33m   diff: -5 min
+  HT  maree.info: 14:07 4.66m   harmonic: 14:00 4.63m   diff: -7 min
+  LT  maree.info: 20:07 1.33m   harmonic: 19:58 1.10m   diff: -9 min
+
+2026-11-06
+  HT  maree.info: 02:31 4.62m   harmonic: 02:28 4.58m   diff: -3 min
+  LT  maree.info: 08:24 1.34m   harmonic: 08:19 1.08m   diff: -5 min
+  HT  maree.info: 14:47 4.80m   harmonic: 14:45 4.78m   diff: -2 min
+  LT  maree.info: 20:53 1.16m   harmonic: 20:44 0.93m   diff: -9 min
+
+2026-11-07
+  HT  maree.info: 03:05 4.79m   harmonic: 03:07 4.77m   diff: +2 min
+  LT  maree.info: 09:10 1.17m   harmonic: 09:05 0.89m   diff: -5 min
+  HT  maree.info: 15:21 4.89m   harmonic: 15:24 4.88m   diff: +3 min
+  LT  maree.info: 21:34 1.06m   harmonic: 21:27 0.82m   diff: -7 min
+
+2026-11-08
+  HT  maree.info: 03:36 4.91m   harmonic: 03:42 4.90m   diff: +6 min
+  LT  maree.info: 09:51 1.07m   harmonic: 09:47 0.78m   diff: -4 min
+  HT  maree.info: 15:52 4.94m   harmonic: 15:59 4.93m   diff: +7 min
+  LT  maree.info: 22:12 1.04m   harmonic: 22:06 0.79m   diff: -6 min
+
+2026-11-09
+  HT  maree.info: 04:07 4.98m   harmonic: 04:14 4.97m   diff: +7 min
+  LT  maree.info: 10:29 1.05m   harmonic: 10:27 0.75m   diff: -2 min
+  HT  maree.info: 16:22 4.93m   harmonic: 16:31 4.91m   diff: +9 min
+  LT  maree.info: 22:47 1.09m   harmonic: 22:45 0.84m   diff: -2 min
+
+2026-11-10
+  HT  maree.info: 04:38 4.99m   harmonic: 04:45 4.98m   diff: +7 min
+  LT  maree.info: 11:06 1.10m   harmonic: 11:06 0.81m   diff: +0 min
+  HT  maree.info: 16:53 4.86m   harmonic: 17:02 4.83m   diff: +9 min
+  LT  maree.info: 23:22 1.20m   harmonic: 23:22 0.96m   diff: +0 min
+
+2026-11-11
+  HT  maree.info: 05:10 4.94m   harmonic: 05:15 4.93m   diff: +5 min
+  LT  maree.info: 11:41 1.21m   harmonic: 11:44 0.95m   diff: +3 min
+  HT  maree.info: 17:24 4.74m   harmonic: 17:33 4.69m   diff: +9 min
+  LT  maree.info: 23:56 1.36m   harmonic: 23:58 1.13m   diff: +2 min
+
+2026-11-12
+  HT  maree.info: 05:43 4.82m   harmonic: 05:46 4.82m   diff: +3 min
+  LT  maree.info: 12:17 1.35m   harmonic: 12:22 1.15m   diff: +5 min
+  HT  maree.info: 17:57 4.56m   harmonic: 18:05 4.51m   diff: +8 min
+
+2026-11-13
+  LT  maree.info: 00:31 1.55m   harmonic: 00:34 1.35m   diff: +3 min
+  HT  maree.info: 06:17 4.65m   harmonic: 06:19 4.65m   diff: +2 min
+  LT  maree.info: 12:54 1.54m   harmonic: 13:00 1.38m   diff: +6 min
+  HT  maree.info: 18:29 4.35m   harmonic: 18:39 4.30m   diff: +10 min
+
+2026-11-14
+  LT  maree.info: 01:07 1.76m   harmonic: 01:11 1.58m   diff: +4 min
+  HT  maree.info: 06:54 4.46m   harmonic: 06:55 4.44m   diff: +1 min
+  LT  maree.info: 13:33 1.74m   harmonic: 13:40 1.62m   diff: +7 min
+  HT  maree.info: 19:05 4.14m   harmonic: 19:19 4.07m   diff: +14 min
+
+2026-11-15
+  LT  maree.info: 01:48 1.97m   harmonic: 01:51 1.82m   diff: +3 min
+  HT  maree.info: 07:36 4.25m   harmonic: 07:37 4.21m   diff: +1 min
+  LT  maree.info: 14:17 1.94m   harmonic: 14:25 1.84m   diff: +8 min
+  HT  maree.info: 19:49 3.93m   harmonic: 20:08 3.85m   diff: +19 min
+
+2026-11-16
+  LT  maree.info: 02:36 2.16m   harmonic: 02:38 2.03m   diff: +2 min
+  HT  maree.info: 08:31 4.06m   harmonic: 08:32 3.99m   diff: +1 min
+  LT  maree.info: 15:08 2.11m   harmonic: 15:19 2.01m   diff: +11 min
+  HT  maree.info: 20:52 3.76m   harmonic: 21:18 3.68m   diff: +26 min
+
+2026-11-17
+  LT  maree.info: 03:35 2.29m   harmonic: 03:37 2.18m   diff: +2 min
+  HT  maree.info: 09:46 3.94m   harmonic: 09:48 3.84m   diff: +2 min
+  LT  maree.info: 16:10 2.19m   harmonic: 16:25 2.09m   diff: +15 min
+  HT  maree.info: 22:32 3.71m   harmonic: 22:46 3.64m   diff: +14 min
+
+2026-11-18
+  LT  maree.info: 04:44 2.31m   harmonic: 04:49 2.23m   diff: +5 min
+  HT  maree.info: 11:11 3.96m   harmonic: 11:12 3.83m   diff: +1 min
+  LT  maree.info: 17:20 2.14m   harmonic: 17:34 2.03m   diff: +14 min
+
+2026-11-19
+  HT  maree.info: 05:54 2.19m   harmonic: 00:01 3.76m   diff: -353 min
+  LT  maree.info: 12:21 4.11m   harmonic: 05:59 2.12m   diff: -382 min
+  HT  maree.info: 18:25 1.96m   harmonic: 12:21 3.97m   diff: -364 min
+
+2026-11-20
+  HT  maree.info: 00:57 4.08m   harmonic: 00:59 3.98m   diff: +2 min
+  LT  maree.info: 06:53 1.96m   harmonic: 06:58 1.90m   diff: +5 min
+  HT  maree.info: 13:15 4.34m   harmonic: 13:15 4.20m   diff: +0 min
+  LT  maree.info: 19:18 1.69m   harmonic: 19:27 1.62m   diff: +9 min
+
+2026-11-21
+  HT  maree.info: 01:43 4.36m   harmonic: 01:46 4.24m   diff: +3 min
+  LT  maree.info: 07:43 1.67m   harmonic: 07:48 1.61m   diff: +5 min
+  HT  maree.info: 14:02 4.60m   harmonic: 14:02 4.47m   diff: +0 min
+  LT  maree.info: 20:05 1.40m   harmonic: 20:13 1.35m   diff: +8 min
+
+2026-11-22
+  HT  maree.info: 02:24 4.64m   harmonic: 02:28 4.53m   diff: +4 min
+  LT  maree.info: 08:29 1.37m   harmonic: 08:33 1.29m   diff: +4 min
+  HT  maree.info: 14:45 4.86m   harmonic: 14:45 4.73m   diff: +0 min
+  LT  maree.info: 20:49 1.12m   harmonic: 20:56 1.09m   diff: +7 min
+
+2026-11-23
+  HT  maree.info: 03:05 4.90m   harmonic: 03:07 4.80m   diff: +2 min
+  LT  maree.info: 09:13 1.08m   harmonic: 09:17 0.99m   diff: +4 min
+  HT  maree.info: 15:27 5.07m   harmonic: 15:27 4.94m   diff: +0 min
+  LT  maree.info: 21:33 0.90m   harmonic: 21:39 0.87m   diff: +6 min
+
+2026-11-24
+  HT  maree.info: 03:45 5.11m   harmonic: 03:47 5.02m   diff: +2 min
+  LT  maree.info: 09:59 0.85m   harmonic: 10:01 0.73m   diff: +2 min
+  HT  maree.info: 16:10 5.20m   harmonic: 16:09 5.08m   diff: -1 min
+  LT  maree.info: 22:17 0.77m   harmonic: 22:22 0.73m   diff: +5 min
+
+2026-11-25
+  HT  maree.info: 04:27 5.24m   harmonic: 04:27 5.18m   diff: +0 min
+  LT  maree.info: 10:46 0.70m   harmonic: 10:46 0.55m   diff: +0 min
+  HT  maree.info: 16:55 5.23m   harmonic: 16:53 5.12m   diff: -2 min
+  LT  maree.info: 23:04 0.75m   harmonic: 23:07 0.67m   diff: +3 min
+
+2026-11-26
+  HT  maree.info: 05:12 5.27m   harmonic: 05:10 5.24m   diff: -2 min
+  LT  maree.info: 11:34 0.65m   harmonic: 11:33 0.49m   diff: -1 min
+  HT  maree.info: 17:42 5.13m   harmonic: 17:39 5.05m   diff: -3 min
+  LT  maree.info: 23:52 0.82m   harmonic: 23:54 0.70m   diff: +2 min
+
+2026-11-27
+  HT  maree.info: 06:00 5.21m   harmonic: 05:56 5.19m   diff: -4 min
+  LT  maree.info: 12:25 0.73m   harmonic: 12:23 0.54m   diff: -2 min
+  HT  maree.info: 18:32 4.94m   harmonic: 18:28 4.88m   diff: -4 min
+
+2026-11-28
+  LT  maree.info: 00:43 0.99m   harmonic: 00:43 0.83m   diff: +0 min
+  HT  maree.info: 06:51 5.06m   harmonic: 06:46 5.04m   diff: -5 min
+  LT  maree.info: 13:18 0.90m   harmonic: 13:15 0.69m   diff: -3 min
+  HT  maree.info: 19:27 4.69m   harmonic: 19:22 4.64m   diff: -5 min
+
+2026-11-29
+  LT  maree.info: 01:37 1.22m   harmonic: 01:35 1.02m   diff: -2 min
+  HT  maree.info: 07:49 4.85m   harmonic: 07:42 4.82m   diff: -7 min
+  LT  maree.info: 14:14 1.15m   harmonic: 14:11 0.91m   diff: -3 min
+  HT  maree.info: 20:31 4.42m   harmonic: 20:24 4.38m   diff: -7 min
+
+2026-11-30
+  LT  maree.info: 02:35 1.46m   harmonic: 02:32 1.24m   diff: -3 min
+  HT  maree.info: 08:55 4.63m   harmonic: 08:47 4.58m   diff: -8 min
+  LT  maree.info: 15:15 1.40m   harmonic: 15:11 1.15m   diff: -4 min
+  HT  maree.info: 21:45 4.22m   harmonic: 21:36 4.17m   diff: -9 min
+
+2026-12-01
+  LT  maree.info: 03:38 1.66m   harmonic: 03:34 1.44m   diff: -4 min
+  HT  maree.info: 10:09 4.45m   harmonic: 10:02 4.38m   diff: -7 min
+  LT  maree.info: 16:21 1.61m   harmonic: 16:15 1.35m   diff: -6 min
+  HT  maree.info: 23:04 4.12m   harmonic: 22:52 4.06m   diff: -12 min
+
+2026-12-02
+  LT  maree.info: 04:46 1.79m   harmonic: 04:40 1.57m   diff: -6 min
+  HT  maree.info: 11:26 4.34m   harmonic: 11:19 4.28m   diff: -7 min
+  LT  maree.info: 17:30 1.71m   harmonic: 17:21 1.47m   diff: -9 min
+
+2026-12-03
+  HT  maree.info: 00:15 4.15m   harmonic: 00:04 4.08m   diff: -11 min
+  LT  maree.info: 05:54 1.80m   harmonic: 05:47 1.60m   diff: -7 min
+  HT  maree.info: 12:37 4.32m   harmonic: 12:29 4.27m   diff: -8 min
+  LT  maree.info: 18:36 1.70m   harmonic: 18:24 1.49m   diff: -12 min
+
+2026-12-04
+  HT  maree.info: 01:13 4.25m   harmonic: 01:06 4.18m   diff: -7 min
+  LT  maree.info: 06:58 1.74m   harmonic: 06:51 1.54m   diff: -7 min
+  HT  maree.info: 13:35 4.37m   harmonic: 13:29 4.33m   diff: -6 min
+  LT  maree.info: 19:35 1.63m   harmonic: 19:22 1.44m   diff: -13 min
+
+2026-12-05
+  HT  maree.info: 02:00 4.39m   harmonic: 01:58 4.33m   diff: -2 min
+  LT  maree.info: 07:56 1.63m   harmonic: 07:48 1.43m   diff: -8 min
+  HT  maree.info: 14:23 4.44m   harmonic: 14:20 4.41m   diff: -3 min
+  LT  maree.info: 20:26 1.53m   harmonic: 20:14 1.36m   diff: -12 min
+
+2026-12-06
+  HT  maree.info: 02:40 4.53m   harmonic: 02:42 4.49m   diff: +2 min
+  LT  maree.info: 08:46 1.52m   harmonic: 08:39 1.29m   diff: -7 min
+  HT  maree.info: 15:02 4.51m   harmonic: 15:02 4.50m   diff: +0 min
+  LT  maree.info: 21:11 1.45m   harmonic: 21:00 1.26m   diff: -11 min
+
+2026-12-07
+  HT  maree.info: 03:16 4.66m   harmonic: 03:20 4.64m   diff: +4 min
+  LT  maree.info: 09:32 1.43m   harmonic: 09:25 1.17m   diff: -7 min
+  HT  maree.info: 15:37 4.58m   harmonic: 15:40 4.57m   diff: +3 min
+  LT  maree.info: 21:52 1.40m   harmonic: 21:43 1.18m   diff: -9 min
+
+2026-12-08
+  HT  maree.info: 03:51 4.76m   harmonic: 03:55 4.76m   diff: +4 min
+  LT  maree.info: 10:13 1.37m   harmonic: 10:08 1.09m   diff: -5 min
+  HT  maree.info: 16:11 4.63m   harmonic: 16:15 4.62m   diff: +4 min
+  LT  maree.info: 22:29 1.38m   harmonic: 22:24 1.13m   diff: -5 min
+
+2026-12-09
+  HT  maree.info: 04:25 4.81m   harmonic: 04:29 4.85m   diff: +4 min
+  LT  maree.info: 10:51 1.34m   harmonic: 10:49 1.05m   diff: -2 min
+  HT  maree.info: 16:44 4.64m   harmonic: 16:48 4.63m   diff: +4 min
+  LT  maree.info: 23:05 1.40m   harmonic: 23:03 1.13m   diff: -2 min
+
+2026-12-10
+  HT  maree.info: 05:00 4.83m   harmonic: 05:02 4.88m   diff: +2 min
+  LT  maree.info: 11:27 1.33m   harmonic: 11:28 1.06m   diff: +1 min
+  HT  maree.info: 17:17 4.61m   harmonic: 17:22 4.61m   diff: +5 min
+  LT  maree.info: 23:40 1.44m   harmonic: 23:40 1.17m   diff: +0 min
+
+2026-12-11
+  HT  maree.info: 05:34 4.80m   harmonic: 05:36 4.86m   diff: +2 min
+  LT  maree.info: 12:03 1.36m   harmonic: 12:06 1.12m   diff: +3 min
+  HT  maree.info: 17:49 4.54m   harmonic: 17:55 4.54m   diff: +6 min
+
+2026-12-12
+  LT  maree.info: 00:15 1.52m   harmonic: 00:17 1.25m   diff: +2 min
+  HT  maree.info: 06:09 4.73m   harmonic: 06:10 4.78m   diff: +1 min
+  LT  maree.info: 12:39 1.43m   harmonic: 12:43 1.22m   diff: +4 min
+  HT  maree.info: 18:22 4.45m   harmonic: 18:30 4.44m   diff: +8 min
+
+2026-12-13
+  LT  maree.info: 00:51 1.62m   harmonic: 00:54 1.37m   diff: +3 min
+  HT  maree.info: 06:45 4.63m   harmonic: 06:45 4.65m   diff: +0 min
+  LT  maree.info: 13:16 1.53m   harmonic: 13:21 1.35m   diff: +5 min
+  HT  maree.info: 18:55 4.33m   harmonic: 19:07 4.30m   diff: +12 min
+
+2026-12-14
+  LT  maree.info: 01:29 1.73m   harmonic: 01:31 1.52m   diff: +2 min
+  HT  maree.info: 07:22 4.50m   harmonic: 07:22 4.50m   diff: +0 min
+  LT  maree.info: 13:55 1.65m   harmonic: 14:01 1.49m   diff: +6 min
+  HT  maree.info: 19:32 4.20m   harmonic: 19:47 4.15m   diff: +15 min
+
+2026-12-15
+  LT  maree.info: 02:10 1.86m   harmonic: 02:12 1.68m   diff: +2 min
+  HT  maree.info: 08:04 4.37m   harmonic: 08:03 4.33m   diff: -1 min
+  LT  maree.info: 14:37 1.77m   harmonic: 14:44 1.64m   diff: +7 min
+  HT  maree.info: 20:16 4.08m   harmonic: 20:33 4.01m   diff: +17 min
+
+2026-12-16
+  LT  maree.info: 02:56 1.97m   harmonic: 02:58 1.83m   diff: +2 min
+  HT  maree.info: 08:54 4.23m   harmonic: 08:51 4.17m   diff: -3 min
+  LT  maree.info: 15:24 1.87m   harmonic: 15:33 1.76m   diff: +9 min
+  HT  maree.info: 21:13 3.98m   harmonic: 21:30 3.90m   diff: +17 min
+
+2026-12-17
+  LT  maree.info: 03:49 2.05m   harmonic: 03:51 1.95m   diff: +2 min
+  HT  maree.info: 09:55 4.14m   harmonic: 09:52 4.04m   diff: -3 min
+  LT  maree.info: 16:18 1.93m   harmonic: 16:29 1.84m   diff: +11 min
+  HT  maree.info: 22:27 3.94m   harmonic: 22:42 3.86m   diff: +15 min
+
+2026-12-18
+  LT  maree.info: 04:49 2.07m   harmonic: 04:53 1.99m   diff: +4 min
+  HT  maree.info: 11:07 4.11m   harmonic: 11:07 4.01m   diff: +0 min
+  LT  maree.info: 17:19 1.92m   harmonic: 17:31 1.84m   diff: +12 min
+  HT  maree.info: 23:49 4.01m   harmonic: 23:57 3.93m   diff: +8 min
+
+2026-12-19
+  LT  maree.info: 05:52 1.99m   harmonic: 05:59 1.93m   diff: +7 min
+  HT  maree.info: 12:19 4.20m   harmonic: 12:22 4.09m   diff: +3 min
+  LT  maree.info: 18:22 1.81m   harmonic: 18:34 1.75m   diff: +12 min
+
+2026-12-20
+  HT  maree.info: 00:56 4.20m   harmonic: 01:03 4.11m   diff: +7 min
+  LT  maree.info: 06:55 1.81m   harmonic: 07:02 1.75m   diff: +7 min
+  HT  maree.info: 13:23 4.37m   harmonic: 13:27 4.27m   diff: +4 min
+  LT  maree.info: 19:22 1.62m   harmonic: 19:33 1.57m   diff: +11 min
+
+2026-12-21
+  HT  maree.info: 01:53 4.45m   harmonic: 01:59 4.36m   diff: +6 min
+  LT  maree.info: 07:53 1.56m   harmonic: 08:01 1.48m   diff: +8 min
+  HT  maree.info: 14:20 4.59m   harmonic: 14:24 4.50m   diff: +4 min
+  LT  maree.info: 20:18 1.38m   harmonic: 20:28 1.33m   diff: +10 min
+
+2026-12-22
+  HT  maree.info: 02:44 4.72m   harmonic: 02:50 4.64m   diff: +6 min
+  LT  maree.info: 08:49 1.26m   harmonic: 08:56 1.17m   diff: +7 min
+  HT  maree.info: 15:13 4.82m   harmonic: 15:16 4.72m   diff: +3 min
+  LT  maree.info: 21:11 1.14m   harmonic: 21:20 1.08m   diff: +9 min
+
+2026-12-23
+  HT  maree.info: 03:34 4.97m   harmonic: 03:37 4.91m   diff: +3 min
+  LT  maree.info: 09:43 0.97m   harmonic: 09:47 0.85m   diff: +4 min
+  HT  maree.info: 16:04 5.01m   harmonic: 16:05 4.91m   diff: +1 min
+  LT  maree.info: 22:02 0.93m   harmonic: 22:09 0.85m   diff: +7 min
+
+2026-12-24
+  HT  maree.info: 04:23 5.18m   harmonic: 04:24 5.14m   diff: +1 min
+  LT  maree.info: 10:35 0.72m   harmonic: 10:37 0.58m   diff: +2 min
+  HT  maree.info: 16:54 5.13m   harmonic: 16:52 5.03m   diff: -2 min
+  LT  maree.info: 22:53 0.79m   harmonic: 22:58 0.68m   diff: +5 min
+
+2026-12-25
+  HT  maree.info: 05:12 5.32m   harmonic: 05:10 5.28m   diff: -2 min
+  LT  maree.info: 11:27 0.57m   harmonic: 11:27 0.41m   diff: +0 min
+  HT  maree.info: 17:43 5.15m   harmonic: 17:39 5.06m   diff: -4 min
+  LT  maree.info: 23:44 0.73m   harmonic: 23:46 0.59m   diff: +2 min
+
+2026-12-26
+  HT  maree.info: 06:02 5.36m   harmonic: 05:56 5.32m   diff: -6 min
+  LT  maree.info: 12:18 0.53m   harmonic: 12:16 0.36m   diff: -2 min
+  HT  maree.info: 18:32 5.07m   harmonic: 18:26 4.99m   diff: -6 min
+
+2026-12-27
+  LT  maree.info: 00:35 0.78m   harmonic: 00:34 0.60m   diff: -1 min
+  HT  maree.info: 06:50 5.30m   harmonic: 06:42 5.25m   diff: -8 min
+  LT  maree.info: 13:09 0.62m   harmonic: 13:05 0.45m   diff: -4 min
+  HT  maree.info: 19:19 4.90m   harmonic: 19:13 4.82m   diff: -6 min
+
+2026-12-28
+  LT  maree.info: 01:26 0.91m   harmonic: 01:23 0.73m   diff: -3 min
+  HT  maree.info: 07:38 5.13m   harmonic: 07:30 5.07m   diff: -8 min
+  LT  maree.info: 14:00 0.84m   harmonic: 13:55 0.65m   diff: -5 min
+  HT  maree.info: 20:06 4.68m   harmonic: 20:02 4.60m   diff: -4 min
+
+2026-12-29
+  LT  maree.info: 02:17 1.12m   harmonic: 02:13 0.94m   diff: -4 min
+  HT  maree.info: 08:25 4.88m   harmonic: 08:21 4.81m   diff: -4 min
+  LT  maree.info: 14:51 1.13m   harmonic: 14:46 0.94m   diff: -5 min
+  HT  maree.info: 20:55 4.43m   harmonic: 20:54 4.35m   diff: -1 min
+
+2026-12-30
+  LT  maree.info: 03:11 1.38m   harmonic: 03:05 1.21m   diff: -6 min
+  HT  maree.info: 09:14 4.58m   harmonic: 09:16 4.50m   diff: +2 min
+  LT  maree.info: 15:46 1.45m   harmonic: 15:39 1.26m   diff: -7 min
+  HT  maree.info: 21:50 4.20m   harmonic: 21:54 4.12m   diff: +4 min
+
+2026-12-31
+  LT  maree.info: 04:09 1.64m   harmonic: 04:01 1.49m   diff: -8 min
+  HT  maree.info: 10:11 4.29m   harmonic: 10:22 4.22m   diff: +11 min
+  LT  maree.info: 16:46 1.73m   harmonic: 16:37 1.56m   diff: -9 min
+  HT  maree.info: 23:02 4.04m   harmonic: 23:05 3.97m   diff: +3 min
+

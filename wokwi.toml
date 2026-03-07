@@ -1,0 +1,4 @@
+[wokwi]
+version=1
+firmware='.pio/build/esp_wroom_02-usb/firmware.bin'
+elf='.pio/build/esp_wroom_02-usb/firmware.elf'
