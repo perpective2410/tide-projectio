@@ -111,6 +111,8 @@ The `examples/TFT_TideDisplay/` folder contains a full-featured tide display for
 
 ### WiFi Configuration
 
+WiFi is only used to synchronise the clock via NTP on startup. The tide calculations themselves run entirely offline. If you'd prefer to set the time manually instead of using WiFi, open an issue — that feature can be added.
+
 Two WiFi modes are available, switchable via a compilation flag:
 
 #### Mode 1: WiFiManager (Default - `#define USE_WIFI_MANAGER`)
