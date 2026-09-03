@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// Station Configuration for the TempSensor / combined dashboard example
+// Station Configuration for the TideDashboard example
 // ─────────────────────────────────────────────────────────────────────────────
 // Edit this file to select which stations are compiled into your firmware.
 

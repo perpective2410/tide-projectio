@@ -1,4 +1,4 @@
-#include "TemperatureTab.h"
+#include "TemperatureWidget.h"
 #include "Shared.h"
 
 int drawTemperatureLabeled(int rightX, int centerY, const char* label, float value, bool valid)

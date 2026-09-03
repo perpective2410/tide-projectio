@@ -1,4 +1,4 @@
-#include "SunTab.h"
+#include "SunWidget.h"
 #include "Shared.h"
 #include <SolarCalculator.h>
 
@@ -10,7 +10,7 @@ void drawSunIcon(int cx, int cy, int radius,
 {
   double azimuth, elevation;
   calcHorizontalCoordinates(year, month, day, hour, minute, second,
-                             NICE_LAT, NICE_LON, azimuth, elevation);
+                             LE_PALAIS_LAT, LE_PALAIS_LON, azimuth, elevation);
 
   uint16_t color = gaugeColorForElevation((float)elevation);
 
