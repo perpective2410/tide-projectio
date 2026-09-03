@@ -51,6 +51,8 @@ struct SelectedDaySunInfo {
   int tz = 1;
   int peakHour = 0, peakMin = 0;
   double peakAz = 0, peakEl = 0;
+  int sunriseDeltaMin = 0;   // vs. the previous calendar day's clock time — + means later, - means earlier
+  int sunsetDeltaMin = 0;
 };
 static SelectedDaySunInfo selectedSunInfo;
 
@@ -201,6 +203,18 @@ static void loadSelectedDay()
   calcHorizontalCoordinates(fd.year, fd.month, fd.day, thh, tmm, tss,
                              LE_PALAIS_LAT, LE_PALAIS_LON, sun.peakAz, sun.peakEl);
 
+  // Day-over-day delta: today's sunrise/sunset clock time minus yesterday's.
+  // Compared directly in UTC decimal hours (not converted to local first) —
+  // the tz offset cancels out in a same-day-to-next-day difference except
+  // on the one day a year the DST offset itself changes, which would skew
+  // this by an hour; not worth special-casing for a "+2min" style readout.
+  int prevYear, prevMonth, prevDay;
+  addDays(fd.year, fd.month, fd.day, -1, prevYear, prevMonth, prevDay);
+  double prevTransit, prevSunrise, prevSunset;
+  calcSunriseSunset(prevYear, prevMonth, prevDay, LE_PALAIS_LAT, LE_PALAIS_LON, prevTransit, prevSunrise, prevSunset);
+  sun.sunriseDeltaMin = (!isnan(sun.sunrise) && !isnan(prevSunrise)) ? (int)round((sun.sunrise - prevSunrise) * 60.0) : 0;
+  sun.sunsetDeltaMin  = (!isnan(sun.sunset)  && !isnan(prevSunset))  ? (int)round((sun.sunset  - prevSunset)  * 60.0) : 0;
+
   lastLoadedOffset = selectedDayOffset;
 }
 
@@ -345,30 +359,47 @@ void drawDashboard(bool timeValid)
     canvas.setTextColor(dayLabelColor);
     canvas.drawString(dayLineBuf, cardCX, STRIP_Y + 22);
 
+    // Icon + coefficient, and (below) wind arrow + speed: each pair is
+    // measured and centered as a unit on cardCX, rather than the icon/arrow
+    // and text sitting at fixed offsets from cardCX regardless of how wide
+    // the text next to them actually is — that left uneven-looking gaps
+    // (e.g. "70" vs "42" not lining up the same way against its icon).
+    const int ICON_ROW_CY = STRIP_Y + 78;
+    const int WIND_ROW_CY = STRIP_Y + 134;
+    const int ICON_D = 46;    // drawWeatherIcon/drawSpinner's approximate visual footprint at the sizes used below
+    const int ARROW_D = 24;   // drawWindArrow's approximate visual footprint at the radius used below
+
     // Icon slot is reserved even before the fetch completes, so a spinner
     // shows where the icon will appear instead of the layout jumping once
     // weather data arrives.
-    int coeffCX = cardCX + 26;
-    if (hasWeather) {
-      drawWeatherIcon(cardCX - 32, STRIP_Y + 70, 24, dailyWeatherCode[i]);
-    } else {
-      drawSpinner(cardCX - 32, STRIP_Y + 70, 12, canvas.color565(90, 100, 115));
-    }
     canvas.setFont(&fonts::FreeSansBold18pt7b);
+    String coeffStr = String(forecast[i].coefficient);
+    int coeffW = canvas.textWidth(coeffStr);
+    int iconCoeffPairW = ICON_D + 10 + coeffW;
+    int iconCX = cardCX - iconCoeffPairW / 2 + ICON_D / 2;
+    int coeffCX = cardCX + iconCoeffPairW / 2 - coeffW / 2;
+
+    if (hasWeather) {
+      drawWeatherIcon(iconCX, ICON_ROW_CY, 24, dailyWeatherCode[i]);
+    } else {
+      drawSpinner(iconCX, ICON_ROW_CY, 12, canvas.color565(90, 100, 115));
+    }
     canvas.setTextColor(colorForCoefficient(forecast[i].coefficient));
-    canvas.drawString(String(forecast[i].coefficient), coeffCX, STRIP_Y + 70);
+    canvas.drawString(coeffStr, coeffCX, ICON_ROW_CY);
 
     if (hasWeather) {
       uint16_t windColor = gaugeColorForWind(dailyWindSpeedMax[i]);
       char windBuf[10];
       snprintf(windBuf, sizeof(windBuf), "%d km/h", (int)round(dailyWindSpeedMax[i]));
-      int windTextX = cardCX - 12;
-      canvas.setFont(&fonts::FreeSans12pt7b);
+      canvas.setFont(&fonts::FreeSansBold12pt7b);
+      int windTextW = canvas.textWidth(windBuf);
+      int windPairW = ARROW_D + 10 + windTextW;
+      int arrowCX = cardCX - windPairW / 2 + ARROW_D / 2;
+      int windTextCX = cardCX + windPairW / 2 - windTextW / 2;
+
+      drawWindArrow(arrowCX, WIND_ROW_CY, 11, dailyWindDirection[i], windColor);
       canvas.setTextColor(windColor);
-      canvas.setTextDatum(textdatum_t::middle_left);
-      canvas.drawString(windBuf, windTextX, STRIP_Y + 118);
-      drawWindArrow(windTextX - 16, STRIP_Y + 118, 10, dailyWindDirection[i], windColor);
-      canvas.setTextDatum(textdatum_t::middle_center);
+      canvas.drawString(windBuf, windTextCX, WIND_ROW_CY);
     }
 
     canvas.setTextDatum(textdatum_t::top_left);
@@ -389,12 +420,13 @@ void drawDashboard(bool timeValid)
   const int INNER_X = CARD_X + 36;
   const int INNER_R = CARD_X + CARD_W - 36;
 
-  // Title row: the selected day's date, then WiFi/weather status (moved
-  // here from the top bar, which felt too busy with it), then a
-  // "Coefficient: NN" pill on the right. TITLE_ROW_CY matches the pill's
-  // own vertical center (pillY + pillH/2 below) so everything on this row
-  // lines up.
+  // Title row: the selected day's date, then sunrise/sunset, then a
+  // "Coefficient: NN" pill right after it, then WiFi/weather status (moved
+  // here from the top bar, which felt too busy with it) at the far right.
+  // TITLE_ROW_CY matches every pill's own vertical center (pillY + PILL_H/2
+  // below) so everything on this row lines up.
   const int TITLE_ROW_CY = CARD_Y + 36;
+  const int PILL_H = 36;
 
   char cardTitleBuf[32];
   snprintf(cardTitleBuf, sizeof(cardTitleBuf), "%s %02d %s",
@@ -407,57 +439,78 @@ void drawDashboard(bool timeValid)
   canvas.setTextDatum(textdatum_t::top_left);
 
   // Sunrise/sunset, right next to the date on the same line, in their own
-  // box — same styling (bg/border/height) as the WiFi and coefficient
-  // pills on this row, so it reads as one of that same family rather than
-  // bare floating icons+text. Sunrise keeps the plain sun glyph; sunset
-  // uses drawSunsetIcon so the two don't look like two identical suns.
+  // box — same styling (bg/border/height) as the coefficient/WiFi pills on
+  // this row, so it reads as one of that same family rather than bare
+  // floating icons+text. Sunrise keeps the plain sun glyph; sunset uses
+  // drawSunsetIcon so the two don't look like two identical suns. Each time
+  // is followed by its delta vs. yesterday's clock time for the same event
+  // (+later, -earlier), in a smaller muted color as secondary info.
   if (!isnan(selectedSunInfo.sunrise) && !isnan(selectedSunInfo.sunset)) {
     uint16_t sunColor = canvas.color565(255, 195, 60);
+    uint16_t deltaColor = canvas.color565(150, 165, 185);
+
     canvas.setFont(&fonts::FreeSansBold12pt7b);
     String riseStr = formatLocalTime(selectedSunInfo.sunrise, selectedSunInfo.tz);
     String setStr = formatLocalTime(selectedSunInfo.sunset, selectedSunInfo.tz);
     int riseTextW = canvas.textWidth(riseStr);
     int setTextW = canvas.textWidth(setStr);
 
-    const int SUN_BOX_H = 36;      // matches PILL_H (the WiFi/coefficient pills), declared later in this function
+    char riseDeltaBuf[8], setDeltaBuf[8];
+    snprintf(riseDeltaBuf, sizeof(riseDeltaBuf), "%+dm", selectedSunInfo.sunriseDeltaMin);
+    snprintf(setDeltaBuf, sizeof(setDeltaBuf), "%+dm", selectedSunInfo.sunsetDeltaMin);
+    canvas.setFont(&fonts::FreeSans12pt7b);
+    int riseDeltaW = canvas.textWidth(riseDeltaBuf);
+    int setDeltaW = canvas.textWidth(setDeltaBuf);
+
     const int PAD = 14;            // box left/right padding
-    const int ICON_TO_TEXT = 16;   // icon center -> text start
+    const int ICON_TO_TEXT = 16;   // icon center -> time text start
+    const int TEXT_TO_DELTA = 6;   // time text -> its delta
     const int PAIR_GAP = 24;       // gap between the rise and set pairs
     int boxX = titleRight + 20;
-    int boxW = PAD + ICON_TO_TEXT + riseTextW + PAIR_GAP + ICON_TO_TEXT + setTextW + PAD;
-    int boxY = TITLE_ROW_CY - SUN_BOX_H / 2;
+    int boxW = PAD + ICON_TO_TEXT + riseTextW + TEXT_TO_DELTA + riseDeltaW
+             + PAIR_GAP
+             + ICON_TO_TEXT + setTextW + TEXT_TO_DELTA + setDeltaW + PAD;
+    int boxY = TITLE_ROW_CY - PILL_H / 2;
 
-    canvas.fillRoundRect(boxX, boxY, boxW, SUN_BOX_H, 18, canvas.color565(28, 38, 55));
-    canvas.drawRoundRect(boxX, boxY, boxW, SUN_BOX_H, 18, sunColor);
+    canvas.fillRoundRect(boxX, boxY, boxW, PILL_H, 18, canvas.color565(28, 38, 55));
+    canvas.drawRoundRect(boxX, boxY, boxW, PILL_H, 18, sunColor);
 
-    canvas.setTextColor(sunColor);
     canvas.setTextDatum(textdatum_t::middle_left);
 
     int sx = boxX + PAD;
     drawWeatherIcon(sx, TITLE_ROW_CY, 11, 0);   // weatherCode 0 = clear-sky sun glyph
     sx += ICON_TO_TEXT;
+    canvas.setFont(&fonts::FreeSansBold12pt7b);
+    canvas.setTextColor(sunColor);
     canvas.drawString(riseStr, sx, TITLE_ROW_CY);
-    sx += riseTextW + PAIR_GAP;
+    sx += riseTextW + TEXT_TO_DELTA;
+    canvas.setFont(&fonts::FreeSans12pt7b);
+    canvas.setTextColor(deltaColor);
+    canvas.drawString(riseDeltaBuf, sx, TITLE_ROW_CY);
+    sx += riseDeltaW + PAIR_GAP;
 
     drawSunsetIcon(sx, TITLE_ROW_CY, 11, sunColor);
     sx += ICON_TO_TEXT;
+    canvas.setFont(&fonts::FreeSansBold12pt7b);
+    canvas.setTextColor(sunColor);
     canvas.drawString(setStr, sx, TITLE_ROW_CY);
+    sx += setTextW + TEXT_TO_DELTA;
+    canvas.setFont(&fonts::FreeSans12pt7b);
+    canvas.setTextColor(deltaColor);
+    canvas.drawString(setDeltaBuf, sx, TITLE_ROW_CY);
 
     titleRight = boxX + boxW;
     canvas.setTextDatum(textdatum_t::top_left);
   }
 
-  char coeffPillBuf[24];
-  snprintf(coeffPillBuf, sizeof(coeffPillBuf), "Coefficient: %d", selectedDate.coefficient);
-  canvas.setFont(&fonts::FreeSansBold12pt7b);
-  int coeffPillW = canvas.textWidth(coeffPillBuf) + 32;
-  const int PILL_H = 36;
-  int coeffPillX = INNER_R - coeffPillW;
-  int coeffPillY = TITLE_ROW_CY - PILL_H / 2;
+  // No separate "Coefficient: NN" pill here anymore — the selected day's
+  // coefficient is already shown in its own day-strip card above (the
+  // highlighted one), so this was a duplicate.
 
-  // WiFi/weather status pill: same box styling and vertical center as the
-  // coefficient pill, centered horizontally in the gap between the title
-  // and that pill (only drawn if it actually fits there).
+  // WiFi/weather status pill: the rightmost element on this row, sized to
+  // its own content and right-aligned to INNER_R rather than centered in a
+  // gap — only drawn if it actually fits without overlapping the
+  // sunrise/sunset box.
   {
     // A momentary RTC read glitch (see the caching at the top of this
     // function) takes priority here — everything else keeps showing
@@ -480,12 +533,10 @@ void drawDashboard(bool timeValid)
 
     canvas.setFont(&fonts::FreeSansBold12pt7b);
     int statusPillW = canvas.textWidth(statusLine) + 32;
-    int gapStart = titleRight + 20;
-    int gapEnd = coeffPillX - 20;
+    int statusPillX = INNER_R - statusPillW;
+    int statusPillY = TITLE_ROW_CY - PILL_H / 2;
 
-    if (statusPillW <= gapEnd - gapStart) {
-      int statusPillX = gapStart + (gapEnd - gapStart - statusPillW) / 2;
-      int statusPillY = TITLE_ROW_CY - PILL_H / 2;
+    if (statusPillX >= titleRight + 20) {
       canvas.fillRoundRect(statusPillX, statusPillY, statusPillW, PILL_H, 18, canvas.color565(28, 38, 55));
       canvas.drawRoundRect(statusPillX, statusPillY, statusPillW, PILL_H, 18, statusColor);
       canvas.setTextDatum(textdatum_t::middle_center);
@@ -494,14 +545,6 @@ void drawDashboard(bool timeValid)
       canvas.setTextDatum(textdatum_t::top_left);
     }
   }
-
-  canvas.setFont(&fonts::FreeSansBold12pt7b);
-  canvas.fillRoundRect(coeffPillX, coeffPillY, coeffPillW, PILL_H, 18, canvas.color565(28, 38, 55));
-  canvas.drawRoundRect(coeffPillX, coeffPillY, coeffPillW, PILL_H, 18, colorForCoefficient(selectedDate.coefficient));
-  canvas.setTextDatum(textdatum_t::middle_center);
-  canvas.setTextColor(colorForCoefficient(selectedDate.coefficient));
-  canvas.drawString(coeffPillBuf, coeffPillX + coeffPillW / 2, coeffPillY + PILL_H / 2);
-  canvas.setTextDatum(textdatum_t::top_left);
 
   // ===================== TIDE CURVE ========================
   uint16_t chartGridColor = canvas.color565(40, 60, 90);
