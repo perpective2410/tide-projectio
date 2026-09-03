@@ -49,7 +49,13 @@ extern float hourlyWindDirection[WEATHER_DAYS * WEATHER_HOURLY_PER_DAY];  // deg
 // -------- Daily wave height, Open-Meteo Marine API (written by WeatherService.cpp) --------
 // Separate API/host from the atmospheric forecast above (marine-api.open-meteo.com
 // vs api.open-meteo.com), fetched as its own request — see fetchDailyMarine().
+// The dwd_ewam model pinned there only forecasts ~3 days out, unlike the
+// 7-day window everything else here uses — dailyWaveHeightValid[] is what
+// tells the day-strip which of the 7 slots actually got a real value back,
+// so it can leave the row blank instead of showing a false "0.0m" for a
+// day the model just didn't cover.
 extern float dailyWaveHeightMax[WEATHER_DAYS];   // meters
+extern bool dailyWaveHeightValid[WEATHER_DAYS];
 extern bool marineDataValid;
 
 // -------- WiFi / weather status, for the header (written by WeatherService.cpp) --------

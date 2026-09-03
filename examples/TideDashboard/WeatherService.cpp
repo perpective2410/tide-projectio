@@ -86,27 +86,42 @@ static void fetchDailyWeather()
 }
 
 // Separate API/host from fetchDailyWeather() above (marine-api.open-meteo.com,
-// not api.open-meteo.com) — same free/no-API-key terms, own request.
-static void fetchDailyMarine()
+// not api.open-meteo.com) — same free/no-API-key terms, own request(s).
+//
+// Two models, because no single one was both accurate and full-range for Le
+// Palais (a small harbor sheltered by Belle-Ile and the Quiberon peninsula):
+//   - dwd_ewam (DWD, ~5km grid): closest grid point to our coordinates and
+//     closest match to Meteo Consult's specialized 1km coastal model
+//     (0.34m vs their 0.3m for the same day) — but only forecasts ~3 days
+//     out, returning null for the rest.
+//   - ecmwf_wam (~9km grid): covers the full 7-day window, and — while its
+//     grid point is ~4.6km away and its numbers run higher than dwd_ewam's
+//     (0.62m for the same day dwd_ewam gave 0.34m) — it's still notably
+//     closer to Meteo Consult than the API's own "best_match" default was
+//     (0.94m for that day).
+// fetchWaveModel() fills in whichever of the WEATHER_DAYS slots don't
+// already have data (dailyWaveHeightValid[i] false), so a day dwd_ewam did
+// cover is never overwritten by the less-accurate fallback.
+static void fetchWaveModel(const char* model)
 {
   WiFiClientSecure client;
   client.setInsecure();
 
   HTTPClient http;
-  char url[220];
+  char url[240];
   snprintf(url, sizeof(url),
            "https://marine-api.open-meteo.com/v1/marine?latitude=%.4f&longitude=%.4f"
-           "&daily=wave_height_max&timezone=auto&forecast_days=%d",
-           LE_PALAIS_LAT, LE_PALAIS_LON, WEATHER_DAYS);
+           "&daily=wave_height_max&timezone=auto&forecast_days=%d&models=%s",
+           LE_PALAIS_LAT, LE_PALAIS_LON, WEATHER_DAYS, model);
 
   if (!http.begin(client, url)) {
-    Serial.println("[Marine] http.begin() failed");
+    Serial.printf("[Marine] http.begin() failed (%s)\n", model);
     return;
   }
 
   int code = http.GET();
   if (code != 200) {
-    Serial.printf("[Marine] GET failed: HTTP %d\n", code);
+    Serial.printf("[Marine] GET failed (%s): HTTP %d\n", model, code);
     http.end();
     return;
   }
@@ -117,23 +132,35 @@ static void fetchDailyMarine()
   JsonDocument doc;
   DeserializationError err = deserializeJson(doc, payload);
   if (err) {
-    Serial.printf("[Marine] JSON parse failed: %s\n", err.c_str());
+    Serial.printf("[Marine] JSON parse failed (%s): %s\n", model, err.c_str());
     return;
   }
 
   JsonArray heights = doc["daily"]["wave_height_max"];
   if (heights.isNull()) {
-    Serial.println("[Marine] Response missing daily.wave_height_max");
+    Serial.printf("[Marine] Response missing daily.wave_height_max (%s)\n", model);
     return;
   }
 
   int n = min((int)heights.size(), WEATHER_DAYS);
+  int filledDays = 0;
   for (int i = 0; i < n; i++) {
+    if (dailyWaveHeightValid[i] || heights[i].isNull()) continue;   // already have a (better) value, or this model doesn't have one either
     dailyWaveHeightMax[i] = heights[i].as<float>();
+    dailyWaveHeightValid[i] = true;
+    filledDays++;
   }
+
   marineDataValid = true;
   redrawRequested = true;
-  Serial.printf("[Marine] Daily wave height updated (%d days), today: %.1fm\n", n, dailyWaveHeightMax[0]);
+  Serial.printf("[Marine] %s filled %d day(s), today: %.1fm\n", model, filledDays, dailyWaveHeightMax[0]);
+}
+
+static void fetchDailyMarine()
+{
+  for (int i = 0; i < WEATHER_DAYS; i++) dailyWaveHeightValid[i] = false;
+  fetchWaveModel("dwd_ewam");    // most accurate for Le Palais specifically, but short-range
+  fetchWaveModel("ecmwf_wam");   // fills in the days dwd_ewam didn't cover
 }
 
 void weatherServiceTask(void* params)
