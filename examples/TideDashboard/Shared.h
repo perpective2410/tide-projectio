@@ -46,6 +46,12 @@ static const int WEATHER_HOURLY_PER_DAY = 24;
 extern float hourlyWindSpeed[WEATHER_DAYS * WEATHER_HOURLY_PER_DAY];      // km/h
 extern float hourlyWindDirection[WEATHER_DAYS * WEATHER_HOURLY_PER_DAY];  // degrees, meteorological convention
 
+// -------- Daily wave height, Open-Meteo Marine API (written by WeatherService.cpp) --------
+// Separate API/host from the atmospheric forecast above (marine-api.open-meteo.com
+// vs api.open-meteo.com), fetched as its own request — see fetchDailyMarine().
+extern float dailyWaveHeightMax[WEATHER_DAYS];   // meters
+extern bool marineDataValid;
+
 // -------- WiFi / weather status, for the header (written by WeatherService.cpp) --------
 extern volatile bool wifiConnected;
 extern String wifiSSID;          // valid once wifiConnected is true

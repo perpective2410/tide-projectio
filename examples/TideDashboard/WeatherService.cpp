@@ -85,6 +85,57 @@ static void fetchDailyWeather()
                 n, dailyWeatherCode[0], dailyWindSpeedMax[0], dailyWindDirection[0]);
 }
 
+// Separate API/host from fetchDailyWeather() above (marine-api.open-meteo.com,
+// not api.open-meteo.com) — same free/no-API-key terms, own request.
+static void fetchDailyMarine()
+{
+  WiFiClientSecure client;
+  client.setInsecure();
+
+  HTTPClient http;
+  char url[220];
+  snprintf(url, sizeof(url),
+           "https://marine-api.open-meteo.com/v1/marine?latitude=%.4f&longitude=%.4f"
+           "&daily=wave_height_max&timezone=auto&forecast_days=%d",
+           LE_PALAIS_LAT, LE_PALAIS_LON, WEATHER_DAYS);
+
+  if (!http.begin(client, url)) {
+    Serial.println("[Marine] http.begin() failed");
+    return;
+  }
+
+  int code = http.GET();
+  if (code != 200) {
+    Serial.printf("[Marine] GET failed: HTTP %d\n", code);
+    http.end();
+    return;
+  }
+
+  String payload = http.getString();
+  http.end();
+
+  JsonDocument doc;
+  DeserializationError err = deserializeJson(doc, payload);
+  if (err) {
+    Serial.printf("[Marine] JSON parse failed: %s\n", err.c_str());
+    return;
+  }
+
+  JsonArray heights = doc["daily"]["wave_height_max"];
+  if (heights.isNull()) {
+    Serial.println("[Marine] Response missing daily.wave_height_max");
+    return;
+  }
+
+  int n = min((int)heights.size(), WEATHER_DAYS);
+  for (int i = 0; i < n; i++) {
+    dailyWaveHeightMax[i] = heights[i].as<float>();
+  }
+  marineDataValid = true;
+  redrawRequested = true;
+  Serial.printf("[Marine] Daily wave height updated (%d days), today: %.1fm\n", n, dailyWaveHeightMax[0]);
+}
+
 void weatherServiceTask(void* params)
 {
   WiFiManager wifiManager;
@@ -122,6 +173,7 @@ void weatherServiceTask(void* params)
 
     if (nowConnected && (lastFetch == 0 || millis() - lastFetch >= FETCH_INTERVAL_MS)) {
       fetchDailyWeather();
+      fetchDailyMarine();
       lastFetch = millis();
     }
 
@@ -184,6 +236,25 @@ void drawWeatherIcon(int cx, int cy, int size, int weatherCode)
     for (int i = -1; i <= 1; i++) {
       int dx = cx + i * (size / 3);
       canvas.fillCircle(dx, cloudCY + (int)(size * 0.5f), 2, snowColor);
+    }
+  }
+}
+
+// Two stacked wavy strokes — the classic "ocean waves" pictogram — for the
+// day-strip's wave height row.
+void drawWaveIcon(int cx, int cy, int size, uint16_t color)
+{
+  const int STEPS = 10;
+  for (int row = 0; row < 2; row++) {
+    int rowCY = cy + (row == 0 ? -(int)(size * 0.32f) : (int)(size * 0.32f));
+    int prevX = cx - size, prevY = rowCY;
+    for (int s = 1; s <= STEPS; s++) {
+      float t = (float)s / STEPS;
+      int x = cx - size + (int)(t * 2 * size);
+      int y = rowCY - (int)(sinf(t * 2.0f * PI * 1.5f) * size * 0.28f);
+      canvas.drawLine(prevX, prevY, x, y, color);
+      prevX = x;
+      prevY = y;
     }
   }
 }

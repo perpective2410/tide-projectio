@@ -16,6 +16,9 @@ bool weatherDataValid = false;
 float hourlyWindSpeed[WEATHER_DAYS * WEATHER_HOURLY_PER_DAY] = {};
 float hourlyWindDirection[WEATHER_DAYS * WEATHER_HOURLY_PER_DAY] = {};
 
+float dailyWaveHeightMax[WEATHER_DAYS] = {};
+bool marineDataValid = false;
+
 volatile bool wifiConnected = false;
 String wifiSSID = "";
 String weatherErrorText = "";

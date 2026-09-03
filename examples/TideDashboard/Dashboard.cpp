@@ -58,8 +58,8 @@ static SelectedDaySunInfo selectedSunInfo;
 
 static const int TIDE_CHART_L  = 56;
 static const int TIDE_CHART_R  = 1224;
-static const int TIDE_CHART_T  = 304;
-static const int TIDE_CHART_B  = 628;   // closer to the hourly-wind row below it (which stays anchored near the card's bottom edge — see windIconY)
+static const int TIDE_CHART_T  = 360;   // pushed down by the day-strip cards' new 4th row (wave height) — see STRIP_H
+static const int TIDE_CHART_B  = 628;   // unchanged: windIconY is anchored to the card's bottom edge (H-10-24), which doesn't move when STRIP_H does — see its declaration
 static const int TIDE_CHART_CW = TIDE_CHART_R - TIDE_CHART_L;
 static const int TIDE_CHART_CH = TIDE_CHART_B - TIDE_CHART_T;
 static const int TIDE_CHART_CY = TIDE_CHART_T + TIDE_CHART_CH / 2;
@@ -220,7 +220,7 @@ static void loadSelectedDay()
 
 // -------- Layout shared between drawing and touch hit-testing --------
 static const int STRIP_Y = 55;
-static const int STRIP_H = 170;   // bigger cards — room freed up by shrinking the chart a bit further (see TIDE_CHART_T/B above)
+static const int STRIP_H = 226;   // +56 for a 4th row (wave height, below wind) — see TIDE_CHART_T above for where that space came from
 static const int STRIP_X0 = 20;
 static const int STRIP_CONTENT_W = W - 40;
 static const int STRIP_GAP = 10;
@@ -366,6 +366,7 @@ void drawDashboard(bool timeValid)
     // (e.g. "70" vs "42" not lining up the same way against its icon).
     const int ICON_ROW_CY = STRIP_Y + 78;
     const int WIND_ROW_CY = STRIP_Y + 134;
+    const int WAVE_ROW_CY = STRIP_Y + 186;
     const int ICON_D = 46;    // drawWeatherIcon/drawSpinner's approximate visual footprint at the sizes used below
     const int ARROW_D = 24;   // drawWindArrow's approximate visual footprint at the radius used below
 
@@ -400,6 +401,24 @@ void drawDashboard(bool timeValid)
       drawWindArrow(arrowCX, WIND_ROW_CY, 11, dailyWindDirection[i], windColor);
       canvas.setTextColor(windColor);
       canvas.drawString(windBuf, windTextCX, WIND_ROW_CY);
+    }
+
+    // Wave height, right under wind — Open-Meteo Marine API, fetched
+    // separately from the atmospheric forecast above (see WeatherService.cpp).
+    if (marineDataValid) {
+      uint16_t waveColor = canvas.color565(80, 190, 230);
+      char waveBuf[10];
+      snprintf(waveBuf, sizeof(waveBuf), "%.1fm", dailyWaveHeightMax[i]);
+      canvas.setFont(&fonts::FreeSansBold12pt7b);
+      int waveTextW = canvas.textWidth(waveBuf);
+      const int WAVE_D = 24;
+      int wavePairW = WAVE_D + 10 + waveTextW;
+      int waveIconCX = cardCX - wavePairW / 2 + WAVE_D / 2;
+      int waveTextCX = cardCX + wavePairW / 2 - waveTextW / 2;
+
+      drawWaveIcon(waveIconCX, WAVE_ROW_CY, 11, waveColor);
+      canvas.setTextColor(waveColor);
+      canvas.drawString(waveBuf, waveTextCX, WAVE_ROW_CY);
     }
 
     canvas.setTextDatum(textdatum_t::top_left);
