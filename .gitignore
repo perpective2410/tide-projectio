@@ -2,4 +2,4 @@
 .pio
 .claude/settings.local.json
 .vscode
-examples/TideDashboard/screenshots/
+examples/TideDashboard/screenshots/compile_commands.json
