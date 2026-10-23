@@ -51,9 +51,10 @@ bool isEuropeDST(int year, int month, int day)
 
 // France local civil date/time from the RTC (UTC) — day boundaries matter
 // for the tide tab (which calendar day's tides to load), so this goes
-// through an epoch round-trip rather than a simple hour%24. No
-// configTzTime()/NTP in this sketch, so TZ is unset (UTC default) and
-// mktime()/gmtime() work directly as UTC<->epoch conversions.
+// through an epoch round-trip rather than a simple hour%24. The NTP sync in
+// WeatherService.cpp deliberately uses configTime(0, 0, ...) rather than
+// configTzTime(), so TZ stays UTC and mktime()/gmtime() work directly as
+// UTC<->epoch conversions here.
 void getLocalFromRTC(int& year, int& month, int& day, int& hour, int& minute, int& second)
 {
   auto dt = M5.Rtc.getDateTime();

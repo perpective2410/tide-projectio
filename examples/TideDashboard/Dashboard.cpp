@@ -303,17 +303,27 @@ void drawDashboard(bool timeValid)
   drawTemperatureLabeled(outLeftX - 25, HEADER_CY, "IN", lastTempC, lastReadOk);
 
   if (!everSynced) {
-    // Genuinely never synced (first-ever boot, dead RTC battery, etc.) —
-    // no date at all yet to compute a forecast from, so there's nothing to
-    // show but this message. A momentary bad read after having been synced
-    // before does NOT hit this path — see the caching above.
+    // Genuinely never synced (first-ever boot, RTC cleared by a long spell
+    // unplugged, etc.) — no date at all yet to compute a forecast from, so
+    // there's nothing to show but this message. A momentary bad read after
+    // having been synced before does NOT hit this path — see the caching above.
+    //
+    // This screen returns early, so none of the usual status pills get drawn
+    // — which is exactly when you most need to know whether WiFi came up,
+    // since the NTP sync that clears this screen (syncRtcFromNtp(),
+    // WeatherService.cpp) can't run until it does. Hence the second line
+    // reporting the live WiFi state rather than a fixed instruction.
     canvas.setTextDatum(textdatum_t::middle_center);
     canvas.setFont(&fonts::FreeSansBold18pt7b);
     canvas.setTextColor(COLOR_ERROR);
     canvas.drawString("RTC not synced", PANEL_CX, H / 2 - 10);
+
+    String hint = wifiConnected
+        ? ("WiFi \"" + wifiSSID + "\" connected - waiting for NTP...")
+        : String("Waiting for WiFi - join the \"TideDashboardSetup\" AP to configure it");
     canvas.setFont(&fonts::FreeSans12pt7b);
-    canvas.setTextColor(canvas.color565(130, 150, 175));
-    canvas.drawString("Run the tide display once to set the RTC via NTP", PANEL_CX, H / 2 + 30);
+    canvas.setTextColor(wifiConnected ? canvas.color565(130, 150, 175) : COLOR_WARN);
+    canvas.drawString(hint, PANEL_CX, H / 2 + 30);
     canvas.setTextDatum(textdatum_t::top_left);
     return;
   }

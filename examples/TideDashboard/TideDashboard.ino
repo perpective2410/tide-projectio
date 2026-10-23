@@ -10,12 +10,13 @@
 //   GND ───────── DS18B20 GND
 //   G49 ───────── DS18B20 DATA  (with internal pull-up enabled below)
 //
-// The clock (RTC) uses UTC directly — no NTP needed for that, and the Tab5's
-// RTC keeps time across reflashes, so run the tide display example once
-// first if it hasn't been synced yet. WiFi is used only for the 7-day
-// forecast strip's weather icon/wind (Open-Meteo, see WeatherService.cpp)
-// — first run, connect to the "TideDashboardSetup" AP it starts to
-// configure it. The header's IN/OUT readouts are DS18B20-probe-related.
+// The clock (RTC) holds UTC directly, and keeps it across reflashes; when it
+// comes up unset (first boot, or a long spell unplugged) syncRtcFromNtp()
+// in WeatherService.cpp re-sets it from NTP as soon as WiFi is up, and tops
+// it up daily after that. WiFi also feeds the 7-day forecast strip's weather
+// icon/wind (Open-Meteo, see WeatherService.cpp) — first run, connect to the
+// "TideDashboardSetup" AP it starts to configure it. The header's IN/OUT
+// readouts are DS18B20-probe-related.
 //
 // File layout: this .ino only owns orchestration (tasks, setup/loop) and the
 // top-level render call. Screen-specific data/drawing lives in Dashboard.cpp

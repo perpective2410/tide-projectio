@@ -69,7 +69,8 @@ static const double LE_PALAIS_LAT = 47.3483;
 static const double LE_PALAIS_LON = -3.1553;  // positive = east
 
 // -------- DST / local time (shared by SunWidget and Dashboard) --------
-// No NTP/configTzTime in this sketch, so these work directly off the RTC.
+// These work directly off the RTC's UTC: NTP only ever sets that clock (see
+// syncRtcFromNtp(), WeatherService.cpp), it never sets the C library's TZ.
 bool isEuropeDST(int year, int month, int day);
 void getLocalFromRTC(int& year, int& month, int& day, int& hour, int& minute, int& second);
 String formatLocalTime(double utcHours, int tzOffsetHours);   // SolarCalculator-style decimal UTC hours -> "HH:MM"

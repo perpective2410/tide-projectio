@@ -5,8 +5,68 @@
 #include <WiFiClientSecure.h>
 #include <HTTPClient.h>
 #include <ArduinoJson.h>
+#include <esp_sntp.h>
 
 static const unsigned long FETCH_INTERVAL_MS = 20UL * 60UL * 1000UL;  // 20 min — plenty for a daily forecast
+static const unsigned long NTP_RESYNC_INTERVAL_MS = 24UL * 3600UL * 1000UL;  // the RTC barely drifts; a daily top-up is plenty
+
+// -------- RTC / NTP --------
+// The dashboard reads the clock straight off the Tab5's RTC, which holds
+// time across reflashes — but not across a long spell unplugged, and a
+// cleared RTC used to leave the whole UI stuck on "RTC not synced" with no
+// way out of it from this sketch (it had no NTP at all, and told you to go
+// flash the tide-display example once instead). WiFi is already up here for
+// the forecast, so the sync belongs here: whenever the RTC looks unset — or
+// a day has passed since the last sync — pull UTC from NTP and write it back.
+//
+// configTime(0, 0, ...), not configTzTime(): it leaves TZ at UTC, which
+// getLocalFromRTC() (Shared.cpp) depends on for its mktime()/gmtime() epoch
+// round-trip. France local time is derived there from the RTC's UTC and the
+// DST rules in isEuropeDST() — never from the C library's timezone.
+static void syncRtcFromNtp()
+{
+  static bool sntpConfigured = false;
+  static unsigned long lastSyncMs = 0;
+  unsigned long now = millis();
+
+  auto dt = M5.Rtc.getDateTime();
+  bool rtcValid = M5.Rtc.isEnabled() && dt.date.year >= 2020;   // same check renderTask uses for timeValid
+  if (rtcValid && lastSyncMs > 0 && now - lastSyncMs < NTP_RESYNC_INTERVAL_MS) return;
+
+  if (!sntpConfigured) {
+    Serial.println("[NTP] Requesting time from pool.ntp.org (UTC)...");
+    configTime(0, 0, "pool.ntp.org", "time.nist.gov");
+    sntpConfigured = true;
+    return;   // the request is async — check the result on a later tick
+  }
+
+  if (sntp_get_sync_status() != SNTP_SYNC_STATUS_COMPLETED) {
+    static unsigned long lastWaitLog = 0;
+    if (now - lastWaitLog > 5000) {
+      Serial.printf("[NTP] Waiting for sync... (status %d)\n", sntp_get_sync_status());
+      lastWaitLog = now;
+    }
+    return;
+  }
+
+  time_t t = time(nullptr);
+  struct tm* utc = gmtime(&t);
+  auto rtcTime = M5.Rtc.getDateTime();
+  rtcTime.date.year = utc->tm_year + 1900;
+  rtcTime.date.month = utc->tm_mon + 1;
+  rtcTime.date.date = utc->tm_mday;
+  rtcTime.time.hours = utc->tm_hour;
+  rtcTime.time.minutes = utc->tm_min;
+  rtcTime.time.seconds = utc->tm_sec;
+  M5.Rtc.setDateTime(rtcTime);
+
+  lastSyncMs = now;
+  sntpConfigured = false;   // reconfigure from scratch when the next sync falls due
+  redrawRequested = true;
+  Serial.printf("[NTP] RTC set to %04d/%02d/%02d %02d:%02d:%02d UTC\n",
+                rtcTime.date.year, rtcTime.date.month, rtcTime.date.date,
+                rtcTime.time.hours, rtcTime.time.minutes, rtcTime.time.seconds);
+}
 
 static void fetchDailyWeather()
 {
@@ -197,6 +257,8 @@ void weatherServiceTask(void* params)
       }
       redrawRequested = true;
     }
+
+    if (nowConnected) syncRtcFromNtp();
 
     if (nowConnected && (lastFetch == 0 || millis() - lastFetch >= FETCH_INTERVAL_MS)) {
       fetchDailyWeather();
